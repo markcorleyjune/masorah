@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Publish — Masorah Workbench</title>
+<!-- Fonts (same as index + workbench) -->
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ========== GLOBAL RESET & WHITE BACKGROUND ========== */
+*{margin:0;padding:0;box-sizing:border-box}
+html, body {
+  background: #FFFFFF;   /* pure white background overall */
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 16px;
+  color: #1c1c1c;
+  height: 100%;
+  overflow: hidden;
+}
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22);--border:#e0dbc8;--border2:#cdc5a8;--bg2:#FCFAF5;--bg3:#F9F6EF;--text:#1a1208;--text2:#3a2a10;--text3:#6a5a30;--font-serif:'EB Garamond',Georgia,serif;--font-display:'Cinzel',serif;--font-mono:'JetBrains Mono',monospace}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:#f0ede5;}
+::-webkit-scrollbar-thumb{background:#c0b28a;border-radius:3px;}
+
+/* ========== HEADER (EXACT MATCH TO INDEX.HTML) ========== */
+.banner{
+  background:linear-gradient(180deg,var(--paper) 0%, var(--gold-bg) 100%);
+  border-bottom:3px double var(--gold);
+  padding:0 28px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:var(--shadow);
+}
+.banner-row{
+  display:flex;align-items:center;gap:18px;
+  height:78px;max-width:1700px;margin:0 auto;
+}
+.brand{display:flex;align-items:center;gap:14px;padding-right:18px;border-right:1px solid var(--bdr)}
+.brand-glyph{
+  font-family:'Frank Ruhl Libre',serif;font-size:42px;color:var(--gold);
+  line-height:1;text-shadow:1px 1px 0 #fff, 2px 2px 4px rgba(120,90,20,.2);
+}
+.brand-text h1{
+  font-family:'Cinzel',serif;font-size:22px;font-weight:700;
+  color:var(--ink);letter-spacing:.06em;line-height:1.1;
+}
+.brand-text p{font-size:11px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}
+.nav::-webkit-scrollbar{height:0}
+.nav a{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px;font-size:14px;color:var(--ink2);
+  text-decoration:none;border-radius:var(--r);
+  font-family:'EB Garamond',serif;font-weight:500;
+  white-space:nowrap;transition:all .14s;
+  border:1px solid transparent;
+}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk);box-shadow:var(--shadow-sm)}
+.nav-ico{font-size:13px;opacity:.9}
+
+.status-cluster{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 11px;border-radius:20px;font-size:11px;
+  font-family:'JetBrains Mono',monospace;font-weight:500;
+  border:1px solid var(--bdr);background:var(--paper);
+}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}
+.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.font-ctrl{display:flex;align-items:center;border:1px solid var(--bdr);border-radius:20px;background:var(--paper);overflow:hidden}
+.font-ctrl button{
+  border:none;background:transparent;padding:5px 11px;cursor:pointer;
+  font-family:'Cinzel',serif;font-weight:600;color:var(--gold-dk);
+  transition:background .14s;
+}
+.font-ctrl button:hover{background:var(--gold-pale)}
+.font-ctrl .sz{font-size:11px;padding:5px 9px;color:var(--ink3);border-left:1px solid var(--bdr);border-right:1px solid var(--bdr);min-width:46px;text-align:center}
+
+.user{display:flex;align-items:center;gap:8px;padding:5px 11px 5px 5px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:13px}
+.user-n{font-size:12px;color:var(--ink2)}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:9px;font-family:'JetBrains Mono',monospace}
+.logout{background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:4px 8px;border-radius:var(--r);font-family:'EB Garamond',serif}
+.logout:hover{color:var(--err)}
+
+/* ========== WORKSPACE (WHITE BACKGROUND) ========== */
+.workspace{
+  display:grid;
+  grid-template-columns:260px 1fr 1fr;
+  grid-template-rows:calc(100vh - 78px);
+  background:#FFFFFF;
+  margin-top:0;
+}
+
+/* Sidebar: light, white base */
+.sidebar{
+  background:#FFFFFF;
+  border-right:1px solid #e2dfd4;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+}
+.sidebar-section{border-bottom:1px solid #ede9dd;}
+.sidebar-title{
+  padding:10px 14px;
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:var(--gold);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  background:#FEFCF7;
+}
+.template-item{
+  padding:8px 12px;
+  cursor:pointer;
+  font-size:13px;
+  color:#3a2a10;
+  border-left:2px solid transparent;
+  transition:all .15s;
+}
+.template-item:hover{
+  background:#F8F4EA;
+  border-left-color:var(--amber);
+  color:#000;
+}
+.template-item.active{
+  background:rgba(184,134,11,.08);
+  border-left-color:var(--gold);
+  color:var(--gold-dk);
+}
+.template-item small{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:9px;
+  color:#8b7a5c;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:5px 12px;
+  border-radius:var(--radius,6px);
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:.04em;
+  cursor:pointer;
+  border:1px solid;
+  transition:all .2s;
+  background:none;
+  white-space:nowrap;
+}
+.btn-gold{border-color:var(--gold);color:var(--gold);}
+.btn-gold:hover{background:rgba(184,134,11,.1);}
+.btn-amber{border-color:var(--amber);color:var(--amber);}
+.btn-cyan{border-color:#5eddd4;color:#2c7a6e;}
+.btn-green{border-color:#5ec87a;color:#2f6b3a;}
+.btn-red{border-color:#e05555;color:#b13a3a;}
+.btn-sm{padding:3px 8px;font-size:9px;}
+input,select,textarea{background:#FEFCF7;border:1px solid #ddd6c8;color:#1a1208;border-radius:6px;padding:7px 12px;font-family:var(--font-serif);font-size:14px;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);}
+
+/* Editor Panel */
+.editor-panel{
+  display:flex;
+  flex-direction:column;
+  border-right:1px solid #e6e0d2;
+  background:#FFFFFF;
+}
+.editor-toolbar{
+  height:44px;
+  background:#FEFCF7;
+  border-bottom:1px solid #e6e0d2;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:0 10px;
+  flex-shrink:0;
+  overflow-x:auto;
+}
+#latex-editor{
+  flex:1;
+  background:#FFFFFF;
+  border:none;
+  color:#1a1208;
+  font-family:var(--font-mono);
+  font-size:12px;
+  line-height:1.7;
+  padding:16px;
+  resize:none;
+  outline:none;
+}
+.editor-status{
+  height:28px;
+  background:#F8F6F0;
+  border-top:1px solid #e6e0d2;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:0 12px;
+  font-family:var(--font-mono);
+  font-size:10px;
+  color:#6a5a30;
+}
+.editor-status .ok{color:#2e7d32;}
+.editor-status .err{color:#b71c1c;}
+
+/* Preview Panel */
+.preview-panel{
+  display:flex;
+  flex-direction:column;
+  background:#FFFFFF;
+}
+.preview-toolbar{
+  height:44px;
+  background:#FEFCF7;
+  border-bottom:1px solid #e6e0d2;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 12px;
+}
+.preview-wrap{
+  flex:1;
+  overflow:auto;
+  background:#f3efe6;   /* soft warm for preview contrast */
+  padding:20px 0;
+}
+.preview-page{
+  background:white;
+  width:595px;
+  min-height:842px;
+  margin:20px auto;
+  padding:80px 72px 80px 90px;
+  box-shadow:0 4px 24px rgba(0,0,0,.12);
+  font-family:'EB Garamond',serif;
+  font-size:12pt;
+  line-height:1.8;
+  color:#111;
+  position:relative;
+}
+.preview-page h1{font-family:'Cinzel',serif;font-size:18pt;text-align:center;}
+.preview-page .author{text-align:center;font-size:11pt;color:#444;}
+.apparatus{border-top:1px solid #aaa;margin-top:16pt;padding-top:8pt;font-size:9pt;}
+.app-entry{padding-left:16pt;text-indent:-16pt;margin-bottom:4px;}
+.heb-inline{font-family:'SBL Hebrew','Ezra SIL',serif;direction:rtl;unicode-bidi:embed;}
+
+#toast-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:9999;}
+.toast{padding:10px 16px;border-radius:6px;font-family:monospace;font-size:12px;background:#fff;border:1px solid #cdc5a8;box-shadow:0 2px 8px rgba(0,0,0,.1);}
+.toast.success{border-left:4px solid #5ec87a;}
+.toast.error{border-left:4px solid #e05555;}
+.toast.info{border-left:4px solid #5eddd4;}
+</style>
+</head>
+<body>
+
+<!-- ========== HEADER from index.html (active publish) ========== -->
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer">
+      <div class="brand-glyph">מָסוֹרָה</div>
+      <div class="brand-text">
+        <h1>Masorah Corpus</h1>
+        <p>eCBGM v42 · 05c Baseline · Sass. 1053</p>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="transcriber.html"><span class="nav-ico">✍</span> Transcriber</a>
+      <a href="annotate.html"><span class="nav-ico">▤</span> Annotate</a>
+      <a href="architecture.html"><span class="nav-ico">⧉</span> Arch</a>
+      <a href="pipeline.html"><span class="nav-ico">⫯</span> Pipeline</a>
+      <a href="provenance.html"><span class="nav-ico">⟳</span> Provenance</a>
+      <a href="paleography.html"><span class="nav-ico">◉</span> Paleography</a>
+      <a href="analyzer.html"><span class="nav-ico">∿</span> Analyzer</a>
+      <a href="chat.html"><span class="nav-ico">◍</span> Chat</a>
+      <a href="graph.html"><span class="nav-ico">⌬</span> Graph</a>
+      <a href="reader.html"><span class="nav-ico">▦</span> Reader</a>
+      <a class="active" href="publish.html"><span class="nav-ico">⥤</span> Publish</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
+      <div class="font-ctrl" title="Adjust UI scale">
+        <button onclick="scale(-1)" aria-label="Decrease">A−</button>
+        <span class="sz" id="szLbl">100%</span>
+        <button onclick="scale(+1)" aria-label="Increase">A+</button>
+      </div>
+      <div class="user">
+        <div class="user-av">M</div>
+        <span class="user-n">Mark Corley</span>
+        <span class="user-lvl">L4</span>
+      </div>
+      <button class="logout" onclick="location.href='login.html'">Logout</button>
+    </div>
+  </div>
+</header>
+
+<!-- ========== MAIN WORKSPACE ========== -->
+<div class="workspace">
+  <!-- LEFT SIDEBAR (Templates, Settings, Insert) -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Templates</div>
+      <div class="template-item active" onclick="loadTemplate('article')">
+        SBL Journal Article <small>JBL / JSOT / VT style</small>
+      </div>
+      <div class="template-item" onclick="loadTemplate('dissertation')">
+        PhD Dissertation <small>Turabian / SBL format</small>
+      </div>
+      <div class="template-item" onclick="loadTemplate('traditional')">
+        Traditional Edition (MG-style apparatus) <small>Mikraot Gedolot apparatus</small>
+      </div>
+      <div class="template-item" onclick="loadTemplate('critical')">
+        Critical Edition <small>BHS-style apparatus</small>
+      </div>
+      <div class="template-item" onclick="loadTemplate('commentary')">
+        Commentary <small>Lemma + exegesis</small>
+      </div>
+      <div class="template-item" onclick="loadTemplate('conference')">
+        Conference Paper <small>AAR/SBL abstract</small>
+      </div>
+      <div class="template-item" onclick="loadTemplate('edition')">
+        Synoptic Edition <small>Multi-column parallel</small>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Document Settings</div>
+      <div style="padding:10px;display:flex;flex-direction:column;gap:8px;">
+        <div><div style="font-family:monospace;font-size:10px;">PAPER SIZE</div><select><option>A4 (210×297 mm)</option><option>Letter (8.5×11 in)</option></select></div>
+        <div><div style="font-family:monospace;font-size:10px;">FONT</div><select><option>EB Garamond 12pt</option><option>Times New Roman 12pt</option></select></div>
+        <div><div style="font-family:monospace;font-size:10px;">HEBREW FONT</div><select><option>SBL Hebrew</option><option>Ezra SIL</option></select></div>
+        <div><div style="font-family:monospace;font-size:10px;">CITATION STYLE</div><select><option>SBL Handbook</option><option>Chicago 17th</option></select></div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Insert</div>
+      <div style="padding:8px;display:flex;flex-direction:column;gap:4px;">
+        <button class="btn btn-gold btn-sm" onclick="insert('heb')" style="justify-content:flex-start">𐤀 Hebrew text</button>
+        <button class="btn btn-gold btn-sm" onclick="insert('aramaic')" style="justify-content:flex-start">𐡀 Aramaic text</button>
+        <button class="btn btn-gold btn-sm" onclick="insert('syriac')" style="justify-content:flex-start">܀ Syriac text</button>
+        <button class="btn btn-gold btn-sm" onclick="insert('paleohebrew')" style="justify-content:flex-start">𐤏 Paleo-Hebrew text</button>
+        <button class="btn btn-gold btn-sm" onclick="insert('gk')" style="justify-content:flex-start">α Greek text</button>
+        <button class="btn btn-amber btn-sm" onclick="insert('fn')" style="justify-content:flex-start">¹ Footnote</button>
+        <button class="btn btn-amber btn-sm" onclick="insert('app')" style="justify-content:flex-start">† App. entry</button>
+        <button class="btn btn-cyan btn-sm" onclick="insert('cite')" style="justify-content:flex-start">§ Citation</button>
+        <button class="btn btn-cyan btn-sm" onclick="insert('biblio')" style="justify-content:flex-start">≡ Bibliography</button>
+        <button class="btn btn-sm" style="border-color:#9c7cd0;color:#7a5aa0;" onclick="insert('table')">⊞ Table</button>
+        <button class="btn btn-sm" style="border-color:#9c7cd0;color:#7a5aa0;" onclick="insert('figure')">⊡ Figure</button>
+      </div>
+    </div>
+
+    <div style="padding:10px;margin-top:auto;border-top:1px solid #e6e0d2;">
+      <button class="btn btn-gold" onclick="compile()" style="width:100%;justify-content:center;margin-bottom:6px">▶ COMPILE XeLaTeX</button>
+      <button class="btn btn-amber" onclick="exportPDF()" style="width:100%;justify-content:center;margin-bottom:6px">↓ EXPORT PDF</button>
+      <button class="btn btn-cyan btn-sm" onclick="exportDocx()" style="width:100%;justify-content:center;margin-bottom:6px">↓ EXPORT DOCX</button>
+      <button class="btn btn-sm" style="width:100%;justify-content:center;border-color:#8a6a20;color:#8a6a20;" onclick="exportTEI()" title="Convert \edtext{lemma}{\Xfootnote{note}} apparatus entries into real TEI P5 app/lem/rdg">↓ EXPORT TEI-XML</button>
+    </div>
+  </div>
+
+  <!-- EDITOR PANEL -->
+  <div class="editor-panel">
+    <div class="editor-toolbar">
+      <button class="btn btn-gold btn-sm" onclick="compile()">▶ COMPILE</button>
+      <div style="width:1px;height:20px;background:#ddd6c8;margin:0 4px;"></div>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="fmtBold()"><b>B</b></button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="fmtItalic()"><i>I</i></button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="fmtSmallCaps()">SC</button>
+      <div style="width:1px;height:20px;background:#ddd6c8;margin:0 4px;"></div>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="insert('heb')">𐤀 HEB</button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="insert('aramaic')">𐡀 ARM</button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="insert('syriac')">܀ SYR</button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="insert('paleohebrew')">𐤏 PLH</button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="insert('gk')">α GK</button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="insert('fn')">FN</button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="insert('app')">APP</button>
+      <button class="btn btn-sm" style="border-color:#bcae88;" onclick="insert('cite')">CITE</button>
+      <div style="flex:1"></div>
+      <select id="template-sel" style="font-family:monospace;font-size:10px;padding:3px 6px;" onchange="loadTemplate(this.value)">
+        <option value="article">SBL Article</option>
+        <option value="dissertation">Dissertation</option>
+        <option value="traditional">Traditional MG</option>
+        <option value="critical">Critical Ed.</option>
+      </select>
+    </div>
+    <textarea id="latex-editor" spellcheck="false" onkeydown="editorKeydown(event)"></textarea>
+    <div class="editor-status">
+      <span id="compile-status" class="ok">● Ready</span>
+      <span id="line-col">Ln 1, Col 1</span>
+      <span id="word-count">0 words</span>
+      <div style="flex:1"></div>
+      <span style="color:#8b7a5c;">XeLaTeX · BibLaTeX · SBL</span>
+    </div>
+  </div>
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-panel">
+    <div class="preview-toolbar">
+      <span style="font-family:monospace;font-size:10px;">PREVIEW</span>
+      <div style="flex:1"></div>
+      <button class="btn btn-amber btn-sm" onclick="togglePreviewMode()">⊡ LAYOUT</button>
+      <button class="btn btn-cyan btn-sm" onclick="exportPDF()">↓ PDF</button>
+    </div>
+    <div class="preview-wrap" id="preview-wrap">
+      <div id="preview-page" class="preview-page"></div>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script>
+// ========== TEMPLATES (including new Traditional MG-style) ==========
+const TEMPLATES = {
+  article: `% SBL Journal Article
+\\documentclass[12pt,a4paper]{article}
+\\usepackage{fontspec,polyglossia,biblatex-sbl,setspace}
+\\setmainfont{EB Garamond}
+\\newfontfamily\\hebrewfont{SBL Hebrew}[Script=Hebrew]
+\\title{The Masorah Parva of Codex Sassoon 1053}
+\\author{Mark Corley}
+\\begin{document}
+\\maketitle
+\\begin{abstract}
+This study examines Masoretic annotations.
+\\end{abstract}
+\\section{Introduction}
+\\texthebrew{בְּרֵאשִׁית} in Gen 1:1.
+\\end{document}`,
+  dissertation: `% PhD Dissertation skeleton
+\\documentclass[12pt,a4paper]{book}
+\\usepackage{fontspec,polyglossia}
+\\setmainfont{EB Garamond}
+\\title{Computational Masorah}
+\\author{Mark Corley}
+\\begin{document}
+\\maketitle
+\\chapter{Introduction}
+\\end{document}`,
+  traditional: `% Traditional Edition with MG-style Apparatus (Mikraot Gedolot)
+\\documentclass[12pt,a4paper]{article}
+\\usepackage{fontspec,polyglossia,reledmac}
+\\setmainfont{EB Garamond}
+\\newfontfamily\\hebrewfont{SBL Hebrew}[Script=Hebrew]
+\\title{Traditional Masoretic Edition \\\\ \\large{Masorah Gedolah \& Parva}}
+\\author{Based on Ben Ḥayyim 1525}
+\\begin{document}
+\\maketitle
+\\section*{Genesis 1:1 -- Apparatus Masoreticus}
+\\beginnumbering
+\\pstart
+\\edtext{בְּרֵאשִׁית}{%
+  \\Afootnote{MG: \\texthebrew{בְּרֵאשִׁ֖ית} — occurs 2× in Torah (Weil §1)}%
+  \\Bfootnote{Masorah Parva: \\texthebrew{בְּרֵאשִׁ֣ית} c. 1 QIsaᵃ variant}}
+\\edtext{בָּרָא}{\\Afootnote{MG: \\texthebrew{בָּרָא} — with qameṣ; Samaritan: \\texthebrew{ברא}}}
+\\edtext{אֱלֹהִים}{\\Afootnote{MP: \\texthebrew{אֱלֹהִים} scribal correction, compare LXX θεός}}
+אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ.
+\\pend
+\\endnumbering
+\\subsection*{Masoretic Notes}
+This edition follows the Tiberian Masoretic tradition with full apparatus citing Ben Asher–Ben Naphtali variations.
+\\end{document}`,
+  critical: `% Critical Edition with reledmac
+\\documentclass[12pt,a4paper]{article}
+\\usepackage{fontspec,reledmac}
+\\setmainfont{EB Garamond}
+\\newfontfamily\\hebrewfont{SBL Hebrew}[Script=Hebrew]
+\\begin{document}
+\\beginnumbering
+\\pstart
+\\edtext{בְּרֵאשִׁית}{\\Afootnote{LXX: ἐν ἀρχῇ}}
+\\pend
+\\endnumbering
+\\end{document}`,
+  commentary: `% Commentary template
+\\documentclass{article}
+\\begin{document}
+\\section{Gen 1:1}
+\\texthebrew{בְּרֵאשִׁית} — Exegetical note.
+\\end{document}`,
+  conference: `% Conference paper abstract
+\\documentclass{article}
+\\begin{document}
+\\title{Masorah and Digital Humanities}
+\\maketitle
+\\end{document}`,
+  edition: `% Synoptic edition
+\\documentclass{article}
+\\usepackage{ledpar}
+\\begin{document}
+\\begin{ledpar}{}
+\\begin{ledleft}
+\\texthebrew{בְּרֵאשִׁית}
+\\end{ledleft}
+\\begin{ledright}
+In the beginning
+\\end{ledright}
+\\end{ledpar}
+\\end{document}`
+};
+
+// Insert snippets (new Aramaic, Syriac, Paleo-Hebrew)
+const INSERTS = {
+  heb: '\\texthebrew{[Hebrew text]}',
+  aramaic: '\\textaramaic{[Aramaic text]}',
+  syriac: '\\textsyriac{[Syriac text]}',
+  paleohebrew: '\\textpalhebrew{[Paleo-Hebrew text]}',
+  gk:  '\\textgreek{[Greek text]}',
+  fn:  '\\footnote{[Footnote text]}',
+  app: '\\edtext{[lemma]}{\\Afootnote{[apparatus entry]}}',
+  cite:'\\footcite[cf.][page]{key}',
+  biblio:'\\printbibliography',
+  table:`\\begin{table}[h]\\centering\\begin{tabular}{lcc}\\hline A & B & C \\\\\\hline\\end{tabular}\\caption{Table}\\end{table}`,
+  figure:`\\begin{figure}[h]\\centering\\includegraphics{file}\\caption{Fig}\\end{figure}`,
+};
+
+const editor = document.getElementById('latex-editor');
+
+function loadTemplate(name){
+  const tpl = TEMPLATES[name] || TEMPLATES.article;
+  editor.value = tpl;
+  updateStatus();
+  renderPreview();
+  toast(`Template loaded: ${name.replace('_',' ')}`, 'info');
+}
+
+function insert(type){
+  const text = INSERTS[type] || '';
+  const start = editor.selectionStart;
+  const before = editor.value.slice(0, start);
+  const after = editor.value.slice(editor.selectionEnd);
+  editor.value = before + text + after;
+  editor.selectionStart = editor.selectionEnd = start + text.length;
+  editor.focus();
+  updateStatus();
+}
+
+function fmtBold(){ wrapSelection('\\textbf{', '}'); }
+function fmtItalic(){ wrapSelection('\\emph{', '}'); }
+function fmtSmallCaps(){ wrapSelection('\\textsc{', '}'); }
+function wrapSelection(open, close){
+  const s=editor.selectionStart, e=editor.selectionEnd;
+  const sel=editor.value.slice(s,e)||'text';
+  editor.value = editor.value.slice(0,s)+open+sel+close+editor.value.slice(e);
+  editor.focus();
+}
+
+function editorKeydown(e){
+  if(e.key==='Tab'){ e.preventDefault(); const s=editor.selectionStart; editor.value=editor.value.slice(0,s)+'  '+editor.value.slice(s); editor.selectionStart=editor.selectionEnd=s+2; }
+  updateStatus();
+  clearTimeout(editor._preview); editor._preview=setTimeout(renderPreview,600);
+}
+editor.addEventListener('keyup',updateStatus);
+editor.addEventListener('click',updateStatus);
+
+function updateStatus(){
+  const val=editor.value;
+  const lines=val.slice(0,editor.selectionStart).split('\n');
+  document.getElementById('line-col').textContent=`Ln ${lines.length}, Col ${lines[lines.length-1].length+1}`;
+  const words=val.replace(/%.*$/mg,'').replace(/\\[a-zA-Z]+/g,'').replace(/[{}[\]]/g,'').trim().split(/\s+/).filter(Boolean).length;
+  document.getElementById('word-count').textContent=`~${words} words`;
+}
+
+function compile(){
+  const statusSpan=document.getElementById('compile-status');
+  statusSpan.textContent='● Compiling…'; statusSpan.style.color='#e8963a';
+  setTimeout(()=>{
+    statusSpan.textContent='● Compiled ✓'; statusSpan.style.color='#2e7d32';
+    renderPreview();
+    toast('XeLaTeX compilation successful (simulated)','success');
+  },1200);
+}
+
+function renderPreview(){
+  const src=editor.value;
+  const pageDiv=document.getElementById('preview-page');
+  const titleMatch=src.match(/\\title\{([^}]+)\}/);
+  const authorMatch=src.match(/\\author\{([^}]+)\}/);
+  const abstractMatch=src.match(/\\begin\{abstract\}([\s\S]*?)\\end\{abstract\}/);
+  const sections=[];
+  const sectionRe=/\\section\*?\{([^}]+)\}([\s\S]*?)(?=\\section|\\printbib|\\end\{document\})/g;
+  let m;
+  while((m=sectionRe.exec(src))!==null){ sections.push({title:m[1], body:m[2]}); }
+  const title=titleMatch?titleMatch[1].replace(/\\\\/g,'<br>'):'Untitled Edition';
+  const author=authorMatch?authorMatch[1].replace(/\\\\/g,'<br>'):'Masorah Editor';
+  let html=`<h1>${title}</h1><p class="author">${author}</p>`;
+  if(abstractMatch){ html+=`<p style="font-variant:small-caps;text-align:center;">Abstract</p><p>${latexToHTML(abstractMatch[1])}</p><hr>`; }
+  sections.forEach(s=>{ html+=`<h2 style="font-variant:small-caps;margin-top:12pt;">${s.title}</h2><p>${latexToHTML(s.body)}</p>`; });
+  // apparatus extraction
+  const appEntries=[];
+  const appRe=/\\edtext\{([^}]+)\}\{\\[ABC]footnote\{([^}]+)\}/g;
+  while((m=appRe.exec(src))!==null){ appEntries.push({lemma:m[1], note:m[2]}); }
+  if(appEntries.length){
+    html+=`<div class="apparatus"><div class="apparatus-head" style="font-variant:small-caps;">Critical & Masoretic Apparatus</div>`;
+    appEntries.forEach((e,i)=>{ html+=`<div class="app-entry"><sup>${i+1}</sup> <span class="heb-inline">${e.lemma}</span>] ${latexToHTML(e.note)}</div>`; });
+    html+=`</div>`;
+  }
+  pageDiv.innerHTML=html;
+}
+
+function latexToHTML(s){
+  return s
+    .replace(/\\texthebrew\{([^}]+)\}/g,'<span class="heb-inline">$1</span>')
+    .replace(/\\textaramaic\{([^}]+)\}/g,'<span style="font-family:\"Ezra SIL\",serif;">$1</span>')
+    .replace(/\\textsyriac\{([^}]+)\}/g,'<span style="font-family:\"Serto Jerusalem\",serif;">$1</span>')
+    .replace(/\\textpalhebrew\{([^}]+)\}/g,'<span style="font-family:\"Frank Ruhl Libre\",serif;">$1</span>')
+    .replace(/\\textgreek\{([^}]+)\}/g,'<span style="font-family:\"SBL Greek\",serif;">$1</span>')
+    .replace(/\\emph\{([^}]+)\}/g,'<em>$1</em>').replace(/\\textbf\{([^}]+)\}/g,'<strong>$1</strong>')
+    .replace(/\\footcite[^{]*\{[^}]*\}\{[^}]*\}\{([^}]+)\}/g,'<sup>[$1]</sup>')
+    .replace(/\\ldots/g,'…').replace(/---/g,'—').replace(/``/g,'“').replace(/''/g,'”')
+    .replace(/\\\\/g,'<br>').replace(/%[^\n]*/g,'').replace(/\\[a-zA-Z]+/g,'').replace(/[{}]/g,'').replace(/\n{3,}/g,'</p><p>').trim();
+}
+
+function exportPDF(){ toast('PDF export: compile .tex with XeLaTeX','info',3000); exportTex(); }
+function exportTex(){ const blob=new Blob([editor.value],{type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='masorah_paper.tex'; a.click(); toast('.tex exported','success'); }
+function exportDocx(){ toast('DOCX via pandoc: pandoc masorah_paper.tex -o output.docx','info'); }
+
+/* ── TEI P5 critical-apparatus export ──
+   Converts this editor's real reledmac markup — \edtext{lemma}{\Afootnote{..}}
+   — into genuine TEI P5 <app>/<lem>/<rdg>, rather than a stub. Each
+   \Xfootnote tier (A/B/C) becomes a distinct <rdg wit="#wX">, with a
+   <listWit> declared in the header so witness sigla resolve per TEI P5. */
+function teiEsc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function latexPlain(s){
+  return (s||'')
+    .replace(/\\texthebrew\{([^}]+)\}/g,'$1').replace(/\\textaramaic\{([^}]+)\}/g,'$1')
+    .replace(/\\textsyriac\{([^}]+)\}/g,'$1').replace(/\\textpalhebrew\{([^}]+)\}/g,'$1')
+    .replace(/\\textgreek\{([^}]+)\}/g,'$1').replace(/\\emph\{([^}]+)\}/g,'$1').replace(/\\textbf\{([^}]+)\}/g,'$1')
+    .replace(/\\footcite[^{]*\{[^}]*\}\{[^}]*\}\{([^}]+)\}/g,'[$1]')
+    .replace(/\\ldots/g,'…').replace(/---/g,'—').replace(/``/g,'“').replace(/''/g,'”')
+    .replace(/\\\\/g,' ').replace(/%[^\n]*/g,'').replace(/\\[a-zA-Z]+\*?/g,'').replace(/[{}]/g,'')
+    .replace(/\s+/g,' ').trim();
+}
+function apparatusToTEI(body){
+  const WIT_LABEL={A:'Masorah Gedolah / primary apparatus tier',B:'Masorah Parva / secondary tier',C:'tertiary / versional tier'};
+  const usedWit=new Set();
+  let out='',last=0,n=0;
+  const appRe=/\\edtext\{([^}]+)\}\{((?:\\[ABC]footnote\{[^}]+\}\s*)+)\}/g;
+  let mm;
+  while((mm=appRe.exec(body))!==null){
+    out+=teiEsc(latexPlain(body.slice(last,mm.index)));
+    n++;
+    const lemma=latexPlain(mm[1]);
+    const noteRe=/\\([ABC])footnote\{([^}]+)\}/g;
+    let nm,rdgs=[];
+    while((nm=noteRe.exec(mm[2]))!==null){usedWit.add(nm[1]);rdgs.push({wit:nm[1],text:latexPlain(nm[2])});}
+    out+=`<app xml:id="app${n}"><lem>${teiEsc(lemma)}</lem>`+rdgs.map(r=>`<rdg wit="#w${r.wit}">${teiEsc(r.text)}</rdg>`).join('')+`</app>`;
+    last=mm.index+mm[0].length;
+  }
+  out+=teiEsc(latexPlain(body.slice(last)));
+  return {xml:out,usedWit,count:n};
+}
+function exportTEI(){
+  const src=editor.value;
+  const titleMatch=src.match(/\\title\{([^}]+)\}/);
+  const authorMatch=src.match(/\\author\{([^}]+)\}/);
+  const title=titleMatch?latexPlain(titleMatch[1]):'Untitled Edition';
+  const author=authorMatch?latexPlain(authorMatch[1]):'Masorah Editor';
+  const sections=[];
+  const sectionRe=/\\section\*?\{([^}]+)\}([\s\S]*?)(?=\\section|\\printbib|\\end\{document\})/g;
+  let m;
+  while((m=sectionRe.exec(src))!==null){ sections.push({title:m[1],body:m[2]}); }
+  const allWit=new Set();
+  let totalApp=0;
+  const divs=sections.map(s=>{
+    const r=apparatusToTEI(s.body);
+    r.usedWit.forEach(w=>allWit.add(w));
+    totalApp+=r.count;
+    return `    <div type="section">\n      <head>${teiEsc(latexPlain(s.title))}</head>\n      <p>${r.xml}</p>\n    </div>`;
+  }).join('\n');
+  if(!sections.length){
+    const r=apparatusToTEI(src);
+    r.usedWit.forEach(w=>allWit.add(w));totalApp+=r.count;
+  }
+  if(!allWit.size){['A','B','C'].forEach(w=>allWit.add(w));}
+  const listWit=[...allWit].sort().map(w=>`      <witness xml:id="w${w}">${teiEsc(WIT_LABEL_SAFE(w))}</witness>`).join('\n');
+  function WIT_LABEL_SAFE(w){return {A:'Masorah Gedolah / primary apparatus tier',B:'Masorah Parva / secondary tier',C:'tertiary / versional tier'}[w]||('Witness tier '+w);}
+  const xml=`<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt><title>${teiEsc(title)}</title><author>${teiEsc(author)}</author></titleStmt>
+      <publicationStmt><p>Generated by Masorah Corpus — publish.html, from reledmac \\edtext apparatus source.</p></publicationStmt>
+      <sourceDesc><p>Converted automatically from LaTeX/reledmac markup edited in this workbench; not independently reviewed.</p></sourceDesc>
+    </fileDesc>
+    <encodingDesc>
+      <listWit>
+${listWit}
+      </listWit>
+      <appInfo><application version="1.0" ident="masorah-corpus-publish"><label>Masorah Corpus Publish — TEI export</label></application></appInfo>
+    </encodingDesc>
+  </teiHeader>
+  <text>
+    <body>
+${divs || '    <div type="section"><p>'+teiEsc(latexPlain(src))+'</p></div>'}
+    </body>
+  </text>
+</TEI>`;
+  const blob=new Blob([xml],{type:'application/xml'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='masorah_edition_tei.xml';a.click();
+  toast(totalApp?('TEI P5 exported — '+totalApp+' apparatus entr'+(totalApp===1?'y':'ies')):'TEI P5 exported (no \\edtext apparatus found — plain text body only)','success',4000);
+}
+function togglePreviewMode(){ const pg=document.getElementById('preview-page'); if(pg.style.maxWidth==='none'){ pg.style.maxWidth='595px'; pg.style.margin='20px auto'; } else { pg.style.maxWidth='none'; pg.style.margin='0'; pg.style.padding='40px'; } }
+function toast(msg,type,ms=3500){ const c=document.getElementById('toast-container'); const t=document.createElement('div'); t.className=`toast ${type}`; t.textContent=msg; c.appendChild(t); setTimeout(()=>t.remove(),ms); }
+
+// Font scale from header
+let szPct=parseInt(localStorage.getItem('masorah.scale')||'100',10);
+function applyScale(){ document.documentElement.style.fontSize=(szPct*0.16)+'px'; document.getElementById('szLbl').textContent=szPct+'%'; localStorage.setItem('masorah.scale',szPct); }
+function scale(dir){ szPct=Math.max(70,Math.min(160,szPct+dir*5)); applyScale(); }
+applyScale();
+
+// API probe simulation
+async function probeAPI(){
+  const pill = document.getElementById('apiPill');
+  if(!pill) return;
+  try{
+    const r = await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});
+    if(r.ok){ pill.className='pill live'; pill.innerHTML='<span class="dot"></span> Active'; return; }
+    throw 0;
+  }catch(e){
+    pill.className='pill warn'; pill.innerHTML='<span class="dot"></span> Offline';
+  }
+}
+probeAPI(); setInterval(probeAPI,10000);
+
+// Load default template on start
+document.addEventListener('DOMContentLoaded',()=>{ loadTemplate('article'); });
+</script>
+</body>
+</html>

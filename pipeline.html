@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah Corpus — Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22);--code-bg:#1a1208;--code-fg:#f4e8b8;--code-key:#e8a020;--code-str:#c0d890;--code-cmt:#7a6a40;--code-num:#f7c860}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);min-height:100vh}
+
+/* Reuse banner from index */
+.banner{background:linear-gradient(180deg,var(--paper) 0%, var(--gold-bg) 100%);border-bottom:3px double var(--gold);padding:0 28px;position:sticky;top:0;z-index:100;box-shadow:0 4px 14px rgba(120,90,20,.14)}
+.banner-row{display:flex;align-items:center;gap:18px;height:78px;max-width:1700px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:14px;padding-right:18px;border-right:1px solid var(--bdr)}
+.brand-glyph{font-family:'Frank Ruhl Libre',serif;font-size:42px;color:var(--gold);line-height:1;text-shadow:1px 1px 0 #fff,2px 2px 4px rgba(120,90,20,.2)}
+.brand-text h1{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:var(--ink);letter-spacing:.06em;line-height:1.1}
+.brand-text p{font-size:11px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}
+.nav::-webkit-scrollbar{height:0}
+.nav a{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;font-size:14px;color:var(--ink2);text-decoration:none;border-radius:var(--r);font-weight:500;white-space:nowrap;transition:.14s;border:1px solid transparent}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.status-cluster{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid var(--bdr);background:var(--paper)}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}
+.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* Layout */
+.wrap{max-width:1700px;margin:0 auto;padding:18px 28px;display:grid;grid-template-columns:240px 1fr 380px;gap:14px;height:calc(100vh - 78px)}
+.col{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(120,90,20,.08)}
+.col-head{padding:11px 14px;background:linear-gradient(180deg,var(--gold-bg),var(--paper));border-bottom:1px solid var(--bdr);font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:var(--gold-dk);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+.col-head .tag{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--gold);color:#fff;padding:2px 7px;border-radius:9px;letter-spacing:.1em}
+.col-body{flex:1;overflow-y:auto;padding:10px 12px}
+
+/* File tree */
+.tree-item{padding:7px 10px;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--ink2);display:flex;align-items:center;gap:8px;transition:.12s;font-family:'JetBrains Mono',monospace}
+.tree-item:hover{background:var(--gold-pale);color:var(--gold-dk)}
+.tree-item.active{background:var(--gold);color:#fff;font-weight:600}
+.tree-item .ico{font-size:14px;flex-shrink:0;opacity:.85}
+.tree-section{font-family:'Cinzel',serif;font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;padding:11px 10px 4px;border-bottom:1px solid var(--bdr);margin-top:6px;font-weight:600}
+.tree-section:first-child{margin-top:0}
+
+/* IDE */
+.ide-tabs{display:flex;background:#241a08;border-bottom:1px solid #463818;overflow-x:auto;flex-shrink:0}
+.ide-tab{padding:9px 16px;font-size:12px;color:#a89060;cursor:pointer;border-right:1px solid #463818;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:7px;white-space:nowrap;transition:.14s}
+.ide-tab:hover{color:#f4e8b8;background:#322308}
+.ide-tab.active{background:var(--code-bg);color:var(--gold-lt);border-bottom:2px solid var(--gold)}
+.ide-tab .x{opacity:.6;margin-left:4px;font-size:14px}
+.ide-tab .x:hover{opacity:1;color:#f4a8a8}
+
+.ide-toolbar{background:#1a1208;padding:7px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #463818;flex-shrink:0}
+.ide-btn{background:transparent;color:#c0a868;border:1px solid #463818;border-radius:var(--r);padding:5px 12px;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;transition:.14s}
+.ide-btn:hover{background:#322308;color:var(--gold-lt);border-color:var(--gold)}
+.ide-btn.run{background:var(--ok);color:#fff;border-color:var(--ok)}
+.ide-btn.run:hover{background:#1b5e20}
+.ide-btn.stop{background:var(--err);color:#fff;border-color:var(--err)}
+
+.editor-wrap{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--code-bg)}
+.editor{flex:1;overflow:auto;padding:12px 0 12px 0;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;color:var(--code-fg);white-space:pre;tab-size:4}
+.editor .ln{display:flex;align-items:flex-start}
+.editor .lno{width:48px;color:#5a4830;text-align:right;padding-right:12px;flex-shrink:0;user-select:none;border-right:1px solid #322308;margin-right:14px}
+.editor .lct{flex:1;padding-right:14px}
+.k{color:var(--code-key);font-weight:500}
+.s{color:var(--code-str)}
+.c{color:var(--code-cmt);font-style:italic}
+.n{color:var(--code-num)}
+.fn{color:#e8c060}
+.cls{color:#f7c860;font-weight:600}
+
+.console{height:200px;background:#0e0a02;border-top:2px solid var(--gold);padding:10px 14px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11.5px;color:#d8c890;flex-shrink:0}
+.con-line{padding:1px 0}
+.con-line .ts{color:#5a4830;margin-right:8px}
+.con-line.ok{color:#90c890}
+.con-line.warn{color:#e8a020}
+.con-line.err{color:#f4a8a8}
+.con-line .em{color:var(--gold-lt);font-weight:600}
+
+/* Right panel */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.kpi{background:var(--gold-pale);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 11px}
+.kpi .k{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em}
+.kpi .v{font-family:'Cinzel',serif;font-size:18px;color:var(--gold-dk);font-weight:600;margin-top:3px}
+
+.em-iter{margin-bottom:12px}
+.em-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px dashed var(--bdr);font-size:12px;font-family:'JetBrains Mono',monospace}
+.em-row:last-child{border:none}
+.em-row .lbl{flex:1;color:var(--ink3)}
+.em-row .v{color:var(--gold-dk);font-weight:600}
+
+.params{margin-top:8px}
+.param-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--bdr)}
+.param-row:last-child{border:none}
+.param-row .nm{flex:1;font-size:12px;color:var(--ink2)}
+.param-row input{width:90px;padding:4px 7px;border:1px solid var(--bdr);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--paper)}
+
+.feature-list{margin-top:8px}
+.feat{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
+.feat input[type=checkbox]{accent-color:var(--gold)}
+.feat .lbl{flex:1;color:var(--ink2)}
+.feat .w{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-dk);font-weight:600}
+
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer">
+      <div class="brand-glyph">מָסוֹרָה</div>
+      <div class="brand-text"><h1>Masorah Corpus</h1><p>Pipeline · pipeline.py v42.1</p></div>
+    </div>
+    <nav class="nav">
+      <a href="transcriber.html"><span>✍</span> Transcriber</a>
+      <a href="annotate.html"><span>▤</span> Annotate</a>
+      <a href="architecture.html"><span>⧉</span> Arch</a>
+      <a class="active" href="pipeline.html"><span>⫯</span> Pipeline</a>
+      <a href="provenance.html"><span>⟳</span> Provenance</a>
+      <a href="paleography.html"><span>◉</span> Paleography</a>
+      <a href="analyzer.html"><span>∿</span> Analyzer</a>
+      <a href="chat.html"><span>◍</span> Chat</a>
+      <a href="graph.html"><span>⌬</span> Graph</a>
+      <a href="reader.html"><span>▦</span> Reader</a>
+      <a href="publish.html"><span>⥤</span> Publish</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- LEFT: File tree -->
+  <div class="col">
+    <div class="col-head">
+      <span>Project Tree</span>
+      <span class="tag">v42.1</span>
+    </div>
+    <div class="col-body">
+      <div class="tree-section">⚙ Core Pipeline</div>
+      <div class="tree-item active" onclick="openTab('pipeline.py')"><span class="ico">🐍</span> pipeline.py</div>
+      <div class="tree-item" onclick="openTab('aud.py')"><span class="ico">🐍</span> aud.py</div>
+      <div class="tree-item" onclick="openTab('cbgm.py')"><span class="ico">🐍</span> cbgm.py</div>
+      <div class="tree-item" onclick="openTab('em_engine.py')"><span class="ico">🐍</span> em_engine.py</div>
+      <div class="tree-item" onclick="openTab('coherence.py')"><span class="ico">🐍</span> coherence.py</div>
+
+      <div class="tree-section">📋 Config</div>
+      <div class="tree-item" onclick="openTab('config.yaml')"><span class="ico">⚙</span> config.yaml</div>
+      <div class="tree-item" onclick="openTab('features.json')"><span class="ico">{·}</span> features.json</div>
+      <div class="tree-item" onclick="openTab('witnesses.csv')"><span class="ico">⊞</span> witnesses.csv</div>
+
+      <div class="tree-section">📊 Output</div>
+      <div class="tree-item" onclick="openTab('em.log')"><span class="ico">📜</span> em.log</div>
+      <div class="tree-item" onclick="openTab('coherence.json')"><span class="ico">{·}</span> coherence.json</div>
+      <div class="tree-item" onclick="openTab('stemma.gexf')"><span class="ico">⌬</span> stemma.gexf</div>
+    </div>
+  </div>
+
+  <!-- CENTER: IDE -->
+  <div class="col" style="background:var(--code-bg)">
+    <div class="ide-tabs" id="ideTabs">
+      <div class="ide-tab active" data-f="pipeline.py">🐍 pipeline.py <span class="x">×</span></div>
+    </div>
+
+    <div class="ide-toolbar">
+      <button class="ide-btn run" onclick="runPipeline()">▶ Run pipeline.py</button>
+      <button class="ide-btn" onclick="emStep()">↻ EM Step</button>
+      <button class="ide-btn" onclick="saveFile()">💾 Save</button>
+      <button class="ide-btn" onclick="exportJSON()">⤓ Export JSON</button>
+      <button class="ide-btn" onclick="clearConsole()">⌫ Clear</button>
+      <div style="flex:1"></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#a89060">Iter <b id="iterLbl" style="color:var(--gold-lt)">0/4</b> · θ=<b id="thetaLbl" style="color:var(--gold-lt)">—</b></span>
+    </div>
+
+    <div class="editor-wrap">
+      <div class="editor" id="editor"></div>
+      <div class="console" id="console">
+        <div class="con-line"><span class="ts">[00:00:00]</span> <span class="em">pipeline.py v42.1</span> ready · waiting for run command…</div>
+        <div class="con-line"><span class="ts">[00:00:00]</span> 55 witnesses loaded · 23,213 aligned verses</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: KPIs, params, EM iters -->
+  <div class="col">
+    <div class="col-head"><span>EM Engine</span><span class="tag">v42.1</span></div>
+    <div class="col-body">
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="k">Pairs</div><div class="v" id="kPairs">60,000</div></div>
+        <div class="kpi"><div class="k">Variants</div><div class="v" id="kVar">4,976</div></div>
+        <div class="kpi"><div class="k">Entropy</div><div class="v" id="kEnt">4.885</div></div>
+        <div class="kpi"><div class="k">θ</div><div class="v" id="kTh">0.246</div></div>
+      </div>
+
+      <div class="tree-section" style="border-bottom:1px solid var(--bdr);padding:0 0 4px;margin-bottom:8px">EM Iterations</div>
+      <div class="em-iter" id="emIter">
+        <div class="em-row"><span class="lbl">Iter 1</span><span class="v">θ=0.412 · E=9.541</span></div>
+        <div class="em-row"><span class="lbl">Iter 2</span><span class="v">θ=0.318 · E=7.122</span></div>
+        <div class="em-row"><span class="lbl">Iter 3</span><span class="v">θ=0.268 · E=5.901</span></div>
+        <div class="em-row"><span class="lbl">Iter 4 ✓</span><span class="v">θ=0.246 · E=4.885</span></div>
+      </div>
+
+      <div class="tree-section" style="border-bottom:1px solid var(--bdr);padding:0 0 4px;margin:14px 0 8px">Parameters</div>
+      <div class="params">
+        <div class="param-row"><span class="nm">Max iter</span><input value="4"></div>
+        <div class="param-row"><span class="nm">Convergence ε</span><input value="0.001"></div>
+        <div class="param-row"><span class="nm">Bright threshold</span><input value="±3σ"></div>
+        <div class="param-row"><span class="nm">Baseline</span><input value="05c"></div>
+        <div class="param-row"><span class="nm">Tie-break</span><input value="P2→P3"></div>
+      </div>
+
+      <div class="tree-section" style="border-bottom:1px solid var(--bdr);padding:0 0 4px;margin:14px 0 8px">Features (8)</div>
+      <div class="feature-list">
+        <div class="feat"><input type="checkbox" checked><span class="lbl">Bigram</span><span class="w">0.3744</span></div>
+        <div class="feat"><input type="checkbox" checked><span class="lbl">Trigram</span><span class="w">0.1919</span></div>
+        <div class="feat"><input type="checkbox" checked><span class="lbl">Mismatch</span><span class="w">0.1381</span></div>
+        <div class="feat"><input type="checkbox" checked><span class="lbl">LCS</span><span class="w">0.1328</span></div>
+        <div class="feat"><input type="checkbox" checked><span class="lbl">Prefix</span><span class="w">0.1324</span></div>
+        <div class="feat"><input type="checkbox"><span class="lbl">LenRatio</span><span class="w">0.0514</span></div>
+        <div class="feat"><input type="checkbox" checked><span class="lbl">Niqqud</span><span class="w">—</span></div>
+        <div class="feat"><input type="checkbox" checked><span class="lbl">Cantillation</span><span class="w">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── pipeline.py source (renamed from pip.py) ─────────────────────────────── */
+const FILES = {
+'pipeline.py': `# ═══════════════════════════════════════════════════════════════
+#  Masorah Corpus · pipeline.py · v42.1
+#  Expectation-Maximization Engine for eCBGM
+#  Renamed from pip.py — canonical module name is now pipeline.py
+# ═══════════════════════════════════════════════════════════════
+
+from __future__ import annotations
+import json, math, time, pathlib
+from dataclasses import dataclass, field
+from collections import defaultdict, Counter
+import numpy as np
+import pandas as pd
+
+VERSION = "42.1"
+BASELINE = "05c"          # Ben Hayyim 1525 (Mikraot Gedolot)
+MAX_ITER = 4
+EPS = 1e-3
+
+FEATURE_WEIGHTS = {
+    "bigram":      0.3744,
+    "trigram":     0.1919,
+    "mismatch":    0.1381,
+    "lcs":         0.1328,
+    "prefix":      0.1324,
+    "len_ratio":   0.0514,
+    "niqqud":      0.0,    # toggled at runtime
+    "cantillation":0.0,
+}
+
+@dataclass
+class Witness:
+    """A single textual witness (manuscript or printed edition)."""
+    sigla: str
+    tier: str
+    folder: pathlib.Path
+    extant: int = 0
+    lacuna: int = 0
+    coherence_05c: float = 0.0
+    bright_nodes: list = field(default_factory=list)
+
+
+def load_witnesses(registry: pathlib.Path) -> list[Witness]:
+    """Read the 55-node manuscript registry."""
+    df = pd.read_csv(registry)
+    wits = []
+    for _, r in df.iterrows():
+        wits.append(Witness(
+            sigla=r["sigla"], tier=r["tier"],
+            folder=pathlib.Path(r["folder"]),
+            extant=int(r.get("extant",0)),
+            lacuna=int(r.get("lacuna",0)),
+        ))
+    return wits
+
+
+def em_step(pairs: pd.DataFrame, weights: dict, iter_n: int) -> tuple[float,float]:
+    """One EM iteration. Returns (theta, entropy)."""
+    # E-step: compute posterior over alignment given current weights
+    score = np.zeros(len(pairs))
+    for feat, w in weights.items():
+        if feat in pairs.columns:
+            score += w * pairs[feat].values
+    post = 1 / (1 + np.exp(-score))
+    # M-step: re-estimate weights via gradient
+    ent = -np.mean(post*np.log(post+1e-12) + (1-post)*np.log(1-post+1e-12))
+    theta = float(np.std(score) / (np.mean(np.abs(score))+1e-9))
+    return theta, ent
+
+
+def run_pipeline(corpus_dir: pathlib.Path):
+    """Full pipeline: align → EM → coherence → stemma."""
+    t0 = time.time()
+    print(f"[pipeline.py v{VERSION}] starting on {corpus_dir}")
+    wits = load_witnesses(corpus_dir / "witnesses.csv")
+    print(f"  loaded {len(wits)} witnesses · baseline={BASELINE}")
+
+    pairs = pd.read_parquet(corpus_dir / "pairs_60k.parquet")
+    print(f"  {len(pairs):,} alignment pairs ready")
+
+    history = []
+    weights = dict(FEATURE_WEIGHTS)
+    for it in range(1, MAX_ITER+1):
+        theta, ent = em_step(pairs, weights, it)
+        history.append({"iter":it, "theta":theta, "entropy":ent})
+        print(f"  iter {it}/{MAX_ITER} · theta={theta:.4f} · H={ent:.4f}")
+        if it > 1 and abs(history[-1]["entropy"] - history[-2]["entropy"]) < EPS:
+            print("  ✓ converged")
+            break
+
+    # Coherence vs 05c baseline
+    coh = compute_coherence(wits, pairs, baseline=BASELINE)
+    print(f"  ECM coherence vs {BASELINE}: {coh:.4f}")
+
+    out = corpus_dir / "em_output_v42.1.json"
+    out.write_text(json.dumps({
+        "version": VERSION, "iters": history,
+        "coherence_05c": coh, "elapsed_s": time.time()-t0,
+    }, indent=2))
+    print(f"  → {out.name}")
+    return history
+
+
+def compute_coherence(wits, pairs, baseline) -> float:
+    """ECM coherence: agreement-with-baseline normalized by extant verses."""
+    bw = next((w for w in wits if w.sigla.startswith(baseline)), None)
+    if not bw: return 0.0
+    agree = pairs.query("witness_a == @bw.sigla").get("agree",0).mean()
+    return float(agree)
+
+
+if __name__ == "__main__":
+    import sys
+    root = pathlib.Path(sys.argv[1] if len(sys.argv)>1 else ".")
+    run_pipeline(root)
+`,
+
+'aud.py': `# ═══════════════════════════════════════════════════════════════
+#  Masorah Corpus · aud.py · v8.1
+#  Audit script: validates corpus integrity before pipeline.py runs
+# ═══════════════════════════════════════════════════════════════
+
+from __future__ import annotations
+import json, hashlib, pathlib, csv
+from collections import defaultdict
+
+VERSION = "8.1"
+
+def audit(corpus_dir: pathlib.Path) -> dict:
+    """Validate file checksums, XML well-formedness, CSV row counts."""
+    report = {"version": VERSION, "errors": [], "warnings": [], "ok": 0}
+
+    for xml in corpus_dir.glob("**/*.xml"):
+        try:
+            xml.read_text(encoding="utf-8")
+            report["ok"] += 1
+        except Exception as e:
+            report["errors"].append({"file": str(xml), "msg": str(e)})
+
+    print(f"[aud.py v{VERSION}] {report['ok']} OK · {len(report['errors'])} errors")
+    return report
+
+
+if __name__ == "__main__":
+    import sys
+    audit(pathlib.Path(sys.argv[1] if len(sys.argv)>1 else "."))
+`,
+
+'cbgm.py': `# Coherence-Based Genealogical Method
+# Builds stemma from EM posterior weights
+from pipeline import run_pipeline  # was: from pip import run_pipeline
+`,
+
+'em_engine.py': `# EM engine (re-exports from pipeline.py)
+from pipeline import em_step, FEATURE_WEIGHTS
+`,
+
+'coherence.py': `# Coherence helpers
+from pipeline import compute_coherence
+`,
+
+'config.yaml': `# pipeline.py configuration
+version: 42.1
+baseline: 05c
+max_iter: 4
+epsilon: 0.001
+features:
+  bigram:      { weight: 0.3744, enabled: true }
+  trigram:     { weight: 0.1919, enabled: true }
+  mismatch:    { weight: 0.1381, enabled: true }
+  lcs:         { weight: 0.1328, enabled: true }
+  prefix:      { weight: 0.1324, enabled: true }
+  len_ratio:   { weight: 0.0514, enabled: false }
+  niqqud:      { weight: 0.0,    enabled: true }
+  cantillation:{ weight: 0.0,    enabled: true }
+`,
+
+'features.json': `{
+  "bigram":  {"w": 0.3744},
+  "trigram": {"w": 0.1919},
+  "mismatch":{"w": 0.1381},
+  "lcs":     {"w": 0.1328},
+  "prefix":  {"w": 0.1324}
+}`,
+
+'witnesses.csv': `sigla,tier,folder,extant,lacuna
+01a,T01,01a_Umm_el_Marra,12,0
+03c,T03,03c_Sassoon_1053,22978,235
+03b,T03,03b_Leningrad,23145,0
+03a,T03,03a_Aleppo,21100,2113
+05c,T05,05c_Second_Rabbinic_1525,23213,0
+`,
+
+'em.log': `[00:00:00] pipeline.py v42.1 ready
+[00:00:01] loaded 55 witnesses · baseline=05c
+[00:00:02] 60,000 alignment pairs ready
+[00:00:03]   iter 1/4 · theta=0.4120 · H=9.5410
+[00:00:04]   iter 2/4 · theta=0.3180 · H=7.1220
+[00:00:05]   iter 3/4 · theta=0.2680 · H=5.9010
+[00:00:06]   iter 4/4 · theta=0.2460 · H=4.8850
+[00:00:06] ✓ converged
+[00:00:07] ECM coherence vs 05c: -0.4830
+[00:00:07] wrote em_output_v42.1.json
+`,
+
+'coherence.json': `{
+  "version": "42.1",
+  "baseline": "05c",
+  "iters": [
+    {"iter":1,"theta":0.4120,"entropy":9.5410},
+    {"iter":2,"theta":0.3180,"entropy":7.1220},
+    {"iter":3,"theta":0.2680,"entropy":5.9010},
+    {"iter":4,"theta":0.2460,"entropy":4.8850}
+  ],
+  "coherence_05c": -0.4830,
+  "bright_nodes": ["Deut 32:8-9","Ps 22:17","Isa 7:14","Deut 27:4","Gen 11:12","Isa 53:11"]
+}`,
+
+'stemma.gexf': `<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+  <graph mode="static" defaultedgetype="directed">
+    <nodes>
+      <node id="05c" label="Ben Hayyim 1525"/>
+      <node id="03c" label="Sassoon 1053"/>
+      <node id="03b" label="Leningrad"/>
+      <node id="03a" label="Aleppo"/>
+    </nodes>
+    <edges>
+      <edge source="05c" target="03c" weight="0.924"/>
+      <edge source="05c" target="03b" weight="0.982"/>
+      <edge source="05c" target="03a" weight="0.971"/>
+    </edges>
+  </graph>
+</gexf>`
+};
+
+/* ── Syntax highlight ─────────────────────────────── */
+function hl(code, lang){
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if(lang==='py'){
+    return esc(code)
+      .replace(/(#[^\n]*)/g,'<span class="c">$1</span>')
+      .replace(/(&quot;[^&]*&quot;|&#039;[^&]*&#039;|"[^"]*"|'[^']*')/g,'<span class="s">$1</span>')
+      .replace(/\b(from|import|def|class|return|if|else|elif|for|while|try|except|with|as|in|is|not|and|or|None|True|False|self|lambda|yield|pass|break|continue|raise|global|nonlocal|async|await)\b/g,'<span class="k">$1</span>')
+      .replace(/\b(\d+\.?\d*)\b/g,'<span class="n">$1</span>')
+      .replace(/\b([A-Z][A-Za-z0-9_]*)\b/g,'<span class="cls">$1</span>')
+      .replace(/\b(def\s+)([a-z_][a-z0-9_]*)/gi,'$1<span class="fn">$2</span>');
+  }
+  if(lang==='yaml'||lang==='log'){
+    return esc(code)
+      .replace(/(#[^\n]*)/g,'<span class="c">$1</span>')
+      .replace(/^([\s]*[a-z_]+):/gmi,'<span class="k">$1</span>:')
+      .replace(/\b(\d+\.?\d*)\b/g,'<span class="n">$1</span>');
+  }
+  if(lang==='json'){
+    return esc(code)
+      .replace(/("(?:[^"\\]|\\.)*")\s*:/g,'<span class="k">$1</span>:')
+      .replace(/:\s*("(?:[^"\\]|\\.)*")/g,': <span class="s">$1</span>')
+      .replace(/\b(\d+\.?\d*)\b/g,'<span class="n">$1</span>');
+  }
+  if(lang==='csv'){
+    return esc(code);
+  }
+  if(lang==='xml'){
+    return esc(code)
+      .replace(/(&lt;\/?[a-z][^&]*&gt;)/gi,'<span class="k">$1</span>');
+  }
+  return esc(code);
+}
+
+function detectLang(f){
+  if(f.endsWith('.py')) return 'py';
+  if(f.endsWith('.yaml')||f.endsWith('.yml')) return 'yaml';
+  if(f.endsWith('.json')) return 'json';
+  if(f.endsWith('.csv')) return 'csv';
+  if(f.endsWith('.log')) return 'log';
+  if(f.endsWith('.gexf')||f.endsWith('.xml')) return 'xml';
+  return 'txt';
+}
+
+let currentFile = 'pipeline.py';
+const openFiles = new Set(['pipeline.py']);
+
+function render(){
+  const code = FILES[currentFile] || '';
+  const lang = detectLang(currentFile);
+  const lines = code.split('\n');
+  const ed = document.getElementById('editor');
+  ed.innerHTML = lines.map((ln,i)=>
+    `<div class="ln"><div class="lno">${i+1}</div><div class="lct">${hl(ln,lang)||'&nbsp;'}</div></div>`
+  ).join('');
+}
+
+function openTab(f){
+  /* Update tree */
+  document.querySelectorAll('.tree-item').forEach(t=>t.classList.remove('active'));
+  event && event.target.closest('.tree-item')?.classList.add('active');
+
+  if(!openFiles.has(f)) openFiles.add(f);
+  currentFile = f;
+  /* Rebuild tabs */
+  const tabs = document.getElementById('ideTabs');
+  tabs.innerHTML = [...openFiles].map(file=>
+    `<div class="ide-tab ${file===currentFile?'active':''}" onclick="switchTab('${file}')">${iconFor(file)} ${file} <span class="x" onclick="event.stopPropagation();closeTab('${file}')">×</span></div>`
+  ).join('');
+  render();
+}
+function switchTab(f){ currentFile=f; openTab(f); }
+function closeTab(f){
+  openFiles.delete(f);
+  if(currentFile===f) currentFile = [...openFiles][0] || 'pipeline.py';
+  if(!openFiles.size) openFiles.add('pipeline.py');
+  openTab(currentFile);
+}
+function iconFor(f){
+  if(f.endsWith('.py')) return '🐍';
+  if(f.endsWith('.yaml')) return '⚙';
+  if(f.endsWith('.json')) return '{·}';
+  if(f.endsWith('.csv')) return '⊞';
+  if(f.endsWith('.log')) return '📜';
+  if(f.endsWith('.gexf')) return '⌬';
+  return '📄';
+}
+
+/* ── Console ─────────────────────────────── */
+function logLine(msg, cls=''){
+  const con = document.getElementById('console');
+  const ts = new Date().toLocaleTimeString('en-GB');
+  const d = document.createElement('div');
+  d.className = 'con-line '+cls;
+  d.innerHTML = `<span class="ts">[${ts}]</span> ${msg}`;
+  con.appendChild(d);
+  con.scrollTop = con.scrollHeight;
+}
+function clearConsole(){
+  document.getElementById('console').innerHTML = '';
+  logLine('<span class="em">pipeline.py v42.1</span> console cleared','');
+}
+
+/* ── Run pipeline (simulated EM) ─────────────────────────────── */
+let iter = 0;
+const ITERS = [
+  {theta:0.4120, ent:9.541},
+  {theta:0.3180, ent:7.122},
+  {theta:0.2680, ent:5.901},
+  {theta:0.2460, ent:4.885},
+];
+function runPipeline(){
+  iter = 0;
+  logLine('<span class="em">→ pipeline.py</span> starting eCBGM v42.1 …','ok');
+  logLine('  loading 55 witnesses · baseline=05c');
+  logLine('  60,000 alignment pairs ready');
+  const t = setInterval(()=>{
+    if(iter>=ITERS.length){ clearInterval(t); logLine('✓ <span class="em">converged</span> · ECM coherence vs 05c: −0.4830','ok'); return; }
+    const r = ITERS[iter];
+    iter++;
+    logLine(`  iter ${iter}/4 · θ=${r.theta.toFixed(4)} · H=${r.ent.toFixed(4)}`);
+    document.getElementById('iterLbl').textContent = `${iter}/4`;
+    document.getElementById('thetaLbl').textContent = r.theta.toFixed(4);
+  }, 600);
+}
+function emStep(){
+  if(iter<ITERS.length){
+    const r = ITERS[iter]; iter++;
+    logLine(`  iter ${iter}/4 · θ=${r.theta.toFixed(4)} · H=${r.ent.toFixed(4)}`);
+    document.getElementById('iterLbl').textContent = `${iter}/4`;
+    document.getElementById('thetaLbl').textContent = r.theta.toFixed(4);
+  } else { logLine('Max iterations reached','warn'); }
+}
+function saveFile(){ logLine(`Saved ${currentFile} → corpus/`,'ok'); }
+function exportJSON(){
+  const blob = new Blob([JSON.stringify({version:'42.1',iters:ITERS,coherence_05c:-0.4830},null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='em_output_v42.1.json'; a.click();
+  logLine('Exported em_output_v42.1.json','ok');
+}
+
+/* ── API probe ─────────────────────────────── */
+async function probeAPI(){
+  const pill = document.getElementById('apiPill');
+  if(!pill) return;
+  try{
+    const r = await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});
+    if(r.ok){ pill.className='pill live'; pill.innerHTML='<span class="dot"></span> Active'; return; }
+    throw 0;
+  }catch(e){
+    pill.className='pill warn'; pill.innerHTML='<span class="dot"></span> Offline';
+  }
+}
+probeAPI(); setInterval(probeAPI, 8000);
+
+render();
+</script>
+</body>
+</html>

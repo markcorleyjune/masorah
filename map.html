@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah Corpus — Map · Manuscript Geography</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+<!-- Leaflet: real open-source tiled-map renderer (OpenStreetMap tiles) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column;overflow:hidden}
+
+.banner{background:linear-gradient(180deg,var(--paper) 0%,var(--gold-bg) 100%);border-bottom:3px double var(--gold);padding:0 28px;flex-shrink:0;box-shadow:var(--shadow);z-index:200}
+.banner-row{display:flex;align-items:center;gap:18px;height:78px;max-width:1900px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:14px;padding-right:18px;border-right:1px solid var(--bdr)}
+.brand-glyph{font-family:'Frank Ruhl Libre',serif;font-size:42px;color:var(--gold);line-height:1;text-shadow:1px 1px 0 #fff,2px 2px 4px rgba(120,90,20,.2)}
+.brand-text h1{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:var(--ink);letter-spacing:.06em;line-height:1.1}
+.brand-text p{font-size:11px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}.nav::-webkit-scrollbar{height:0}
+.nav a{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;font-size:14px;color:var(--ink2);text-decoration:none;border-radius:var(--r);font-weight:500;white-space:nowrap;transition:all .14s;border:1px solid transparent}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk);box-shadow:var(--shadow-sm)}
+.status-cluster{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid var(--bdr);background:var(--paper)}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user{display:flex;align-items:center;gap:8px;padding:5px 11px 5px 5px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:13px}
+.user-n{font-size:12px;color:var(--ink2)}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:9px;font-family:'JetBrains Mono',monospace}
+.logout{background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:4px 8px;border-radius:var(--r)}
+.logout:hover{color:var(--err)}
+
+.toolbar{display:flex;align-items:center;gap:12px;height:52px;padding:0 20px;background:var(--gold-bg);border-bottom:1px solid var(--bdr);flex-shrink:0;flex-wrap:wrap}
+.toolbar h2{font-family:'Cinzel',serif;font-size:14px;color:var(--ink2);white-space:nowrap}
+.tb-search{flex:0 0 220px;padding:6px 10px;border:1px solid var(--bdr);border-radius:var(--r);font-family:inherit;font-size:12.5px;background:var(--paper)}
+.tb-search:focus{outline:none;border-color:var(--gold)}
+.tb-sep{width:1px;height:22px;background:var(--bdr)}
+.year-range{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3)}
+.year-range input[type=range]{width:150px;accent-color:var(--gold)}
+.tb-chip{font-size:11px;padding:4px 10px;border:1px solid var(--bdr);border-radius:14px;background:var(--paper);color:var(--ink2);cursor:pointer}
+.tb-chip.sel{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.tb-reset{margin-left:auto;font-size:11.5px;color:var(--gold-dk);background:none;border:none;text-decoration:underline;cursor:pointer;white-space:nowrap}
+.tb-count{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink3);white-space:nowrap}
+.tb-count b{color:var(--gold-dk)}
+
+.mapwrap{flex:1;position:relative;min-height:0}
+#leafletMap{position:absolute;inset:0}
+.leaflet-popup-content{font-family:'EB Garamond',serif}
+.pop-sigil{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-dk);font-weight:700}
+.pop-title{font-family:'Cinzel',serif;font-size:13.5px;color:var(--ink);margin:2px 0 4px}
+.pop-meta{font-size:11.5px;color:var(--ink3);margin-bottom:6px}
+.pop-link{font-size:11.5px;color:var(--gold-dk);text-decoration:none;font-weight:600}
+
+.pin-dot{width:16px;height:16px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.legend{position:absolute;bottom:16px;left:16px;background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);padding:10px 14px;box-shadow:var(--shadow);font-size:11px;color:var(--ink2);z-index:500}
+.legend-row{display:flex;align-items:center;gap:6px;margin-top:4px}
+.legend-sw{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand">
+      <div class="brand-glyph">מָסוֹרָה</div>
+      <div class="brand-text"><h1>Masorah Corpus</h1></div>
+    </div>
+    <nav class="nav">
+      <a href="masorah.html">⌂ Project</a>
+      <a href="scriptorium.html">📚 Library</a>
+      <a href="map.html" class="active">🗺 Map</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill warn" id="apiPill"><span class="dot"></span> Offline</span>
+      <!-- Map is open access - no session exists here, so no user/logout is shown.
+           Full workbench (index.html and gated pages) requires requesting access first. -->
+      <a href="login.html" style="background:var(--gold);color:#fff;text-decoration:none;font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:var(--r);white-space:nowrap">🔒 Request Access</a>
+    </div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <h2>🗺 Manuscript Geography</h2>
+  <input class="tb-search" id="searchBox" placeholder="Search by name, sigil, or place…" oninput="applyFilters()">
+  <div class="tb-sep"></div>
+  <div class="year-range">
+    <span>Year</span>
+    <span id="yrFromLbl">-200</span>
+    <input type="range" id="yrFrom" min="-200" max="1100" value="-200" step="10" oninput="onYearChange()">
+    <input type="range" id="yrTo" min="-200" max="1100" value="1100" step="10" oninput="onYearChange()">
+    <span id="yrToLbl">1100</span>
+  </div>
+  <div class="tb-sep"></div>
+  <div id="tradChips" style="display:flex;gap:5px;flex-wrap:wrap"></div>
+  <span class="tb-count">Showing <b id="cnt">0</b> of <b id="cntTotal">0</b></span>
+  <button class="tb-reset" onclick="resetAll()">Reset all</button>
+</div>
+
+<div class="mapwrap">
+  <div id="leafletMap"></div>
+  <div class="legend">
+    <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.06em">Tradition</div>
+    <div id="legendBody"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   MAP — geographic distribution of corpus witnesses
+   Same manuscript records as scriptorium.html (kept in sync by
+   hand — natural next step is a shared JSON/IIIF manifest, see
+   architecture.html for the planned schema). Origin coordinates
+   are approximate — public-domain findspots for well-known
+   witnesses, plotted with Leaflet + OpenStreetMap tiles.
+   ════════════════════════════════════════════════════════════ */
+const TRAD_COLORS={'Tiberian':'#B8860B','Proto-Masoretic (Qumran)':'#9a6cc4','Proto-Masoretic':'#e08a1e','Mixed / Oriental':'#c0394b'};
+const MSS=[
+ {id:'sassoon1053',sigil:'Sassoon 1053',name:'Tanakh (MS Sassoon 1053)',date:900,dateLbl:'c. 880–960 CE',tradition:'Tiberian',place:'Tiberias, Levant',lat:32.79,lng:35.53,
+  desc:'Primary research object of this project — Tiberian codex with a distinctive S1 scribal profile.'},
+ {id:'aleppo',sigil:'Aleppo Codex',name:'Aleppo Codex (Keter Aram Tsova)',date:920,dateLbl:'c. 920 CE',tradition:'Tiberian',place:'Tiberias, Levant',lat:32.792,lng:35.535,
+  desc:'Vocalized by Aharon ben Asher; later moved to Aleppo, Syria, where it resided for centuries before relocating to Jerusalem.'},
+ {id:'leningrad',sigil:'Leningrad Codex',name:'Codex Leningradensis',date:1008,dateLbl:'1008/9 CE',tradition:'Tiberian',place:'Cairo (Fustat), Egypt',lat:30.006,lng:31.23,
+  desc:'Oldest complete dated Masoretic Bible codex; base text of BHS/BHQ.'},
+ {id:'orquart',sigil:'BL Or 4445',name:'London Pentateuch (BL Or 4445)',date:925,dateLbl:'c. 920–950 CE',tradition:'Tiberian',place:'Eretz Yisrael, Levant',lat:31.9,lng:35.2,
+  desc:'Substantially complete Tiberian Pentateuch, an early control witness.'},
+ {id:'genizah',sigil:'Cairo Genizah',name:'Cairo Genizah Bible Fragments',date:1000,dateLbl:'9th–14th c. (composite)',tradition:'Mixed / Oriental',place:'Fustat (Old Cairo), Egypt',lat:30.005,lng:31.234,
+  desc:'Dispersed fragment corpus recovered from the Ben Ezra Synagogue genizah.'},
+ {id:'1qisaa',sigil:'1QIsaa',name:'Great Isaiah Scroll (Dead Sea Scrolls)',date:-150,dateLbl:'c. 350–100 BCE',tradition:'Proto-Masoretic (Qumran)',place:'Qumran, Judean Desert',lat:31.7415,lng:35.4587,
+  desc:'Earliest substantially complete witness to Isaiah, over a millennium older than the medieval codices.'},
+ {id:'engedi',sigil:'En-Gedi Scroll',name:'En-Gedi Leviticus Scroll',date:300,dateLbl:'c. 3rd–4th c. CE',tradition:'Proto-Masoretic',place:'Ein Gedi, Judean Desert',lat:31.4616,lng:35.3866,
+  desc:'Carbonized synagogue scroll read via CT scanning; text matches the medieval Masoretic tradition closely.'}
+];
+const state={search:'',yrFrom:-200,yrTo:1100,trad:new Set()};
+let map,markers=[];
+
+function initMap(){
+  map=L.map('leafletMap',{scrollWheelZoom:true}).setView([33.5,33],4.4);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom:18
+  }).addTo(map);
+  MSS.forEach(m=>{
+    const color=TRAD_COLORS[m.tradition]||'#8a6a20';
+    const icon=L.divIcon({className:'',html:`<div class="pin-dot" style="background:${color}"></div>`,iconSize:[16,16],iconAnchor:[8,14]});
+    const mk=L.marker([m.lat,m.lng],{icon}).addTo(map);
+    mk.bindPopup(`<div class="pop-sigil">${m.sigil}</div><div class="pop-title">${m.name}</div><div class="pop-meta">📅 ${m.dateLbl} · 📍 ${m.place}</div><div style="font-size:11.5px;color:#3a2a10;margin-bottom:6px">${m.desc}</div><a class="pop-link" href="scriptorium.html">Open in Scriptorium →</a>`);
+    mk._rec=m;
+    markers.push(mk);
+  });
+}
+function buildChips(){
+  const trads=[...new Set(MSS.map(m=>m.tradition))];
+  document.getElementById('tradChips').innerHTML=trads.map(t=>
+    `<span class="tb-chip" data-t="${t.replace(/"/g,'&quot;')}" onclick="toggleTrad(this)">${t}</span>`
+  ).join('');
+  document.getElementById('legendBody').innerHTML=trads.map(t=>
+    `<div class="legend-row"><span class="legend-sw" style="background:${TRAD_COLORS[t]||'#8a6a20'}"></span>${t}</div>`
+  ).join('');
+}
+function toggleTrad(el){
+  const t=el.dataset.t;el.classList.toggle('sel');
+  if(state.trad.has(t))state.trad.delete(t);else state.trad.add(t);
+  applyFilters();
+}
+function onYearChange(){
+  let a=parseInt(document.getElementById('yrFrom').value),b=parseInt(document.getElementById('yrTo').value);
+  if(a>b){[a,b]=[b,a];}
+  state.yrFrom=a;state.yrTo=b;
+  document.getElementById('yrFromLbl').textContent=a<0?(-a+' BCE'):(a+' CE');
+  document.getElementById('yrToLbl').textContent=b<0?(-b+' BCE'):(b+' CE');
+  applyFilters();
+}
+function resetAll(){
+  document.getElementById('searchBox').value='';
+  document.getElementById('yrFrom').value=-200;document.getElementById('yrTo').value=1100;
+  document.querySelectorAll('.tb-chip.sel').forEach(c=>c.classList.remove('sel'));
+  state.search='';state.yrFrom=-200;state.yrTo=1100;state.trad.clear();
+  document.getElementById('yrFromLbl').textContent='-200';document.getElementById('yrToLbl').textContent='1100';
+  applyFilters();
+}
+function applyFilters(){
+  state.search=document.getElementById('searchBox').value.trim().toLowerCase();
+  let shown=0;
+  markers.forEach(mk=>{
+    const m=mk._rec;
+    let ok=true;
+    if(state.search&&!(m.name.toLowerCase().includes(state.search)||m.sigil.toLowerCase().includes(state.search)||m.place.toLowerCase().includes(state.search)))ok=false;
+    if(ok&&(m.date<state.yrFrom||m.date>state.yrTo))ok=false;
+    if(ok&&state.trad.size&&!state.trad.has(m.tradition))ok=false;
+    if(ok){if(!map.hasLayer(mk))mk.addTo(map);shown++;}
+    else{if(map.hasLayer(mk))map.removeLayer(mk);}
+  });
+  document.getElementById('cnt').textContent=shown;
+  document.getElementById('cntTotal').textContent=MSS.length;
+}
+
+initMap();buildChips();applyFilters();
+
+async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+probeAPI();setInterval(probeAPI,8000);
+</script>
+</body>
+</html>

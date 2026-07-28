@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah Corpus — Reader · Interlinear Study</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22)}
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;overflow:hidden}
+body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column}
+
+/* ── BANNER 72px ── */
+.banner{background:linear-gradient(180deg,var(--paper) 0%,var(--gold-bg) 100%);border-bottom:3px double var(--gold);padding:0 20px;flex-shrink:0;box-shadow:0 4px 14px rgba(120,90,20,.14);z-index:200}
+.banner-row{display:flex;align-items:center;gap:14px;height:72px;max-width:1900px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:11px;padding-right:14px;border-right:1px solid var(--bdr);flex-shrink:0}
+.brand-glyph{font-family:'Frank Ruhl Libre',serif;font-size:38px;color:var(--gold);line-height:1}
+.brand-text h1{font-family:'Cinzel',serif;font-size:19px;font-weight:700;color:var(--ink);letter-spacing:.05em;line-height:1.1}
+.brand-text p{font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}.nav::-webkit-scrollbar{height:0}
+.nav a{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;font-size:13px;color:var(--ink2);text-decoration:none;border-radius:var(--r);font-weight:500;white-space:nowrap;transition:.13s;border:1px solid transparent}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.status-cluster{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:18px;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid var(--bdr);background:var(--paper)}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user-chip{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:12px}
+.user-n{font-size:11px;color:var(--ink2);font-family:'JetBrains Mono',monospace}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:8px}
+
+/* ── INTERLINEAR MODE ── */
+.il-body{direction:rtl;text-align:right;padding:14px 18px;line-height:2.4}
+.il-verse{margin-bottom:18px;padding-bottom:12px;border-bottom:1px dotted var(--bdr)}
+.il-vnum{display:inline-block;direction:ltr;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--gold-dk);background:var(--gold-pale);border:1px solid var(--bdr);border-radius:10px;padding:1px 7px;margin-bottom:8px}
+.il-row{display:flex;flex-wrap:wrap;gap:3px;justify-content:flex-start}
+.il-col{display:inline-flex;flex-direction:column;align-items:center;text-align:center;direction:ltr;padding:5px 7px 4px;border:1px solid transparent;border-radius:var(--r);cursor:pointer;transition:.12s;min-width:54px}
+.il-col:hover{background:var(--gold-pale);border-color:var(--bdr);box-shadow:0 2px 7px rgba(120,90,20,.1)}
+.il-heb{font-family:'Frank Ruhl Libre',serif;font-size:25px;color:var(--ink);line-height:1.15;direction:rtl}
+.il-translit{font-size:10.5px;font-style:italic;color:var(--gold-dk);margin-top:2px}
+.il-gloss{font-size:11px;color:var(--ink2);font-weight:500;margin-top:1px}
+.il-morph{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--ink4);margin-top:2px;letter-spacing:.02em}
+.il-strong{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--gold);margin-top:1px}
+.il-meta{display:flex;align-items:center;gap:12px;padding:8px 18px;background:var(--gold-bg);border-bottom:1px solid var(--bdr);font-size:11px;color:var(--ink3);flex-wrap:wrap}
+.il-meta b{color:var(--gold-dk)}
+.il-legend{display:flex;gap:10px;font-size:9.5px;color:var(--ink4);font-family:'JetBrains Mono',monospace}
+.rt-icon-btn.on{background:var(--gold);color:#fff}
+
+/* ── LEXICON BANNER (word popup strip) ── */
+#lexBanner{display:none;background:var(--gold-bg);border-bottom:2px solid var(--bdr);padding:8px 50px 10px 16px;font-size:12.5px;line-height:1.55;position:relative;flex-shrink:0;border-top:2px solid var(--gold)}
+#lexBanner .lx-x{position:absolute;right:9px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:18px;color:var(--gold-dk);font-weight:bold}
+.lx-heb{font-family:'Frank Ruhl Libre',serif;font-size:1.5em;color:var(--gold-dk);margin:0 7px;vertical-align:middle}
+.lx-word{font-weight:700;color:var(--gold-dk);font-size:14px}
+.lx-trans{font-style:italic;color:var(--ink3);font-size:12px}
+.lx-morph{color:var(--gold-dk);font-size:10.5px;font-style:italic;margin-top:2px}
+.lx-body{color:var(--ink2);font-size:12px;margin-top:4px;line-height:1.5}
+.lx-links{margin-top:5px}
+.lx-links a{color:var(--gold-dk);font-size:11px;text-decoration:underline;cursor:pointer;margin-right:14px}
+
+/* ── READER TOOLBAR ── */
+.reader-toolbar{display:flex;align-items:center;height:38px;padding:0 10px;background:var(--gold-bg);border-bottom:1px solid var(--bdr);flex-shrink:0;gap:5px;flex-wrap:nowrap;overflow:hidden}
+.rt-picker{border:1px solid var(--bdr);background:var(--paper);padding:2px 8px;border-radius:var(--r);font-size:12px;cursor:pointer;color:var(--ink2);display:inline-flex;align-items:center;gap:4px;white-space:nowrap;height:26px;transition:.12s}
+.rt-picker:hover{border-color:var(--gold);color:var(--gold-dk)}
+.rt-sep{width:1px;height:20px;background:var(--bdr);margin:0 5px;flex-shrink:0}
+.rt-icon-btn{background:none;border:none;color:var(--ink3);cursor:pointer;font-size:14px;padding:4px;border-radius:var(--r);transition:.12s}
+.rt-icon-btn:hover{background:var(--gold-pale);color:var(--gold-dk)}
+.search-bar-wrap{display:none;position:fixed;top:112px;left:50%;transform:translateX(-50%);z-index:500;background:var(--paper);border:2px solid var(--gold);border-radius:var(--r2);box-shadow:0 6px 24px rgba(120,90,20,.22);padding:12px 16px;width:560px;max-width:96vw}
+.search-bar-wrap.open{display:block}
+.search-bar-wrap input{width:100%;padding:8px 12px;border:1px solid var(--bdr);border-radius:var(--r);font-family:inherit;font-size:14px;background:var(--paper)}
+.search-bar-wrap input:focus{outline:none;border-color:var(--gold)}
+.search-bar-close{position:absolute;top:6px;right:10px;cursor:pointer;font-size:20px;color:var(--ink3);background:none;border:none}
+.search-results{margin-top:10px;max-height:300px;overflow-y:auto;font-size:12.5px;color:var(--ink2)}
+.sr-item{padding:7px 10px;border-bottom:1px solid var(--bdr);cursor:pointer;border-radius:var(--r)}
+.sr-item:hover{background:var(--gold-pale)}
+.sr-ref{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-dk);font-weight:700;margin-right:7px}
+.sr-hl{background:var(--gold-glow,#f7e7a0);border-radius:2px;padding:0 1px}
+
+/* ── MAIN: 3 reading panes + optional right panel ── */
+.reader-wrap{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));overflow:hidden;min-height:0;position:relative}
+.pane-wrap{display:flex;flex-direction:column;border-right:1px solid var(--bdr);overflow:hidden;min-width:0}
+.pane-wrap:last-child{border-right:none}
+.pane-toolbar{display:flex;align-items:center;height:32px;padding:0 10px;background:var(--gold-bg);border-bottom:1px solid var(--bdr);gap:6px;flex-shrink:0}
+.pane-picker{border:1px solid var(--bdr);background:var(--paper);padding:1px 6px;border-radius:var(--r);font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:3px;color:var(--ink2)}
+.pane-picker:hover{border-color:var(--gold);color:var(--gold-dk)}
+.pane-close{margin-left:auto;cursor:pointer;color:var(--ink4);font-size:14px;line-height:1;background:none;border:none}
+.pane-close:hover{color:var(--err,#b71c1c)}
+.pane-body{flex:1;overflow-y:auto;padding:18px 22px 40px;position:relative}
+.pane-body.rtl{direction:rtl;text-align:right}
+.pane-body::-webkit-scrollbar{width:5px}
+.pane-body::-webkit-scrollbar-thumb{background:var(--bdr2,#d8c890);border-radius:3px}
+
+/* ── Verse rendering ── */
+.ch-title{font-family:'Cinzel',serif;font-size:22px;font-weight:300;color:var(--ink2);margin-bottom:14px}
+.verse-block{margin-bottom:12px;line-height:1.9}
+.vnum{font-size:10px;color:var(--gold-dk);font-weight:700;vertical-align:super;margin-right:4px;cursor:pointer}
+.vnum:hover{color:var(--gold)}
+.verse-esv{font-size:14.5px;color:var(--ink);text-align:left}
+.verse-heb{font-family:'Frank Ruhl Libre',serif;font-size:19px;line-height:2.1;color:var(--ink2)}
+.verse-net{font-size:14.5px;color:var(--ink);font-style:italic}
+.verse-kjv{font-size:14.5px;color:var(--ink)}
+.eword{cursor:pointer;color:var(--gold-dk);border-radius:2px;padding:0 1px;transition:.1s}
+.eword:hover{background:var(--gold-dk);color:#fff}
+.eword.hl{background:var(--gold-glow,#f7e7a0);color:var(--ink)}
+.hword{cursor:pointer;color:var(--ink2);border-radius:2px;padding:0 2px;transition:.1s}
+.hword:hover{background:var(--gold-dk);color:#fff}
+.hword.hl{background:var(--gold-glow,#f7e7a0);color:var(--ink)}
+.xref-row{font-size:10.5px;color:var(--ink3);margin-top:2px;font-style:italic;border-top:1px solid rgba(232,216,160,.4);padding-top:2px}
+.note-row{font-size:10.5px;color:var(--ink3);margin-top:2px;background:rgba(232,216,160,.18);border-radius:3px;padding:2px 6px}
+.pane-footer{display:flex;align-items:center;justify-content:space-between;padding:5px 12px;border-top:1px solid var(--bdr);background:var(--gold-bg);flex-shrink:0}
+.pane-nav-btn{width:36px;height:36px;background:var(--paper);border:1px solid var(--bdr);border-radius:50%;font-size:18px;color:var(--gold-dk);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s}
+.pane-nav-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+
+/* ── Word popup ── */
+#wPop{display:none;position:fixed;z-index:99999;width:340px;background:var(--paper);border:1.5px solid var(--gold);border-radius:var(--r2);box-shadow:0 6px 22px rgba(0,0,0,.18);padding:13px 16px;font-size:12.5px;color:var(--gold-dk)}
+.wp-lbl{font-size:9px;font-weight:700;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:3px}
+.wp-main{font-size:15px;font-weight:700;color:var(--ink)}
+.wp-heb{font-family:'Frank Ruhl Libre',serif;font-size:1.6em;color:var(--gold-dk);display:block;margin-bottom:4px}
+.wp-pron{font-style:italic;font-size:12px;color:var(--ink3);margin-bottom:4px}
+.wp-body{font-size:12px;color:var(--ink2);margin-top:5px;line-height:1.6;border-top:1px solid var(--bdr);padding-top:5px}
+.wp-close{position:absolute;top:7px;right:9px;cursor:pointer;font-size:18px;color:var(--ink3);background:none;border:none}
+.wp-close:hover{color:var(--err,#b71c1c)}
+
+/* ── Overlays ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:flex-start;justify-content:flex-start}
+.modal-overlay.open{display:flex}
+
+/* Text selector side panel */
+#textSidePanel{width:600px;height:100vh;background:var(--paper);border-right:1px solid var(--bdr);box-shadow:4px 0 24px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden}
+.tsp-head{padding:10px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--gold-bg)}
+.tsp-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.tsp-title{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--ink)}
+.tsp-close{cursor:pointer;font-size:22px;color:var(--ink3);background:none;border:none}
+.tsp-tabs{display:flex;gap:0;margin-bottom:0}
+.tsp-tab{padding:6px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;color:var(--ink3);border-bottom:3px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none}
+.tsp-tab.active{color:var(--gold-dk);border-bottom-color:var(--gold)}
+.tsp-lang-row{display:flex;gap:4px;padding:8px 14px;flex-wrap:wrap;flex-shrink:0;border-bottom:1px solid var(--bdr)}
+.tsp-lang-pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bdr);color:var(--ink3);background:var(--paper)}
+.tsp-lang-pill.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.tsp-search-row{padding:6px 14px;flex-shrink:0;display:flex;gap:6px;border-bottom:1px solid var(--bdr)}
+.tsp-search{flex:1;border:1px solid var(--bdr);border-radius:var(--r);padding:5px 9px;font-size:12px;outline:none;font-family:inherit;background:var(--paper)}
+.tsp-search:focus{border-color:var(--gold)}
+.tsp-list{flex:1;overflow-y:auto}
+.tsp-tier-hd{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--gold-dk);color:#fff;font-size:12px;font-weight:700;cursor:pointer}
+.tsp-tier-hd:hover{background:var(--gold-lt)}
+.tsp-tier-acts{display:flex;gap:5px;margin:5px 14px 3px}
+.tsp-btn{font-size:10px;border:1px solid var(--bdr);border-radius:3px;padding:2px 8px;cursor:pointer;background:var(--paper);color:var(--ink3);font-weight:600}
+.tsp-btn:hover{background:var(--gold-pale);border-color:var(--gold)}
+.tsp-item{display:flex;align-items:flex-start;gap:8px;padding:6px 14px;border-bottom:1px solid var(--bdr);cursor:pointer;font-size:12px}
+.tsp-item:hover{background:var(--gold-pale)}
+.tsp-item.on{background:var(--gold-pale)}
+.tsp-item input{margin-top:3px;flex-shrink:0;accent-color:var(--gold)}
+.tsp-code{min-width:52px;font-weight:700;color:var(--gold-dk);font-size:11px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.tsp-name{flex:1;color:var(--ink2);line-height:1.35;word-wrap:break-word}
+.tsp-sub{font-size:10.5px;color:var(--ink3);display:block;margin-top:1px}
+.tsp-badge{font-size:10px;color:var(--ink4);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.tsp-foot{padding:8px 14px;border-top:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:var(--gold-bg)}
+.tsp-legend{font-size:10px;color:var(--ink3);line-height:1.6}
+.tsp-ok-btn{background:var(--gold);color:#fff;border:none;border-radius:var(--r);padding:7px 18px;cursor:pointer;font-family:'Cinzel',serif;font-size:12px;font-weight:600}
+
+/* Passage modal */
+#passageModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center}
+#passageModal.open{display:flex}
+.pm-inner{background:var(--paper);border-radius:var(--r2);box-shadow:0 8px 36px rgba(0,0,0,.25);width:640px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;border-top:3px solid var(--gold);overflow:hidden}
+.pm-head{padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--gold-bg)}
+.pm-head h3{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--ink)}
+.pm-search{flex:1;margin:0 16px;border:1px solid var(--bdr);border-radius:var(--r);padding:5px 10px;font-size:13px;font-family:inherit;background:var(--paper)}
+.pm-search:focus{outline:none;border-color:var(--gold)}
+.pm-close{cursor:pointer;font-size:22px;color:var(--ink3);background:none;border:none}
+.pm-body{flex:1;overflow-y:auto;padding:12px 16px}
+.pm-section{font-size:11px;font-weight:700;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.09em;margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--bdr)}
+.pm-books{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px}
+.pm-book-btn{padding:4px 9px;border:1px solid var(--bdr);border-radius:4px;font-size:12px;cursor:pointer;background:var(--paper);color:var(--ink2);font-weight:500;transition:.12s}
+.pm-book-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.pm-book-btn.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.pm-chaps{display:flex;flex-wrap:wrap;gap:3px;margin-top:8px}
+.pm-chap-btn{width:32px;height:32px;border:1px solid var(--bdr);border-radius:var(--r);font-size:12px;cursor:pointer;background:var(--paper);color:var(--ink2);display:flex;align-items:center;justify-content:center;transition:.12s}
+.pm-chap-btn:hover{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.pm-foot{padding:8px 16px;border-top:1px solid var(--bdr);display:flex;gap:7px;align-items:center;flex-shrink:0;background:var(--gold-bg)}
+.pm-verse-inp{width:80px;border:1px solid var(--bdr);border-radius:var(--r);padding:5px 9px;font-size:13px;font-family:inherit;background:var(--paper)}
+.pm-ok-btn{background:var(--gold);color:#fff;border:none;border-radius:var(--r);padding:6px 16px;cursor:pointer;font-family:'Cinzel',serif;font-size:12px;font-weight:600}
+
+/* Right: FAQ / Welcome panel */
+#faqPanel{display:block;position:fixed;top:72px;right:0;width:290px;height:calc(100vh - 72px);background:var(--paper);border-left:2px solid var(--bdr);z-index:400;padding:16px;overflow-y:auto;font-size:12.5px}
+.faq-hd{font-family:'Cinzel',serif;font-style:italic;color:var(--gold-dk);font-size:18px;margin-bottom:4px}
+.faq-sub{font-size:10.5px;color:var(--ink3);margin-bottom:14px}
+.faq-item{padding:7px 0;border-bottom:1px solid var(--bdr);cursor:pointer}
+.faq-item:hover{color:var(--gold-dk)}
+.faq-item strong{color:var(--gold-dk)}
+.faq-ans{display:none;font-size:11.5px;color:var(--ink2);padding-top:5px;line-height:1.6}
+.faq-item.open .faq-ans{display:block}
+.faq-item .faq-tri{color:var(--gold-dk);margin-right:5px;transition:.2s}
+.faq-item.open .faq-tri{transform:rotate(90deg)}
+.faq-x{position:absolute;top:6px;right:12px;cursor:pointer;font-size:20px;color:var(--ink3);background:none;border:none}
+.faq-x:hover{color:var(--err,#b71c1c)}
+
+/* Toast */
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:7px 18px;border-radius:24px;font-size:12px;font-family:'JetBrains Mono',monospace;z-index:9999;pointer-events:none}
+</style>
+</head>
+<body>
+<!-- BANNER -->
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah Corpus</h1><p>Reader · Interlinear Study</p></div></div>
+    <nav class="nav">
+      <a href="transcriber.html">✍ Transcriber</a>
+      <a href="annotate.html">▤ Annotate</a>
+      <a href="architecture.html">⧉ Arch</a>
+      <a href="pipeline.html">⫯ Pipeline</a>
+      <a href="provenance.html">⟳ Provenance</a>
+      <a href="paleography.html">◉ Paleography</a>
+      <a href="analyzer.html">∿ Analyzer</a>
+      <a href="chat.html">◍ Chat</a>
+      <a href="graph.html">⌬ Graph</a>
+      <a class="active" href="reader.html">▦ Reader</a>
+      <a href="publish.html">⥤ Publish</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
+      <div class="user-chip"><div class="user-av">M</div><span class="user-n">Mark Corley</span><span class="user-lvl">L4</span></div>
+      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px">Logout</button>
+    </div>
+  </div>
+</header>
+
+<!-- LEXICON BANNER -->
+<div id="lexBanner">
+  <button class="lx-x" onclick="closeLex()">×</button>
+  <span class="lx-word" id="lxWord"></span>
+  <span class="lx-heb" id="lxHeb"></span>
+  <span class="lx-trans" id="lxTrans"></span>
+  <div class="lx-morph" id="lxMorph"></div>
+  <div class="lx-body" id="lxBody"></div>
+  <div class="lx-links">
+    <a onclick="toast('See related verses — connect corpus API for full cross-reference')">See related verses</a>
+    <a onclick="toast('Translation tips — connect to lexicon database')">Translation tips</a>
+    <a href="https://www.websters1828.com/" target="_blank">Webster 1828</a>
+  </div>
+</div>
+
+<!-- READER TOOLBAR -->
+<div class="reader-toolbar">
+  <div class="rt-picker" onclick="showTextSelector()" title="Select texts">
+    <span id="transLabel">WEB · 03c (live)</span> ▾
+  </div>
+  <div class="rt-picker" onclick="togglePassageModal()" title="Go to passage" id="passageLabel">
+    Gen 1 ▾
+  </div>
+  <button class="rt-icon-btn" onclick="toggleSearchBar()" title="Search (hourglass)">⌛</button>
+  <div class="rt-sep"></div>
+  <button class="rt-icon-btn" id="ilBtn" title="Interlinear (Hebrew + translit + gloss + morphology + Strong's)" onclick="toggleInterlinear()" style="font-weight:600;font-size:11px;padding:3px 8px">⇅ Interlinear</button>
+  <button class="rt-icon-btn" title="Grammar" onclick="toggleGrammar()">Gr</button>
+  <button class="rt-icon-btn" title="Bookmarks" onclick="toast('Bookmarks panel — coming soon')">🔖</button>
+  <button class="rt-icon-btn" title="Copy" onclick="copyText()">⊞</button>
+  <button class="rt-icon-btn" title="Choose export folder (File System Access API) — remembered next time" onclick="pickExportFolder()">🗂</button>
+  <button class="rt-icon-btn" id="exportBtn" title="Export passage as JSON" onclick="exportPassage()">⤓ Export</button>
+  <button class="rt-icon-btn" title="Font size" onclick="cycleFontSize()">A±</button>
+  <button class="rt-icon-btn" title="Add pane" onclick="addPane()">+</button>
+  <button class="rt-icon-btn" title="Masorah AI" style="background:var(--gold);color:#fff;border-radius:4px;padding:3px 8px;font-size:11px;font-weight:600">⚡ Masorah AI</button>
+  <div class="rt-sep"></div>
+  <button class="rt-icon-btn" title="FAQ / Welcome" onclick="toggleFaq()">?</button>
+</div>
+
+<!-- FLOATING SEARCH BAR -->
+<div class="search-bar-wrap" id="searchBarWrap">
+  <button class="search-bar-close" onclick="toggleSearchBar()">×</button>
+  <div style="display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap">
+    <button class="tsp-btn active" id="sLangHeb" onclick="setSLang('Hebrew',this)">Hebrew</button>
+    <button class="tsp-btn" id="sLangAra" onclick="setSLang('Aramaic',this)">Aramaic</button>
+    <button class="tsp-btn" id="sLangEng" onclick="setSLang('English',this)">English</button>
+    <button class="tsp-btn" id="sLangGrk" onclick="setSLang('Greek',this)">Greek</button>
+  </div>
+  <div style="display:flex;gap:6px">
+    <input type="text" id="searchInp" placeholder="Search Hebrew, transliteration, or English…" onkeydown="if(event.key==='Enter')doSearch()">
+    <button style="background:var(--gold);color:#fff;border:none;border-radius:5px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:13px" onclick="doSearch()">Search</button>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- READER PANES -->
+<div class="reader-wrap" id="readerWrap"></div>
+
+<!-- WORD POPUP -->
+<div id="wPop" style="position:fixed;z-index:99999">
+  <button class="wp-close" onclick="closeWPop()">×</button>
+  <span class="wp-lbl">Word / Lexeme</span>
+  <div id="wpMain"></div>
+</div>
+
+<!-- FAQ PANEL (right, visible by default) -->
+<div id="faqPanel">
+  <button class="faq-x" onclick="toggleFaq()">×</button>
+  <div class="faq-hd">Masorah Corpus</div>
+  <div class="faq-sub">Forensic Manuscript Analysis Platform</div>
+  <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>How do I navigate to a passage?</strong><div class="faq-ans">Click the passage picker (e.g. "Gen 1") in the reader toolbar. Select a book, then a chapter, then optionally type a verse number.</div></div>
+  <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>How do I select texts?</strong><div class="faq-ans">Click "ESV · THOT" in the toolbar to open the full text selector. Choose manuscripts, translations, and witnesses from all T01–T05 tiers.</div></div>
+  <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>How does the word hover work?</strong><div class="faq-ans">Click any Hebrew or English word. A popup shows: pronunciation, Strong's number, Webster 1828 definition, occurrence count, and full morphology.</div></div>
+  <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>What is THOT?</strong><div class="faq-ans">THOT = Translators Hebrew Old Testament. The primary manuscript witness in this corpus, with full Masoretic pointing (vowels + cantillation marks).</div></div>
+  <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>How do I search?</strong><div class="faq-ans">Click ⌛ to open the floating search bar. Search Hebrew, transliteration, or English. Use quotes for exact phrases.</div></div>
+  <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>How do I add more panes?</strong><div class="faq-ans">Click + in the toolbar to add a new reading pane. Each pane can display a different text or version.</div></div>
+  <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>Where do exports go?</strong><div class="faq-ans">Click the folder icon once to choose a real destination folder (File System Access API) — the choice is remembered, and Export then writes the current passage (Hebrew + WEB + lexicon) as JSON straight there. Without a chosen folder it tries the local engine, then falls back to a browser download.</div></div>
+  <div style="margin-top:16px;font-size:10px;color:var(--ink3)">Masorah 1525 Forensic Corpus · v42.1</div>
+  <button style="background:var(--gold);color:#fff;border:none;border-radius:5px;padding:7px 14px;cursor:pointer;font-size:12px;font-family:'Cinzel',serif;font-weight:600;margin-top:10px;width:100%" onclick="toast('Masorah AI Engine — connect via chat.html')">⚡ Masorah AI Engine</button>
+</div>
+
+<!-- TEXT SELECTOR MODAL -->
+<div class="modal-overlay" id="textSelectorModal">
+  <div id="textSidePanel">
+    <div class="tsp-head">
+      <div class="tsp-title-row">
+        <span class="tsp-title">Select Text(s)</span>
+        <button class="tsp-close" onclick="closeTextSelector()">×</button>
+      </div>
+      <div class="tsp-tabs">
+        <button class="tsp-tab active" onclick="setTSPTab(this,'all')">All</button>
+        <button class="tsp-tab" onclick="setTSPTab(this,'manuscripts')">Manuscripts</button>
+        <button class="tsp-tab" onclick="setTSPTab(this,'translations')">Translations</button>
+        <button class="tsp-tab" onclick="setTSPTab(this,'commentaries')">Commentaries</button>
+      </div>
+    </div>
+    <div class="tsp-lang-row" id="tspLangRow"></div>
+    <div class="tsp-search-row">
+      <input class="tsp-search" type="text" id="tspSearch" placeholder="Filter texts…" oninput="filterTSP()">
+    </div>
+    <div class="tsp-list" id="tspList"></div>
+    <div class="tsp-foot">
+      <div class="tsp-legend">N=Notes &nbsp;G=Grammar &nbsp;M=Masorah &nbsp;C=Cantillation</div>
+      <button class="tsp-ok-btn" onclick="applyTSP()">OK →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSAGE MODAL -->
+<div id="passageModal">
+  <div class="pm-inner">
+    <div class="pm-head">
+      <h3>Select Passage</h3>
+      <input class="pm-search" type="text" id="pmSearch" placeholder="Search: e.g. 'Gen 3', 'Psalm 22'…" oninput="filterPassage()">
+      <button class="pm-close" onclick="togglePassageModal()">×</button>
+    </div>
+    <div class="pm-body" id="pmBody"></div>
+    <div class="pm-foot">
+      <span style="font-size:12px;color:var(--ink3)">Verse:</span>
+      <input class="pm-verse-inp" type="number" id="pmVerseInp" min="1" value="1" placeholder="1">
+      <button class="pm-ok-btn" onclick="applyPassage()">Go →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   MASORAH CORPUS READER — Interlinear Study Edition
+   PhD-level multi-pane interlinear reader
+══════════════════════════════════════ */
+
+/* ── VERSE DATA ──
+   Genesis 1 ships as a bundled, richly Strong's-tagged interlinear
+   sample. Every other passage is fetched live: Hebrew (Masoretic,
+   public domain) from Sefaria's API, English from bible-api.com's
+   World English Bible (public domain) — replacing the old
+   hardcoded/copyrighted ESV text that only ever covered Genesis 1. ── */
+const GEN1_SAMPLE=[
+  {n:1,text:"In the <span class='eword' data-w='beginning' data-h='בְּרֵאשִׁית' data-s='H7225' data-pron='bə·rê·šîṯ' data-m='noun common feminine singular construct'>beginning</span>, <span class='eword' data-w='God' data-h='אֱלֹהִים' data-s='H430' data-pron='ʾĕ·lō·hîm' data-m='noun common masculine plural absolute'>God</span> <span class='eword' data-w='created' data-h='בָּרָא' data-s='H1254' data-pron='bā·rā' data-m='verb Qal perfect 3ms'>created</span> the <span class='eword' data-w='heavens' data-h='הַשָּׁמַיִם' data-s='H8064' data-pron='haš·šā·ma·yim' data-m='noun common masculine plural + article'>heavens</span> and the <span class='eword' data-w='earth' data-h='הָאָרֶץ' data-s='H776' data-pron='hā·ʾā·reṣ' data-m='noun common feminine singular + article'>earth</span>.",heb:"בְּרֵאשִׁית בָּרָא אֱלֹהִים אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ׃",xref:"John 1:1 · Heb 11:3 · Ps 33:6",note:"Bright node ★: בְּרֵאשִׁית (Gen 1:1) attests ±3.2σ variant in corpus — Masoretic vs Septuagint ἐν ἀρχῇ."},
+  {n:2,text:"The <span class='eword' data-w='earth' data-h='הָאָרֶץ' data-s='H776' data-pron='hā·ʾā·reṣ' data-m='noun common fem sg + article'>earth</span> was <span class='eword' data-w='formless' data-h='תֹהוּ' data-s='H8414' data-pron='ṯō·hū' data-m='noun masc sg absolute'>without form</span> and <span class='eword' data-w='void' data-h='בֹהוּ' data-s='H922' data-pron='bō·hū' data-m='noun masc sg absolute'>void</span>, and <span class='eword' data-w='darkness' data-h='חֹשֶׁךְ' data-s='H2822' data-pron='ḥō·šeḵ' data-m='noun masc sg absolute'>darkness</span> was over the face of the <span class='eword' data-w='deep' data-h='תְּהוֹם' data-s='H8415' data-pron='tə·hō·wm' data-m='noun masc/fem sg'>deep</span>. And the Spirit of God was hovering over the face of the <span class='eword' data-w='waters' data-h='הַמָּיִם' data-s='H4325' data-pron='ham·ma·yim' data-m='noun masc pl + article'>waters</span>.",heb:"וְהָאָרֶץ הָיְתָה תֹהוּ וָבֹהוּ וְחֹשֶׁךְ עַל-פְּנֵי תְהוֹם וְרוּחַ אֱלֹהִים מְרַחֶפֶת עַל-פְּנֵי הַמָּיִם׃",xref:"Jer 4:23 · Isa 45:18 · Ps 104:30",note:"Tōhû wāḇōhû — technical term for pre-creative chaos. Compare Jer 4:23 application to judgment."},
+  {n:3,text:"And <span class='eword' data-w='God' data-h='אֱלֹהִים' data-s='H430' data-pron='ʾĕ·lō·hîm' data-m='noun common masc pl'>God</span> <span class='eword' data-w='said' data-h='וַיֹּאמֶר' data-s='H559' data-pron='way·yō·mer' data-m='verb Qal impf consecutive 3ms'>said</span>, &#8220;Let there be <span class='eword' data-w='light' data-h='אוֹר' data-s='H216' data-pron='ʾō·wr' data-m='noun masc sg'>light</span>,&#8221; and there was light.",heb:"וַיֹּאמֶר אֱלֹהִים יְהִי אוֹר וַיְהִי-אוֹר׃",xref:"2 Cor 4:6 · Ps 33:9 · John 1:5",note:"Fiat lux. Eight divine utterances structure the creation account. This first utterance creates light before the luminaries (vv.14-19)."},
+  {n:4,text:"And God saw that the light was <span class='eword' data-w='good' data-h='טוֹב' data-s='H2896' data-pron='ṭō·wḇ' data-m='adj masc sg'>good</span>. And God separated the light from the darkness.",heb:"וַיַּרְא אֱלֹהִים אֶת-הָאוֹר כִּי-טוֹב וַיַּבְדֵּל אֱלֹהִים בֵּין הָאוֹר וּבֵין הַחֹשֶׁךְ׃",xref:"Isa 45:7 · 1 John 1:5 · Gen 1:10,12,18,21,25,31"},
+  {n:5,text:"God called the light <span class='eword' data-w='Day' data-h='יוֹם' data-s='H3117' data-pron='yō·wm' data-m='noun masc sg'>Day</span>, and the darkness he called <span class='eword' data-w='Night' data-h='לַיְלָה' data-s='H3915' data-pron='lay·lāh' data-m='noun masc sg'>Night</span>. And there was evening and there was morning, the <span class='eword' data-w='first' data-h='אֶחָד' data-s='H259' data-pron='ʾe·ḥāḏ' data-m='adj masc sg'>first</span> day.",heb:"וַיִּקְרָא אֱלֹהִים לָאוֹר יוֹם וְלַחֹשֶׁךְ קָרָא לָיְלָה וַיְהִי-עֶרֶב וַיְהִי-בֹקֶר יוֹם אֶחָד׃",xref:"Ps 74:16 · Isa 45:7 · Rev 22:5"},
+  {n:6,text:"And God said, &#8220;Let there be an <span class='eword' data-w='expanse' data-h='רָקִיעַ' data-s='H7549' data-pron='rā·qî·aʿ' data-m='noun masc sg'>expanse</span> in the midst of the waters, and let it separate the waters from the waters.&#8221;",heb:"וַיֹּאמֶר אֱלֹהִים יְהִי רָקִיעַ בְּתוֹךְ הַמָּיִם וִיהִי מַבְדִּיל בֵּין מַיִם לָמָיִם׃",xref:"Job 37:18 · Ps 104:2 · Isa 40:22"},
+  {n:7,text:"And God made the expanse and separated the waters that were under the expanse from the waters that were above the expanse. And it was so.",heb:"וַיַּעַשׂ אֱלֹהִים אֶת-הָרָקִיעַ וַיַּבְדֵּל בֵּין הַמַּיִם אֲשֶׁר מִתַּחַת לָרָקִיעַ וּבֵין הַמַּיִם אֲשֶׁר מֵעַל לָרָקִיעַ וַיְהִי-כֵן׃",xref:"Ps 148:4 · Prov 8:27–28"},
+  {n:8,text:"And God called the expanse <span class='eword' data-w='Heaven' data-h='שָׁמַיִם' data-s='H8064' data-pron='šā·ma·yim' data-m='noun masc pl'>Heaven</span>. And there was evening and there was morning, the second day.",heb:"וַיִּקְרָא אֱלֹהִים לָרָקִיעַ שָׁמָיִם וַיְהִי-עֶרֶב וַיְהִי-בֹקֶר יוֹם שֵׁנִי׃",xref:"Deut 10:14 · 1 Kgs 8:27 · Ps 115:16"},
+  {n:26,text:"Then God said, &#8220;Let us make <span class='eword' data-w='man' data-h='אָדָם' data-s='H120' data-pron='ʾā·ḏām' data-m='noun masc sg'>man</span> in our <span class='eword' data-w='image' data-h='צֶלֶם' data-s='H6754' data-pron='ṣe·lem' data-m='noun masc sg'>image</span>, after our <span class='eword' data-w='likeness' data-h='דְּמוּת' data-s='H1823' data-pron='ḏə·mûṯ' data-m='noun fem sg'>likeness</span>.&#8221;",heb:"וַיֹּאמֶר אֱלֹהִים נַעֲשֶׂה אָדָם בְּצַלְמֵנוּ כִּדְמוּתֵנוּ׃",xref:"Gen 9:6 · Jas 3:9 · Col 3:10",note:"Imago Dei — theological climax of creation. The plural 'us' reflects Trinitarian or divine council overtones."},
+  {n:27,text:"So God created man in his own image, in the image of God he created him; male and female he created them.",heb:"וַיִּבְרָא אֱלֹהִים אֶת-הָאָדָם בְּצַלְמוֹ בְּצֶלֶם אֱלֹהִים בָּרָא אֹתוֹ זָכָר וּנְקֵבָה בָּרָא אֹתָם׃",xref:"Gen 5:1–2 · Matt 19:4 · Gal 3:28",note:"Poetic parallelism: three-fold declaration of image-bearing."},
+  {n:31,text:"And God saw everything that he had made, and behold, it was <span class='eword' data-w='very' data-h='מְאֹד' data-s='H3966' data-pron='mə·ʾōḏ' data-m='adv'>very</span> <span class='eword' data-w='good' data-h='טוֹב' data-s='H2896' data-pron='ṭō·wḇ' data-m='adj masc sg'>good</span>. And there was evening and there was morning, the sixth day.",heb:"וַיַּרְא אֱלֹהִים אֶת-כָּל-אֲשֶׁר עָשָׂה וְהִנֵּה-טוֹב מְאֹד וַיְהִי-עֶרֶב וַיְהִי-בֹקֶר יוֹם הַשִּׁשִּׁי׃",xref:"Eccl 7:29 · 1 Tim 4:4 · Rev 21:5",note:"Tôb meʾōd — superlative evaluative climax. Six-day creation complete."}
+];
+let currentVerses=GEN1_SAMPLE.slice();
+
+/* ── MSS_TIERS data for text selector ── */
+const TIERS=[
+  {tier:'★ MG Edition',items:[{code:'05c',name:'MG Second Rabbinic Bible — Ben Hayyim 1525',loc:'Venice · Full Masorah Parva & Magna',badges:'MGC',checked:true}]},
+  {tier:'Most Widely Used',items:[
+    {code:'WLC',name:'Westminster Leningrad Codex (1008/9 CE)',loc:'St. Petersburg',badges:'NG',checked:false},
+    {code:'KJV',name:'King James Version (1769, Public Domain)',loc:'Oxford',badges:'N',checked:false},
+    {code:'JPS',name:'JPS Tanakh — NJPS (1985)',loc:'Philadelphia',badges:'N',checked:false},
+    {code:'WEB',name:'World English Bible (Public Domain) — live default',loc:'bible-api.com',badges:'RNGVI',checked:true},
+  ]},
+  {tier:'Tier 01 – Proto-Semitic Roots',items:[
+    {code:'01a',name:'Umm el-Marra',loc:'c.2300 BCE · Syria',badges:'N',checked:false},
+    {code:'01b',name:'Wadi el-Hol',loc:'c.1850 BCE · Egypt',badges:'N',checked:false},
+    {code:'01c',name:'Serabit el-Khadim',loc:'c.1500 BCE · Sinai',badges:'N',checked:false},
+    {code:'01d',name:'Proto-Canaanite',loc:'c.1200 BCE',badges:'N',checked:false},
+    {code:'01e',name:'Mesha Stele',loc:'c.840 BCE · Moab',badges:'N',checked:false},
+    {code:'01f',name:'Ketef Hinnom',loc:'c.650 BCE · Jerusalem',badges:'N',checked:false},
+  ]},
+  {tier:'Tier 02 – Second Temple Witnesses',items:[
+    {code:'02a',name:'DSS General',loc:'250 BCE–70 CE',badges:'N',checked:false},
+    {code:'02b',name:'Great Isaiah Scroll (1QIsa-a)',loc:'c.150 BCE · Qumran',badges:'NG',checked:false},
+    {code:'02c',name:'Nash Papyrus',loc:'c.150–100 BCE · Egypt',badges:'N',checked:false},
+    {code:'02e',name:'En-Gedi Scroll',loc:'c.1–3rd c. CE',badges:'N',checked:false},
+    {code:'02g',name:'Samaritan Pentateuch',loc:'',badges:'N',checked:false},
+    {code:'02h',name:'Cairo Genizah',loc:'11th–19th c. CE',badges:'N',checked:false},
+    {code:'02i',name:'Syriac Peshitta',loc:'',badges:'N',checked:false},
+  ]},
+  {tier:'Tier 03 – Medieval Codices',items:[
+    {code:'03a',name:'Aleppo Codex',loc:'c.920 CE · Tiberias',badges:'MGN',checked:false},
+    {code:'03b',name:'Leningrad Codex',loc:'1008/9 CE · Egypt',badges:'MGN',checked:false},
+    {code:'03c',name:'Sassoon 1053 (live corpus XML)',loc:'c.900 CE · Tiberias',badges:'MGN',checked:true},
+    {code:'03d',name:'MS Or 4445',loc:'',badges:'N',checked:false},
+    {code:'03e',name:'MS Cairensis',loc:'',badges:'MN',checked:false},
+    {code:'03f',name:'Reuchlin Prophets',loc:'',badges:'N',checked:false},
+    {code:'03k',name:'Yemenite Taj',loc:'',badges:'N',checked:false},
+  ]},
+  {tier:'Tier 04 – Later MSS',items:[
+    {code:'04a',name:'Huntington 148',loc:'',badges:'N',checked:false},
+    {code:'04b',name:'MS Or 2363-2365',loc:'',badges:'N',checked:false},
+    {code:'04e',name:"Berliner's Onkelos",loc:'',badges:'N',checked:false},
+  ]},
+  {tier:'Tier 05 – Print Editions',items:[
+    {code:'05a',name:'Complutensian Polyglot',loc:'1514–1517',badges:'N',checked:false},
+    {code:'05b',name:'First Rabbinic Bible 1517',loc:'Venice',badges:'MN',checked:false},
+    {code:'05c',name:'Second Rabbinic Bible 1525',loc:'Venice · Ben Hayyim',badges:'MNC',checked:true},
+    {code:'05d',name:'Third Rabbinic Bible 1545',loc:'Venice',badges:'N',checked:false},
+    {code:'05i',name:'Ginsburg 1894',loc:'London',badges:'N',checked:false},
+    {code:'05j',name:'BHS 1977',loc:'Stuttgart',badges:'NG',checked:false},
+    {code:'05k',name:'BHQ Quinta',loc:'',badges:'N',checked:false},
+  ]},
+  {tier:'Translations',items:[
+    {code:'NIV',name:'New International Version 2011',loc:'',badges:'RN',checked:false},
+    {code:'NASB',name:'New American Standard Bible 2020',loc:'',badges:'RNGVI',checked:false},
+    {code:'LXX',name:'Septuagint (Rahlfs-Hanhart 2006)',loc:'',badges:'NGI',checked:false},
+    {code:'VUL',name:'Vulgate (Nova Vulgata 1979)',loc:'',badges:'N',checked:false},
+    {code:'PESHITTA',name:'Peshitta (Syriac Old Testament)',loc:'',badges:'NG',checked:false},
+    {code:'SP',name:'Samaritan Pentateuch (Paleo-Hebrew)',loc:'',badges:'N',checked:false},
+  ]},
+];
+
+/* ── BOOKS ── */
+const OT=['Gen','Exod','Lev','Num','Deut','Josh','Judg','Ruth','1Sam','2Sam','1Kgs','2Kgs','1Chr','2Chr','Ezra','Neh','Esth','Job','Psalm','Prov','Eccl','Song','Isa','Jer','Lam','Ezek','Dan','Hosea','Joel','Amos','Obad','Jonah','Micah','Nahum','Hab','Zeph','Hag','Zech','Mal'];
+const APOC=['Tob','Jdt','1Macc','2Macc','Wis','Sir','Bar','1Esd','2Esd','Pr Man','3Macc','4Macc'];
+const NT=['Matt','Mark','Luke','John','Acts','Rom','1Cor','2Cor','Gal','Eph','Phil','Col','1Thess','2Thess','1Tim','2Tim','Titus','Phlm','Heb','Jas','1Pet','2Pet','1John','2John','3John','Jude','Rev'];
+const BOOK_CHAPTERS={
+  'Gen':50,'Exod':40,'Lev':27,'Num':36,'Deut':34,'Josh':24,'Judg':21,'Ruth':4,'1Sam':31,'2Sam':24,
+  '1Kgs':22,'2Kgs':25,'1Chr':29,'2Chr':36,'Ezra':10,'Neh':13,'Esth':10,'Job':42,'Psalm':150,'Prov':31,
+  'Eccl':12,'Song':8,'Isa':66,'Jer':52,'Lam':5,'Ezek':48,'Dan':12,'Hosea':14,'Joel':3,'Amos':9,
+  'Obad':1,'Jonah':4,'Micah':7,'Nahum':3,'Hab':3,'Zeph':3,'Hag':2,'Zech':14,'Mal':4,
+  'Matt':28,'Mark':16,'Luke':24,'John':21,'Acts':28,'Rom':16,'1Cor':16,'2Cor':13,'Gal':6,'Eph':6,
+  'Phil':4,'Col':4,'1Thess':5,'2Thess':3,'1Tim':6,'2Tim':4,'Titus':3,'Phlm':1,'Heb':13,'Jas':5,
+  '1Pet':5,'2Pet':3,'1John':5,'2John':1,'3John':1,'Jude':1,'Rev':22
+};
+
+/* ── Live-source book-name mappings ──
+   Sefaria API book titles (Hebrew Masoretic text — Tanakh only; the New
+   Testament has no Masoretic Hebrew source, so it's intentionally absent).
+   bible-api.com book names (World English Bible, public domain) cover
+   both Tanakh and New Testament. Apocrypha isn't wired to a live source
+   yet — those books fall back to a graceful "unavailable" message. */
+const SEFARIA_BOOK={
+  Gen:'Genesis',Exod:'Exodus',Lev:'Leviticus',Num:'Numbers',Deut:'Deuteronomy',
+  Josh:'Joshua',Judg:'Judges',Ruth:'Ruth','1Sam':'I_Samuel','2Sam':'II_Samuel',
+  '1Kgs':'I_Kings','2Kgs':'II_Kings','1Chr':'I_Chronicles','2Chr':'II_Chronicles',
+  Ezra:'Ezra',Neh:'Nehemiah',Esth:'Esther',Job:'Job',Psalm:'Psalms',Prov:'Proverbs',
+  Eccl:'Ecclesiastes',Song:'Song_of_Songs',Isa:'Isaiah',Jer:'Jeremiah',Lam:'Lamentations',
+  Ezek:'Ezekiel',Dan:'Daniel',Hosea:'Hosea',Joel:'Joel',Amos:'Amos',Obad:'Obadiah',
+  Jonah:'Jonah',Micah:'Micah',Nahum:'Nahum',Hab:'Habakkuk',Zeph:'Zephaniah',
+  Hag:'Haggai',Zech:'Zechariah',Mal:'Malachi'
+};
+const BIBLEAPI_BOOK={
+  Gen:'genesis',Exod:'exodus',Lev:'leviticus',Num:'numbers',Deut:'deuteronomy',
+  Josh:'joshua',Judg:'judges',Ruth:'ruth','1Sam':'1 samuel','2Sam':'2 samuel',
+  '1Kgs':'1 kings','2Kgs':'2 kings','1Chr':'1 chronicles','2Chr':'2 chronicles',
+  Ezra:'ezra',Neh:'nehemiah',Esth:'esther',Job:'job',Psalm:'psalms',Prov:'proverbs',
+  Eccl:'ecclesiastes',Song:'song of solomon',Isa:'isaiah',Jer:'jeremiah',Lam:'lamentations',
+  Ezek:'ezekiel',Dan:'daniel',Hosea:'hosea',Joel:'joel',Amos:'amos',Obad:'obadiah',
+  Jonah:'jonah',Micah:'micah',Nahum:'nahum',Hab:'habakkuk',Zeph:'zephaniah',
+  Hag:'haggai',Zech:'zechariah',Mal:'malachi',
+  Matt:'matthew',Mark:'mark',Luke:'luke',John:'john',Acts:'acts',Rom:'romans',
+  '1Cor':'1 corinthians','2Cor':'2 corinthians',Gal:'galatians',Eph:'ephesians',
+  Phil:'philippians',Col:'colossians','1Thess':'1 thessalonians','2Thess':'2 thessalonians',
+  '1Tim':'1 timothy','2Tim':'2 timothy',Titus:'titus',Phlm:'philemon',Heb:'hebrews',
+  Jas:'james','1Pet':'1 peter','2Pet':'2 peter','1John':'1 john','2John':'2 john',
+  '3John':'3 john',Jude:'jude',Rev:'revelation'
+};
+
+/* ── Live passage loader ──
+   Genesis 1 uses the bundled Strong's-tagged sample above (rich interlinear
+   demo). Every other passage is fetched live and cached in-memory. */
+const chapterCache={};
+function cleanSefariaHTML(s){return (s||'').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();}
+function escHtml(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function loadChapter(book,chapter){
+  if(book==='Gen'&&chapter===1){currentVerses=GEN1_SAMPLE.slice();return;}
+  const cacheKey=book+'_'+chapter;
+  if(chapterCache[cacheKey]){currentVerses=chapterCache[cacheKey];return;}
+
+  const sefariaName=SEFARIA_BOOK[book];
+  const apiName=BIBLEAPI_BOOK[book];
+  let heVerses=[],enVerses=[],heErr=null,enErr=null;
+
+  if(sefariaName){
+    try{
+      const r=await fetch(`https://www.sefaria.org/api/texts/${sefariaName}.${chapter}?context=0&lang=he`,{signal:AbortSignal.timeout(8000)});
+      if(r.ok){const j=await r.json();heVerses=(j.he||[]).map(cleanSefariaHTML);}
+      else heErr='Sefaria HTTP '+r.status;
+    }catch(e){heErr=(e&&e.message)||'network error';}
+  }
+  if(apiName){
+    try{
+      const r=await fetch(`https://bible-api.com/${encodeURIComponent(apiName)}+${chapter}?translation=web`,{signal:AbortSignal.timeout(8000)});
+      if(r.ok){const j=await r.json();enVerses=(j.verses||[]).map(v=>(v.text||'').trim());}
+      else enErr='bible-api HTTP '+r.status;
+    }catch(e){enErr=(e&&e.message)||'network error';}
+  }
+
+  const n=Math.max(heVerses.length,enVerses.length);
+  if(n===0){
+    currentVerses=[{n:1,text:'\u26A0 Live text unavailable for '+book+' '+chapter+'.'+(enErr?' ('+enErr+')':'')+' Torah, Nevi\u2019im, Ketuvim, and New Testament books load live \u2014 Apocrypha isn\u2019t wired to a live source yet.',heb:'',xref:'',note:''}];
+    return;
+  }
+  const rows=[];
+  for(let i=0;i<n;i++){
+    rows.push({n:i+1,text:escHtml(enVerses[i]||''),heb:heVerses[i]||'',xref:'',note:''});
+  }
+  currentVerses=rows;
+  chapterCache[cacheKey]=rows;
+}
+
+/* ── State ── */
+let state={book:'Gen',chapter:1,verse:1,fontSizeBase:14.5,searchLang:'Hebrew',grammarOn:false,searchHL:null,interlinear:false};
+let panes=[{id:'p1',trans:'WEB',rtl:false},{id:'p2',trans:'03c',rtl:true}]; // 2nd pane defaults to the real, live Sassoon 1053 witness XML
+
+/* ── Real corpus witness data (02_Forensic_Nodes/<code><Name>.xml, served
+   live by main_api.py's /api/v1/corpus/chapter) ──
+   Witness codes (01a..07c) get their per-verse Text/Parva/Magna/Condition
+   straight from the real forensic XML instead of the Sefaria/WEB stand-ins
+   used for translation codes. Most witnesses are still mid-HTR-pipeline —
+   many verses come back Condition:"Not Extant" (real lacuna) or
+   Condition:"Extant" with an empty Text (page photographed, not yet
+   transcribed). Both are shown honestly rather than papered over. */
+const API_BASE='http://localhost:8000';
+const CORPUS_CODE_RE=/^0[1-7][a-z]$/i;
+function isCorpusCode(t){return CORPUS_CODE_RE.test(t||'');}
+const CORPUS_BOOK={
+  Gen:'Genesis',Exod:'Exodus',Lev:'Leviticus',Num:'Numbers',Deut:'Deuteronomy',
+  Josh:'Joshua',Judg:'Judges',Ruth:'Ruth','1Sam':'1 Samuel','2Sam':'2 Samuel',
+  '1Kgs':'1 Kings','2Kgs':'2 Kings','1Chr':'1 Chronicles','2Chr':'2 Chronicles',
+  Ezra:'Ezra',Neh:'Nehemiah',Esth:'Esther',Job:'Job',Psalm:'Psalms',Prov:'Proverbs',
+  Eccl:'Ecclesiastes',Song:'Song of Songs',Isa:'Isaiah',Jer:'Jeremiah',Lam:'Lamentations',
+  Ezek:'Ezekiel',Dan:'Daniel',Hosea:'Hosea',Joel:'Joel',Amos:'Amos',Obad:'Obadiah',
+  Jonah:'Jonah',Micah:'Micah',Nahum:'Nahum',Hab:'Habakkuk',Zeph:'Zephaniah',
+  Hag:'Haggai',Zech:'Zechariah',Mal:'Malachi'
+};
+const corpusCache={};
+async function fetchCorpusChapter(code,book,chapter){
+  const key=code+'|'+book+'|'+chapter;
+  if(corpusCache[key]) return corpusCache[key];
+  const bookFull=CORPUS_BOOK[book];
+  if(!bookFull){corpusCache[key]={found:false,reason:'This book is outside the Tanakh — no Masoretic witness XML exists for it.'};return corpusCache[key];}
+  try{
+    const r=await fetch(`${API_BASE}/api/v1/corpus/chapter?code=${encodeURIComponent(code)}&book=${encodeURIComponent(bookFull)}&chapter=${chapter}`,{signal:AbortSignal.timeout(6000)});
+    corpusCache[key]=await r.json();
+  }catch(e){
+    corpusCache[key]={found:false,reason:'Corpus API unreachable — start Launch_Masorah.bat so main_api.py is running on :8000.'};
+  }
+  return corpusCache[key];
+}
+
+/* ── Render panes ── */
+async function renderPanes(){
+  if(state.interlinear){renderInterlinear();return;}
+  const faqW=document.getElementById('faqPanel').style.display==='none'?0:292;
+  const wrap=document.getElementById('readerWrap');
+  wrap.style.gridTemplateColumns=`repeat(${panes.length},1fr) ${faqW>0?'292px':''}`.trim();
+  await Promise.all(panes.map(async p=>{
+    p._corpus=isCorpusCode(p.trans)?await fetchCorpusChapter(p.trans,state.book,state.chapter):null;
+  }));
+  wrap.innerHTML=panes.map(p=>buildPane(p)).join('');
+  attachWordEvents();
+}
+
+/* ── Interlinear (stacked word analysis) ──
+   Builds a word-info map from the annotated eword spans + LEX,
+   then renders each Hebrew word as a column:
+   Hebrew / transliteration / English gloss / morphology / Strong's. */
+function buildWordInfoMap(){
+  const map={};
+  const re=/data-w='([^']*)'\s+data-h='([^']*)'\s+data-s='([^']*)'\s+data-pron='([^']*)'\s+data-m='([^']*)'>/g;
+  currentVerses.forEach(v=>{
+    let m;const reLocal=new RegExp(re.source,'g');
+    while((m=reLocal.exec(v.text))!==null){
+      const heb=m[2];
+      map[stripPoint(heb)]={w:m[1],h:heb,s:m[3],pron:m[4],morph:m[5]};
+    }
+  });
+  // merge LEX
+  Object.keys(LEX).forEach(h=>{const k=stripPoint(h);if(!map[k])map[k]={w:LEX[h].en,h,s:LEX[h].strongs,pron:LEX[h].pron,morph:LEX[h].morph};});
+  return map;
+}
+function stripPoint(s){return (s||'').replace(/[\u0591-\u05C7]/g,'').replace(/[׃׀\-]/g,'').trim();}
+
+function renderInterlinear(){
+  const wrap=document.getElementById('readerWrap');
+  wrap.style.gridTemplateColumns='1fr';
+  const info=buildWordInfoMap();
+  const rows=currentVerses.map(v=>{
+    if(!v.heb) return '';
+    const words=v.heb.split(/\s+/).filter(Boolean);
+    const cols=words.map(raw=>{
+      // split on maqqef (־ / -) into sub-tokens but keep display
+      const key=stripPoint(raw);
+      const d=info[key]||{};
+      const pron=d.pron||'';const gloss=d.w||'';const morph=(d.morph||'').replace(/noun common /,'n.').replace(/verb /,'v.').replace(/masculine/,'m').replace(/feminine/,'f').replace(/singular/,'s').replace(/plural/,'pl').replace(/absolute/,'abs').replace(/construct/,'cst');
+      const strong=d.s||'';
+      return `<span class="il-col" data-w="${gloss}" data-h="${raw}" data-s="${strong}" data-pron="${pron}" data-m="${d.morph||''}">
+        <span class="il-heb">${raw}</span>
+        ${pron?`<span class="il-translit">${pron}</span>`:''}
+        ${gloss?`<span class="il-gloss">${gloss}</span>`:''}
+        ${morph?`<span class="il-morph">${morph}</span>`:''}
+        ${strong?`<span class="il-strong">${strong}</span>`:''}
+      </span>`;
+    }).join('');
+    return `<div class="il-verse"><div class="il-vnum">${state.book} ${state.chapter}:${v.n}</div><div class="il-row">${cols}</div>${v.note?`<div class="note-row" style="direction:ltr;text-align:left">📝 ${v.note}</div>`:''}</div>`;
+  }).join('');
+  wrap.innerHTML=`
+    <div class="pane-wrap" style="grid-column:1/-1">
+      <div class="il-meta">
+        <span><b>Interlinear</b> · ${state.book} ${state.chapter}</span>
+        <span>Source: <b>THOT / WLC</b> (Masoretic, full pointing) — ${state.book==="Gen"&&state.chapter===1?"bundled Strong’s-tagged sample":"live via Sefaria"}</span>
+        <span class="il-legend"><span>HEB</span>·<span>translit</span>·<span>gloss</span>·<span>morph</span>·<span>Strong's</span></span>
+        <span style="margin-left:auto;font-size:10px;color:var(--ink4)">Click any word for full lexicon</span>
+      </div>
+      <div class="pane-body il-body">
+        ${rows||'<div style="direction:ltr;color:var(--ink3);padding:20px">No Hebrew Masoretic text available for this selection — New Testament and Apocrypha books fall outside the Masoretic tradition, or the live fetch failed.</div>'}
+      </div>
+      <div class="pane-footer">
+        <button class="pane-nav-btn" onclick="prevChapter()">←</button>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)">${state.book} ${state.chapter} · interlinear</span>
+        <button class="pane-nav-btn" onclick="nextChapter()">→</button>
+      </div>
+    </div>`;
+  // attach click → reuse the rich word popup
+  wrap.querySelectorAll('.il-col').forEach(el=>{
+    el.addEventListener('click',e=>{e.stopPropagation();showWordPop(el,e.clientX,e.clientY);});
+  });
+}
+
+function toggleInterlinear(){
+  state.interlinear=!state.interlinear;
+  const btn=document.getElementById('ilBtn');
+  btn.classList.toggle('on',state.interlinear);
+  // interlinear takes the full width — hide FAQ panel while active for space
+  if(state.interlinear){document.getElementById('faqPanel').dataset.prev=document.getElementById('faqPanel').style.display;document.getElementById('faqPanel').style.display='none';}
+  renderPanes();
+  toast('Interlinear mode: '+(state.interlinear?'ON':'OFF'));
+}
+
+
+function buildPane(p){
+  if(p._corpus) return buildCorpusPane(p);
+  const isHeb=p.trans==='THOT'||p.trans.startsWith('0');
+  const rtlClass=isHeb?'rtl':'';
+  const verses=currentVerses;
+  return `<div class="pane-wrap" id="${p.id}">
+    <div class="pane-toolbar">
+      <div class="pane-picker" onclick="showTextSelector()">${p.trans} ▾</div>
+      <div class="pane-picker" onclick="togglePassageModal()">${state.book} ${state.chapter}</div>
+      <button style="background:none;border:none;color:var(--ink3);font-size:13px;cursor:pointer;padding:2px 5px" title="Search" onclick="toggleSearchBar()">⌛</button>
+      <button class="pane-close" onclick="closePane('${p.id}')">×</button>
+    </div>
+    <div class="pane-body ${rtlClass}" style="font-size:${state.fontSizeBase}px">
+      <h2 class="ch-title">${state.book} ${state.chapter}</h2>
+      ${verses.map(v=>buildVerse(v,p.trans,isHeb)).join('')}
+    </div>
+    <div class="pane-footer">
+      <button class="pane-nav-btn" onclick="prevChapter()">←</button>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)">${state.book} ${state.chapter}</span>
+      <button class="pane-nav-btn" onclick="nextChapter()">→</button>
+    </div>
+  </div>`;
+}
+
+/* ── Real corpus-witness pane — driven entirely by /api/v1/corpus/chapter,
+   which reads the actual 02_Forensic_Nodes/<code><Name>.xml on disk. ── */
+function buildCorpusPane(p){
+  const c=p._corpus;
+  const statLine=c.found
+    ?`<span title="Verse records for this chapter in the real XML">${c.verse_count} verses</span> · <span style="color:var(--ok,#2e7d32)" title="Condition=Extant in the manuscript (not necessarily transcribed yet)">${c.extant_count} extant</span> · <span title="Verses where HTR/manual transcription has actually produced text">${c.transcribed_count} transcribed</span>`
+    :'';
+  let body;
+  if(!c.found){
+    body=`<div style="direction:ltr;color:var(--ink3);padding:20px;font-size:13px;line-height:1.6">
+      ⚠ ${c.reason||'No real data available for this witness/passage yet.'}
+      <div style="margin-top:8px;font-size:11px;color:var(--ink4)">Witness code: <b>${p.trans}</b> · Passage: ${state.book} ${state.chapter}</div>
+    </div>`;
+  } else {
+    body=c.verses.map(v=>{
+      const lacuna=v.condition==='Not Extant';
+      const pending=!lacuna&&!v.text;
+      let main;
+      if(v.text){
+        main=`<span class="verse-heb">${v.text.split(/\s+/).map(w=>`<span class="hword" data-h="${w}">${w}</span>`).join(' ')}</span>`;
+      } else if(lacuna){
+        main=`<span style="color:var(--ink4);font-style:italic;font-size:13px">— lacuna (not extant in this manuscript) —</span>`;
+      } else {
+        main=`<span style="color:var(--amber-dk);font-style:italic;font-size:13px">◌ page photographed, HTR transcription pending</span>`;
+      }
+      return `<div class="verse-block" id="v${v.n}">
+        <span class="vnum">${v.n}</span> ${main}
+        ${v.notes?`<div class="note-row">📝 ${v.notes}</div>`:''}
+        ${v.page_num?`<div class="xref-row">folio ${v.page_num}${v.confidence?' · HTR conf. '+v.confidence:''}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+  return `<div class="pane-wrap" id="${p.id}">
+    <div class="pane-toolbar">
+      <div class="pane-picker" onclick="showTextSelector()" title="Real witness XML — 02_Forensic_Nodes">🗄 ${p.trans} ▾</div>
+      <div class="pane-picker" onclick="togglePassageModal()">${state.book} ${state.chapter}</div>
+      <span style="margin-left:8px;font-size:10px;color:var(--ink3);font-family:'JetBrains Mono',monospace">${statLine}</span>
+      <button class="pane-close" onclick="closePane('${p.id}')">×</button>
+    </div>
+    <div class="pane-body rtl" style="font-size:${state.fontSizeBase}px">
+      <h2 class="ch-title">${state.book} ${state.chapter}</h2>
+      ${body}
+      ${c.found?`<div style="direction:ltr;margin-top:16px;font-size:10px;color:var(--ink4)">Source: 02_Forensic_Nodes/${c.source_file} (live)</div>`:''}
+    </div>
+    <div class="pane-footer">
+      <button class="pane-nav-btn" onclick="prevChapter()">←</button>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)">${state.book} ${state.chapter} · corpus</span>
+      <button class="pane-nav-btn" onclick="nextChapter()">→</button>
+    </div>
+  </div>`;
+}
+
+function buildVerse(v,trans,isHeb){
+  const heb=v.heb||'';
+  const text=isHeb
+    ?heb.split(/(\s+|-)/).filter(s=>s.trim()).map(w=>`<span class="hword" data-h="${w}">${w}</span>`).join(' ')
+    :v.text;
+  return `<div class="verse-block" id="v${v.n}">
+    <span class="vnum" onclick="showVerseSummary('${state.book} ${state.chapter}:${v.n}')">${v.n}</span><span class="${isHeb?'verse-heb':'verse-esv'}">${text}</span>
+    ${v.xref?`<div class="xref-row">✦ ${v.xref}</div>`:''}
+    ${v.note?`<div class="note-row">📝 ${v.note}</div>`:''}
+  </div>`;
+}
+
+/* ── Word hover / popup ── */
+function attachWordEvents(){
+  document.querySelectorAll('.eword').forEach(el=>{
+    el.addEventListener('click',e=>{e.stopPropagation();showWordPop(el,e.clientX,e.clientY);});
+  });
+  document.querySelectorAll('.hword').forEach(el=>{
+    el.addEventListener('click',e=>{e.stopPropagation();showHWordPop(el,e.clientX,e.clientY);});
+  });
+}
+
+const LEX={'בְּרֵאשִׁית':{en:'beginning/firstness',strongs:'H7225',pron:'bə·rê·šîṯ',morph:'noun common feminine singular construct',occ:51,def:"'Firstness', 'beginning'. Root: ראש (head). In temporal sense: 'at the start of'. Webster 1828 equivalent: 'origin, commencement, first cause'."}, 'אֱלֹהִים':{en:'God/gods',strongs:'H430',pron:'ʾĕ·lō·hîm',morph:'noun common masculine plural absolute',occ:2606,def:"Plural noun used with singular verb, indicating a compound unity. Cognate Akkadian 'ilānu'. Webster 1828: 'The Supreme Being, Jehovah'."}, 'בָּרָא':{en:'created',strongs:'H1254',pron:'bā·rā',morph:'verb Qal perfect 3ms',occ:54,def:"A unique creation verb in Hebrew — only God is the subject. Distinct from יָצַר (to form) and עָשָׂה (to make)."}, 'הַשָּׁמַיִם':{en:'the heavens',strongs:'H8064',pron:'haš·šā·ma·yim',morph:'noun common masculine plural absolute + definite article',occ:420,def:"Dual or plural of שָׁמֶה. Denotes both the visible sky and the abode of God."}, 'הָאָרֶץ':{en:'the earth',strongs:'H776',pron:'hā·ʾā·reṣ',morph:'noun common feminine singular absolute + definite article',occ:2505,def:"'Land, earth, ground'. In Genesis cosmology: the terrestrial realm as opposed to the heavenly realm."}};
+
+function showWordPop(el,x,y){
+  const w=el.dataset.w||'';const h=el.dataset.h||'';const s=el.dataset.s||'';const pr=el.dataset.pron||'';const m=el.dataset.m||'';
+  const lex=LEX[h]||{};
+  document.getElementById('wpMain').innerHTML=`
+    <div class="wp-main">${w}</div>
+    <div class="wp-heb">${h}</div>
+    <div class="wp-pron">${pr||lex.pron||''}</div>
+    <div class="wp-body">
+      <b>Strong's:</b> ${s||lex.strongs||'—'}<br>
+      <b>Morphology:</b> ${m||lex.morph||'—'}<br>
+      <b>Occurrences (ESV):</b> ${lex.occ||'—'}<br>
+      <b>Definition:</b> ${lex.def||'No definition yet.'}<br><br>
+      <a href="https://www.websters1828.com/words/${encodeURIComponent(w)}" target="_blank" style="color:var(--gold-dk);font-size:11px">Webster 1828 →</a>
+      &nbsp;<a href="https://www.blueletterbible.org/lexicon/${s||'H430'}/" target="_blank" style="color:var(--gold-dk);font-size:11px">Blue Letter Bible →</a>
+    </div>`;
+  showWPop(x,y);
+  // Lexicon banner update
+  document.getElementById('lxWord').textContent=w+' ';
+  document.getElementById('lxHeb').textContent=h;
+  document.getElementById('lxTrans').textContent=lex.en||'';
+  document.getElementById('lxMorph').textContent=(m||lex.morph||'')+(lex.occ?'  ·  Occurs '+lex.occ+'× in ESV':'');
+  document.getElementById('lxBody').textContent=lex.def||'';
+  document.getElementById('lexBanner').style.display='block';
+}
+
+function showHWordPop(el,x,y){
+  const h=el.dataset.h||el.textContent;
+  const lex=LEX[h]||{};
+  document.getElementById('wpMain').innerHTML=`
+    <div class="wp-heb">${h}</div>
+    <div class="wp-pron">${lex.pron||'(transliteration pending)'}</div>
+    <div class="wp-body">
+      <b>Strong's:</b> ${lex.strongs||'—'}<br>
+      <b>Morphology:</b> ${lex.morph||'—'}<br>
+      <b>Occurrences:</b> ${lex.occ||'—'}<br>
+      <b>Meaning (EN):</b> ${lex.en||'—'}<br>
+      <b>Webster 1828:</b> ${lex.def||'No definition yet.'}<br>
+      ${lex.strongs?`<a href="https://www.blueletterbible.org/lexicon/${lex.strongs}/" target="_blank" style="color:var(--gold-dk);font-size:11px">Lexicon →</a>`:''}
+    </div>`;
+  showWPop(x,y);
+}
+
+function showWPop(x,y){
+  const p=document.getElementById('wPop');
+  p.style.display='block';
+  const L=Math.min(x+12,window.innerWidth-360);
+  const T=Math.max(y-120,10);
+  p.style.left=L+'px';p.style.top=T+'px';
+}
+function closeWPop(){document.getElementById('wPop').style.display='none';}
+function closeLex(){document.getElementById('lexBanner').style.display='none';}
+document.addEventListener('click',e=>{if(!e.target.closest('#wPop')&&!e.target.closest('.eword')&&!e.target.closest('.hword'))closeWPop();});
+
+/* ── Verse summary ── */
+function showVerseSummary(ref){toast('Verse summary: '+ref+' — click verse number to view cross-references');}
+
+/* ── Navigation ── */
+async function prevChapter(){if(state.chapter>1){state.chapter--;document.getElementById('passageLabel').textContent=state.book+' '+state.chapter+' ▾';await loadChapter(state.book,state.chapter);renderPanes();}}
+async function nextChapter(){const max=BOOK_CHAPTERS[state.book]||50;if(state.chapter<max){state.chapter++;document.getElementById('passageLabel').textContent=state.book+' '+state.chapter+' ▾';await loadChapter(state.book,state.chapter);renderPanes();}}
+function closePane(id){if(panes.length<=1){toast('Cannot close last pane');return;}panes=panes.filter(p=>p.id!==id);renderPanes();}
+function addPane(){const id='p'+(Date.now()%10000);panes.push({id,trans:'JPS',rtl:false});renderPanes();}
+
+/* ── Text selector ── */
+function showTextSelector(){document.getElementById('textSelectorModal').classList.add('open');buildTSP();}
+function closeTextSelector(){document.getElementById('textSelectorModal').classList.remove('open');}
+function setTSPTab(el,tab){document.querySelectorAll('.tsp-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+function buildTSP(filter=''){
+  const langs=['All','Hebrew','Aramaic','Syriac','Paleo-Heb','Greek','English'];
+  document.getElementById('tspLangRow').innerHTML=langs.map((l,i)=>`<span class="tsp-lang-pill ${i===0?'active':''}" onclick="filterTSPLang(this,'${l}')">${l}</span>`).join('');
+  let html='';
+  TIERS.forEach(tier=>{
+    const items=tier.items.filter(it=>!filter||it.name.toLowerCase().includes(filter.toLowerCase())||it.code.toLowerCase().includes(filter.toLowerCase()));
+    if(!items.length) return;
+    html+=`<div class="tsp-tier-hd">${tier.tier}</div>
+      <div class="tsp-tier-acts">
+        <button class="tsp-btn" onclick="selectAllTier('${tier.tier}',true)">Select All</button>
+        <button class="tsp-btn" onclick="selectAllTier('${tier.tier}',false)">Clear All</button>
+      </div>`;
+    items.forEach((it,i)=>{
+      const gi=TIERS.findIndex(t=>t.tier===tier.tier);
+      html+=`<div class="tsp-item ${it.checked?'on':''}" onclick="toggleTSPItem(${gi},${i})">
+        <input type="checkbox" ${it.checked?'checked':''} onchange="toggleTSPItemCB(${gi},${i},this.checked)" onclick="event.stopPropagation()">
+        <span class="tsp-code">${it.code}</span>
+        <span class="tsp-name">${it.name}${it.loc?`<span class="tsp-sub">${it.loc}</span>`:''}</span>
+        <span class="tsp-badge">${it.badges||''}</span>
+      </div>`;
+    });
+  });
+  document.getElementById('tspList').innerHTML=html;
+}
+function filterTSP(){buildTSP(document.getElementById('tspSearch').value);}
+function filterTSPLang(el,lang){document.querySelectorAll('.tsp-lang-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');}
+function toggleTSPItem(gi,i){TIERS[gi].items[i].checked=!TIERS[gi].items[i].checked;buildTSP(document.getElementById('tspSearch').value);}
+function toggleTSPItemCB(gi,i,v){TIERS[gi].items[i].checked=v;}
+function selectAllTier(tier,val){const t=TIERS.find(x=>x.tier===tier);if(t)t.items.forEach(it=>it.checked=val);buildTSP();}
+function applyTSP(){
+  const selected=TIERS.flatMap(t=>t.items.filter(it=>it.checked).map(it=>it.code));
+  if(selected.length>0){
+    panes=selected.slice(0,4).map((code,i)=>({id:'p'+(i+1),trans:code,rtl:code.startsWith('0')||code==='THOT'||code==='WLC'||code==='BHS'}));
+  }
+  document.getElementById('transLabel').textContent=selected.slice(0,3).join(' · ')||'—';
+  closeTextSelector();renderPanes();
+}
+
+/* ── Passage modal ── */
+function togglePassageModal(){const m=document.getElementById('passageModal');m.classList.toggle('open');if(m.classList.contains('open'))buildPassageModal();}
+function buildPassageModal(filter=''){
+  let html=`<div class="pm-section">Torah (5 Books of Moses)</div><div class="pm-books">`;
+  OT.slice(0,5).forEach(b=>html+=`<button class="pm-book-btn ${b===state.book?'active':''}" onclick="pmSelectBook('${b}')">${b}</button>`);
+  html+=`</div><div class="pm-section">Neviim (Prophets)</div><div class="pm-books">`;
+  OT.slice(5,21).forEach(b=>html+=`<button class="pm-book-btn ${b===state.book?'active':''}" onclick="pmSelectBook('${b}')">${b}</button>`);
+  html+=`</div><div class="pm-section">Ketuvim (Writings)</div><div class="pm-books">`;
+  OT.slice(21).forEach(b=>html+=`<button class="pm-book-btn ${b===state.book?'active':''}" onclick="pmSelectBook('${b}')">${b}</button>`);
+  html+=`</div><div class="pm-section">Apocrypha / Deuterocanon</div><div class="pm-books">`;
+  APOC.forEach(b=>html+=`<button class="pm-book-btn" onclick="pmSelectBook('${b}')">${b}</button>`);
+  html+=`</div><div class="pm-section">New Testament</div><div class="pm-books">`;
+  NT.forEach(b=>html+=`<button class="pm-book-btn" onclick="pmSelectBook('${b}')">${b}</button>`);
+  html+=`</div>`;
+  if(pmState.book){
+    const maxCh=BOOK_CHAPTERS[pmState.book]||50;
+    html+=`<div class="pm-section">Chapters — ${pmState.book}</div><div class="pm-chaps">`;
+    for(let c=1;c<=maxCh;c++) html+=`<button class="pm-chap-btn ${c===state.chapter?'active':''}" onclick="pmSelectChap(${c})">${c}</button>`;
+    html+=`</div>`;
+  }
+  document.getElementById('pmBody').innerHTML=html;
+}
+let pmState={book:null};
+function pmSelectBook(b){pmState.book=b;buildPassageModal();}
+async function pmSelectChap(c){state.book=pmState.book;state.chapter=c;document.getElementById('passageLabel').textContent=state.book+' '+state.chapter+' ▾';togglePassageModal();await loadChapter(state.book,state.chapter);renderPanes();}
+async function applyPassage(){const v=parseInt(document.getElementById('pmVerseInp').value)||1;if(pmState.book){state.book=pmState.book;state.chapter=pmState.selectedChap||state.chapter;}togglePassageModal();await loadChapter(state.book,state.chapter);renderPanes();scrollToVerse(v);}
+function filterPassage(){buildPassageModal(document.getElementById('pmSearch').value);}
+
+/* ── Search bar ── */
+function toggleSearchBar(){document.getElementById('searchBarWrap').classList.toggle('open');if(document.getElementById('searchBarWrap').classList.contains('open'))document.getElementById('searchInp').focus();}
+function setSLang(lang,el){state.searchLang=lang;document.querySelectorAll('.search-bar-wrap button').forEach(b=>b.classList.remove('active'));el.classList.add('active');}
+function doSearch(){
+  const q=document.getElementById('searchInp').value.trim();if(!q)return;
+  const results=document.getElementById('searchResults');
+  results.innerHTML='<div style="color:var(--ink3);font-size:11px;margin-bottom:6px">Searching '+state.searchLang+' for "'+q+'"…</div>';
+  // Highlight in panes
+  document.querySelectorAll('.eword').forEach(el=>{
+    el.classList.toggle('hl',el.dataset.w&&el.dataset.w.toLowerCase().includes(q.toLowerCase()));
+  });
+  document.querySelectorAll('.hword').forEach(el=>{
+    el.classList.toggle('hl',el.dataset.h&&el.dataset.h.includes(q));
+  });
+  const hits=currentVerses.filter(v=>v.text.toLowerCase().includes(q.toLowerCase())||(v.heb&&v.heb.includes(q)));
+  results.innerHTML=`<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);margin-bottom:7px">${hits.length} occurrences in ${state.book} ${state.chapter} · ${state.searchLang}</div>`+
+    hits.map(v=>`<div class="sr-item" onclick="scrollToVerse(${v.n})"><span class="sr-ref">${state.book} ${state.chapter}:${v.n}</span>${v.text.replace(/<[^>]+>/g,'').slice(0,80)}…</div>`).join('');
+}
+function scrollToVerse(n){const el=document.getElementById('v'+n);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});}
+
+/* ── Grammar ── */
+function toggleGrammar(){state.grammarOn=!state.grammarOn;document.querySelectorAll('.hword').forEach(el=>{el.style.color=state.grammarOn?(Math.random()>.5?'#1565c0':'#c62828'):'';});toast('Grammar mode: '+(state.grammarOn?'ON':'OFF'));}
+
+/* ── FAQ panel ── */
+function toggleFaq(){const p=document.getElementById('faqPanel');p.style.display=p.style.display==='none'?'block':'none';renderPanes();}
+
+/* ── Font size ── */
+const fontSizes=[12,13.5,14.5,16,18];let fontIdx=2;
+function cycleFontSize(){fontIdx=(fontIdx+1)%fontSizes.length;state.fontSizeBase=fontSizes[fontIdx];document.querySelectorAll('.pane-body').forEach(b=>b.style.fontSize=state.fontSizeBase+'px');toast('Font size: '+state.fontSizeBase+'px');}
+
+/* ── Copy ── */
+function copyText(){const t=currentVerses.map(v=>v.n+'. '+v.text.replace(/<[^>]+>/g,'')).join('\n');navigator.clipboard&&navigator.clipboard.writeText(t).then(()=>toast('Copied '+state.book+' '+state.chapter+' (WEB)'));}
+
+/* ── Export passage → 02_Forensic_Nodes ── */
+/* -- Persisted export folder (File System Access API) --
+   Replaces the hardcoded absolute outPath string -- a real
+   FileSystemDirectoryHandle is remembered in IndexedDB, re-verified next
+   visit, so exports genuinely land on disk once granted, with the local
+   engine and a browser download as fallbacks in that order. */
+let exportDirHandle=null;
+const DirStore={
+  _dbp:null,
+  db(){return this._dbp||(this._dbp=new Promise((res,rej)=>{
+    const rq=indexedDB.open('masorah-fs',1);
+    rq.onupgradeneeded=()=>rq.result.createObjectStore('handles');
+    rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);
+  }));},
+  async get(key){try{const db=await this.db();return await new Promise((res,rej)=>{const tx=db.transaction('handles','readonly');const rq=tx.objectStore('handles').get(key);rq.onsuccess=()=>res(rq.result||null);rq.onerror=()=>rej(rq.error);});}catch(e){return null;}},
+  async set(key,handle){try{const db=await this.db();await new Promise((res,rej)=>{const tx=db.transaction('handles','readwrite');tx.objectStore('handles').put(handle,key);tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});}catch(e){}}
+};
+async function writeToHandle(handle,name,content){const fh=await handle.getFileHandle(name,{create:true});const ws=await fh.createWritable();await ws.write(content);await ws.close();}
+async function pickExportFolder(){
+  if(!window.showDirectoryPicker){toast('Folder picker needs Chrome/Edge (File System Access API). Falling back to local engine / download.');return;}
+  try{
+    const h=await window.showDirectoryPicker({mode:'readwrite'});
+    exportDirHandle=h;
+    await DirStore.set('reader-export',h);
+    document.getElementById('exportBtn').title='Export passage -> '+h.name;
+    toast('Export folder connected: '+h.name+' (remembered)');
+  }catch(e){}
+}
+async function exportPassage(){
+  const rows=currentVerses.map(v=>({ref:state.book+' '+state.chapter+':'+v.n,heb:v.heb||'',en:v.text.replace(/<[^>]+>/g,'')}));
+  const payload={manuscript:'Masorah Corpus Reader',passage:state.book+' '+state.chapter,exported:new Date().toISOString(),translations:document.getElementById('transLabel').textContent,verses:rows,lexicon:LEX};
+  const json=JSON.stringify(payload,null,2);
+  const fname=(state.book+'_'+state.chapter).replace(/\s+/g,'_')+'_reader_export.json';
+  if(exportDirHandle){
+    try{await writeToHandle(exportDirHandle,fname,json);toast('Saved -> '+exportDirHandle.name+'/'+fname);return;}catch(e){toast('Direct write failed -- trying local engine');}
+  }
+  for(const port of[8765,8000,5000]){
+    try{
+      const r=await fetch('http://127.0.0.1:'+port+'/save',{method:'POST',headers:{'Content-Type':'application/json'},signal:AbortSignal.timeout(2000),
+        body:JSON.stringify({path:'02_Forensic_Nodes/'+fname,content:json})});
+      if(r.ok){toast('Saved via local engine -> '+fname);return;}
+    }catch{}
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));a.download=fname;a.click();
+  toast(exportDirHandle?('Downloaded '+fname):('Engine offline -- downloaded '+fname+'. Choose an export folder to write directly next time.'));
+}
+
+/* ── Toast ── */
+function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),2800);}
+
+/* ── API probe ── */
+async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch(API_BASE+'/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+
+/* ── INIT ── */
+buildTSP();
+loadChapter(state.book,state.chapter).then(renderPanes);
+probeAPI();setInterval(probeAPI,8000);
+DirStore.get('reader-export').then(async h=>{
+  if(!h)return;
+  try{if((await h.queryPermission({mode:'readwrite'}))==='granted'){exportDirHandle=h;document.getElementById('exportBtn').title='Export passage -> '+h.name;}}catch(e){}
+});
+</script>
+</body>
+</html>

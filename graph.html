@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah Corpus — Graph Explorer (CBGM Stemma)</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22)}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column;overflow:hidden;font-size:14px}
+/* banner */
+.banner{background:linear-gradient(180deg,var(--paper),var(--gold-bg));border-bottom:3px double var(--gold);padding:0 20px;flex-shrink:0;box-shadow:var(--shadow);z-index:200}
+.banner-row{display:flex;align-items:center;gap:14px;height:60px}
+.brand{display:flex;align-items:center;gap:11px;padding-right:14px;border-right:1px solid var(--bdr)}
+.brand-glyph{font-family:'Frank Ruhl Libre',serif;font-size:34px;color:var(--gold);line-height:1;text-shadow:1px 1px 0 #fff}
+.brand-text h1{font-family:'Cinzel',serif;font-size:17px;font-weight:700;color:var(--ink);letter-spacing:.05em;line-height:1.1}
+.brand-text p{font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}.nav::-webkit-scrollbar{height:0}
+.nav a{display:inline-flex;align-items:center;gap:4px;padding:7px 11px;font-size:13px;color:var(--ink2);text-decoration:none;border-radius:var(--r);font-weight:500;white-space:nowrap;transition:.14s;border:1px solid transparent}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:18px;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid var(--bdr);background:var(--paper)}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:12px}
+.user-n{font-size:12px;color:var(--ink2)}.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:9px;font-family:'JetBrains Mono',monospace}
+.logout{background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:4px 7px;border-radius:var(--r);font-family:inherit}.logout:hover{color:var(--err)}
+.status-cluster{display:flex;align-items:center;gap:9px;flex-shrink:0}
+/* layout */
+.row{flex:1;display:grid;grid-template-columns:280px 1fr;min-height:0}
+.left{background:var(--paper);border-right:1px solid var(--bdr);overflow-y:auto;display:flex;flex-direction:column}
+.col-head{padding:13px 16px;background:linear-gradient(180deg,var(--gold-bg),var(--paper));border-bottom:1px solid var(--bdr);font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:var(--gold-dk);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.add-btn{background:var(--gold);color:#fff;border:none;border-radius:var(--r);font-size:11px;padding:4px 9px;cursor:pointer;font-family:inherit}
+.add-btn:hover{background:var(--gold-lt)}
+.tier{border-bottom:1px solid var(--bdr)}
+.tier-h{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--gold-bg);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.08em}
+.tier-h .ct{margin-left:auto;background:var(--gold);color:#fff;border-radius:8px;padding:1px 6px;font-size:9px}
+.wit{display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;border-left:3px solid transparent}
+.wit:hover{background:var(--gold-pale)}
+.wit.on{background:var(--gold-pale);border-left-color:var(--gold)}
+.wit .sw{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+.wit .gid{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink4);margin-left:auto}
+.panel-sec{padding:12px 14px;border-top:1px solid var(--bdr);background:var(--gold-bg)}
+.panel-sec h4{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.formula{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink2);line-height:1.8;background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r);padding:8px 10px}
+.lbtns{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.lbtn{background:var(--paper);border:1px solid var(--bdr);border-radius:10px;padding:4px 9px;font-size:11px;cursor:pointer;color:var(--ink2);text-decoration:none;font-family:inherit}
+.lbtn:hover{background:var(--gold-pale);border-color:var(--gold);color:var(--gold-dk)}
+/* graph area — WHITE background */
+.graph-col{display:flex;flex-direction:column;min-width:0;background:#ffffff}
+.gtoolbar{padding:9px 16px;background:linear-gradient(180deg,var(--gold-bg),var(--paper));border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0}
+.gtoolbar label{font-size:11px;color:var(--ink3);font-family:'JetBrains Mono',monospace}
+.gtoolbar select{background:var(--paper);color:var(--ink2);border:1px solid var(--bdr);border-radius:var(--r);padding:5px 9px;font-size:12px;font-family:inherit}
+.gbtn{background:var(--gold);color:#fff;border:1px solid var(--gold-dk);border-radius:var(--r);padding:6px 11px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600}
+.gbtn:hover{background:var(--gold-lt)}
+.gbtn.ghost{background:var(--paper);color:var(--gold-dk);border-color:var(--bdr)}
+.gbtn.ghost:hover{background:var(--gold-pale)}
+.canvas-host{flex:1;position:relative;overflow:hidden;background:
+  radial-gradient(circle,#eef0f3 1px,transparent 1px) 0 0/26px 26px,#ffffff}
+#gsvg{position:absolute;inset:0;width:100%;height:100%;cursor:grab}
+#gsvg.panning{cursor:grabbing}
+.gnode{cursor:grab}
+.gnode:active{cursor:grabbing}
+.gnode circle{stroke:#fff;stroke-width:2.5;filter:drop-shadow(0 2px 5px rgba(60,40,10,.25));transition:r .12s}
+.gnode text{font-family:'Cinzel',serif;font-size:12px;fill:#1a1208;text-anchor:middle;pointer-events:none;font-weight:600}
+.gnode.sel circle{stroke:var(--gold);stroke-width:4}
+.gedge{stroke:#b8a878;stroke-width:1.6;fill:none;marker-end:url(#arrow)}
+.gedge.strong{stroke:var(--gold);stroke-width:2.6}
+.gedge.weak{stroke:#d8cba8;stroke-dasharray:4 4}
+.elabel{font-family:'JetBrains Mono',monospace;font-size:9px;fill:#8a7a4a}
+.legend{position:absolute;bottom:14px;left:14px;background:rgba(255,255,255,.92);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 13px;font-size:11px;box-shadow:var(--shadow-sm)}
+.legend .lr{display:flex;align-items:center;gap:7px;margin:3px 0;color:var(--ink2)}
+.legend .sw{width:11px;height:11px;border-radius:50%}
+.hint{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.92);border:1px solid var(--bdr);border-radius:var(--r);padding:8px 12px;font-size:11px;color:var(--ink3);box-shadow:var(--shadow-sm);max-width:230px;line-height:1.5}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(26,18,8,.92);color:#fff;padding:9px 20px;border-radius:24px;font-size:13px;font-family:'JetBrains Mono',monospace;z-index:9999;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1;bottom:36px}
+.footer-bar{flex-shrink:0;background:#1e1610;color:#a89868;font-family:'JetBrains Mono',monospace;font-size:10px;padding:5px 16px;display:flex;gap:16px}.footer-bar .grow{flex:1}
+</style>
+</head>
+<body>
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah Corpus</h1><p>Graph Explorer · CBGM Stemma</p></div></div>
+    <nav class="nav">
+      <a href="transcriber.html">✍ Transcriber</a>
+      <a href="annotate.html">▤ Annotate</a>
+      <a href="architecture.html">⧉ Arch</a>
+      <a href="pipeline.html">⫯ Pipeline</a>
+      <a href="provenance.html">⟳ Provenance</a>
+      <a href="paleography.html">◉ Paleography</a>
+      <a href="analyzer.html">∿ Analyzer</a>
+      <a href="chat.html">◍ Chat</a>
+      <a class="active" href="graph.html">⌬ Graph</a>
+      <a href="reader.html">▦ Reader</a>
+      <a href="publish.html">⥤ Publish</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill warn" id="apiPill"><span class="dot"></span> Offline</span>
+      <div class="user"><div class="user-av">M</div><span class="user-n">Mark Corley</span><span class="user-lvl">L4</span></div>
+      <button class="logout" onclick="location.href='login.html'">Logout</button>
+    </div>
+  </div>
+</header>
+
+<div class="row">
+  <!-- LEFT -->
+  <aside class="left">
+    <div class="col-head"><span>Witnesses by Tier</span><button class="add-btn" onclick="addWit()">+ Add</button></div>
+    <div id="witList"></div>
+    <div class="panel-sec">
+      <h4>Coherence (05c baseline)</h4>
+      <div class="formula">θ = pre(w₁,w₂) − pre(w₂,w₁)<br>ECM = Σ coh / n<br>Bright = coh &lt; −0.20</div>
+    </div>
+    <div class="panel-sec">
+      <h4>Links</h4>
+      <div class="lbtns">
+        <a class="lbtn" href="analyzer.html">Analyzer</a>
+        <a class="lbtn" href="pipeline.html">Pipeline</a>
+        <a class="lbtn" href="architecture.html">Topology</a>
+        <a class="lbtn" href="publish.html">Apparatus</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- GRAPH -->
+  <div class="graph-col">
+    <div class="gtoolbar">
+      <label>Layout</label>
+      <select id="layoutSel" onchange="applyLayout()">
+        <option value="stemma">Stemma (top-down)</option>
+        <option value="force">Force-directed</option>
+        <option value="radial">Radial</option>
+        <option value="circle">Circular</option>
+      </select>
+      <label>Edges</label>
+      <select id="edgeType" onchange="render()">
+        <option value="all">All</option>
+        <option value="strong">Strong (θ&gt;.4)</option>
+        <option value="agree">Agreements</option>
+      </select>
+      <button class="gbtn" onclick="applyLayout()">↻ Re-layout</button>
+      <button class="gbtn ghost" onclick="resetView()">⤢ Fit</button>
+      <button class="gbtn ghost" onclick="toggleForce()" id="forceBtn">▶ Physics</button>
+      <span style="flex:1"></span>
+      <button class="gbtn ghost" onclick="exportSVG()">Export SVG</button>
+      <button class="gbtn ghost" onclick="exportGEXF()">Export GEXF</button>
+    </div>
+    <div class="canvas-host" id="host">
+      <svg id="gsvg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#b8a878"/>
+          </marker>
+        </defs>
+        <g id="viewport">
+          <g id="edges"></g>
+          <g id="nodes"></g>
+        </g>
+      </svg>
+      <div class="hint">Drag any node to reposition. Scroll to zoom, drag the background to pan. Toggle <b>Physics</b> for live force layout.</div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-bar"><span id="engineMsg">Engine offline — run Launch_Masorah.bat</span><span class="grow"></span><span>Nodes: <b id="fN">0</b></span><span>Edges: <b id="fE">0</b></span><span>WS: default</span></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── DATA ── */
+/* FIX (2026-07-28): tier labels used to be invented placeholders ("T01
+   Archetype", "T02 Tiberian", "T03 Babylonian"...) that collided in name
+   with, but did not match, the real 7-tier corpus taxonomy used everywhere
+   else in this app (analyzer.html, TIER_MAP). This view groups witnesses by
+   transmission sub-tradition (a CBGM stemma concern), which is a real and
+   useful second axis distinct from the corpus tier taxonomy — so each node
+   now carries both its real corpus code (e.g. 03a) and a sub-tradition
+   grouping, and the invented "Archetype α" reconstructed-ur-text node is
+   gone (the Exposé explicitly rejects privileging a hypothetical archetype
+   over extant witnesses) in favor of Ketef Hinnom, the earliest witness
+   actually in the corpus. */
+const TIERS={
+ 'Tier 01 · Proto-Semitic Roots':'#8a6a20','Sub-tradition: Tiberian (Ben Asher)':'#B8860B','Sub-tradition: Babylonian':'#3f8ed0',
+ 'Sub-tradition: Palestinian':'#3a9d6e','Tier 05 · Printed and Critical':'#9a6cc4','Tier 02 · Second Temple Witnesses':'#d05a3a','Tier 06 · Translations':'#c0394b'};
+let nodes=[
+ {id:'05c',label:'05c — Second Rabbinic 1525',tier:'Tier 05 · Printed and Critical',code:'05c',on:true},
+ {id:'A',label:'03a — Aleppo Codex',tier:'Sub-tradition: Tiberian (Ben Asher)',code:'03a',on:true},
+ {id:'L',label:'03b — Leningrad Codex',tier:'Sub-tradition: Tiberian (Ben Asher)',code:'03b',on:true},
+ {id:'S1053',label:'03c — Sassoon 1053',tier:'Sub-tradition: Tiberian (Ben Asher)',code:'03c',on:true},
+ {id:'C',label:'03e — MS Cairensis',tier:'Sub-tradition: Tiberian (Ben Asher)',code:'03e',on:true},
+ {id:'BabEb',label:'03j — MS Babylonicus',tier:'Sub-tradition: Babylonian',code:'03j',on:true},
+ {id:'Pal',label:'02h — Cairo Genizah',tier:'Sub-tradition: Palestinian',code:'02h',on:true},
+ {id:'1QIsa',label:'02b — Great Isaiah Scroll (1QIsaᵃ)',tier:'Tier 02 · Second Temple Witnesses',code:'02b',on:true},
+ {id:'LXX',label:'06d — Septuagint (Rahlfs-Hanhart)',tier:'Tier 06 · Translations',code:'06d',on:true},
+ {id:'Sam',label:'02g — Samaritan Pentateuch',tier:'Tier 02 · Second Temple Witnesses',code:'02g',on:true},
+ {id:'ARCH',label:'01f — Ketef Hinnom',tier:'Tier 01 · Proto-Semitic Roots',code:'01f',on:true},
+];
+let edges=[
+ {s:'ARCH',t:'A',w:.62},{s:'ARCH',t:'BabEb',w:.41},{s:'ARCH',t:'Pal',w:.38},{s:'ARCH',t:'1QIsa',w:.30},
+ {s:'A',t:'L',w:.71},{s:'A',t:'S1053',w:.66},{s:'A',t:'C',w:.58},{s:'L',t:'05c',w:.74},
+ {s:'S1053',t:'05c',w:.69},{s:'C',t:'05c',w:.52},{s:'BabEb',t:'L',w:.33},{s:'1QIsa',t:'LXX',w:.27},
+ {s:'Pal',t:'Sam',w:.36},{s:'ARCH',t:'LXX',w:.22},
+];
+let pos={};       // id -> {x,y}
+let view={x:0,y:0,k:1};
+let selId=null, physics=false, physTimer=null;
+
+const svg=document.getElementById('gsvg'),host=document.getElementById('host');
+const vp=document.getElementById('viewport'),gE=document.getElementById('edges'),gN=document.getElementById('nodes');
+
+function W(){return host.clientWidth;} function H(){return host.clientHeight;}
+
+/* ── BUILD ── */
+function buildWitList(){
+  const byTier={};nodes.forEach(n=>{(byTier[n.tier]=byTier[n.tier]||[]).push(n);});
+  document.getElementById('witList').innerHTML=Object.keys(TIERS).filter(t=>byTier[t]).map(t=>`
+    <div class="tier"><div class="tier-h"><span class="sw" style="width:9px;height:9px;border-radius:2px;background:${TIERS[t]}"></span>${t}<span class="ct">${byTier[t].length}</span></div>
+    ${byTier[t].map(n=>`<div class="wit ${n.on?'on':''}" onclick="toggleWit('${n.id}')">
+      <span class="sw" style="background:${TIERS[n.tier]}"></span>${n.label}<span class="gid">${n.id}</span></div>`).join('')}</div>`).join('');
+}
+function buildLegend(){
+  document.getElementById('legend').innerHTML='<div style="font-family:JetBrains Mono;font-size:10px;color:var(--ink3);margin-bottom:4px">TIERS</div>'+
+    Object.keys(TIERS).map(t=>`<div class="lr"><span class="sw" style="background:${TIERS[t]}"></span>${t}</div>`).join('');
+}
+
+/* ── LAYOUTS ── */
+function applyLayout(){
+  const L=document.getElementById('layoutSel').value;const act=nodes.filter(n=>n.on);
+  if(L==='stemma'){
+    const order=['Tier 01 · Proto-Semitic Roots','Sub-tradition: Babylonian','Sub-tradition: Palestinian','Tier 02 · Second Temple Witnesses','Sub-tradition: Tiberian (Ben Asher)','Tier 06 · Translations','Tier 05 · Printed and Critical'];
+    const rows={};order.forEach((t,i)=>rows[t]=i);
+    const byRow={};act.forEach(n=>{(byRow[rows[n.tier]]=byRow[rows[n.tier]]||[]).push(n);});
+    const maxRow=Math.max(...Object.keys(byRow).map(Number));
+    Object.keys(byRow).forEach(r=>{const arr=byRow[r];arr.forEach((n,i)=>{
+      pos[n.id]={x:(W()/(arr.length+1))*(i+1),y:60+(+r)*((H()-120)/(maxRow||1))};});});
+  } else if(L==='force'){ act.forEach(n=>{if(!pos[n.id])pos[n.id]={x:Math.random()*W(),y:Math.random()*H()};}); forceTick(140); }
+  else if(L==='radial'){ const cx=W()/2,cy=H()/2;const arch=act.find(n=>n.tier==='Tier 01 · Proto-Semitic Roots'); if(arch)pos[arch.id]={x:cx,y:cy};
+    const rest=act.filter(n=>n!==arch); rest.forEach((n,i)=>{const a=(i/rest.length)*Math.PI*2;const r=Math.min(W(),H())*0.36;pos[n.id]={x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};});}
+  else { const cx=W()/2,cy=H()/2,r=Math.min(W(),H())*0.38; act.forEach((n,i)=>{const a=(i/act.length)*Math.PI*2;pos[n.id]={x:cx+Math.cos(a)*r,y:cy+Math.sin(a)*r};});}
+  render(); toast('Layout: '+document.getElementById('layoutSel').selectedOptions[0].text);
+}
+function forceTick(iter){
+  const act=nodes.filter(n=>n.on);
+  for(let it=0;it<iter;it++){
+    act.forEach(a=>{a._fx=0;a._fy=0;
+      act.forEach(b=>{if(a===b)return;let dx=pos[a.id].x-pos[b.id].x,dy=pos[a.id].y-pos[b.id].y;let d=Math.hypot(dx,dy)||1;let f=9000/(d*d);a._fx+=dx/d*f;a._fy+=dy/d*f;});});
+    edges.forEach(e=>{const a=nodes.find(n=>n.id===e.s),b=nodes.find(n=>n.id===e.t);if(!a||!b||!a.on||!b.on)return;
+      let dx=pos[b.id].x-pos[a.id].x,dy=pos[b.id].y-pos[a.id].y,d=Math.hypot(dx,dy)||1;let f=(d-120)*0.02;
+      a._fx+=dx/d*f;a._fy+=dy/d*f;b._fx-=dx/d*f;b._fy-=dy/d*f;});
+    act.forEach(n=>{if(n._dragging)return;pos[n.id].x+=Math.max(-12,Math.min(12,n._fx));pos[n.id].y+=Math.max(-12,Math.min(12,n._fy));
+      pos[n.id].x=Math.max(40,Math.min(W()-40,pos[n.id].x));pos[n.id].y=Math.max(40,Math.min(H()-40,pos[n.id].y));});
+  }
+}
+function toggleForce(){
+  physics=!physics;document.getElementById('forceBtn').textContent=physics?'⏸ Physics':'▶ Physics';
+  if(physics){physTimer=setInterval(()=>{forceTick(1);render();},33);} else clearInterval(physTimer);
+}
+
+/* ── RENDER ── */
+function visEdges(){
+  const ft=document.getElementById('edgeType').value;
+  return edges.filter(e=>{const a=nodes.find(n=>n.id===e.s),b=nodes.find(n=>n.id===e.t);
+    if(!a||!b||!a.on||!b.on)return false;
+    if(ft==='strong')return e.w>0.4; return true;});
+}
+function render(){
+  const act=nodes.filter(n=>n.on);act.forEach(n=>{if(!pos[n.id])pos[n.id]={x:Math.random()*W(),y:Math.random()*H()};});
+  const es=visEdges();
+  gE.innerHTML=es.map(e=>{const a=pos[e.s],b=pos[e.t];if(!a||!b)return'';
+    const cls=e.w>0.55?'strong':(e.w<0.32?'weak':'');
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    return `<path class="gedge ${cls}" d="M${a.x},${a.y} L${b.x},${b.y}"/><text class="elabel" x="${mx}" y="${my-4}">${e.w.toFixed(2)}</text>`;}).join('');
+  gN.innerHTML=act.map(n=>{const p=pos[n.id];const deg=edges.filter(e=>(e.s===n.id||e.t===n.id)).length;const r=14+deg*1.6;
+    return `<g class="gnode ${n.id===selId?'sel':''}" data-id="${n.id}" transform="translate(${p.x},${p.y})">
+      <circle r="${r}" fill="${TIERS[n.tier]}"/><text y="${r+14}">${n.label}</text></g>`;}).join('');
+  vp.setAttribute('transform',`translate(${view.x},${view.y}) scale(${view.k})`);
+  document.getElementById('fN').textContent=act.length;document.getElementById('fE').textContent=es.length;
+  bindNodeDrag();
+}
+
+/* ── DRAG NODES + PAN/ZOOM ── */
+function svgPt(e){const r=svg.getBoundingClientRect();return {x:(e.clientX-r.left-view.x)/view.k,y:(e.clientY-r.top-view.y)/view.k};}
+let nodeDrag=null,panDrag=null;
+function bindNodeDrag(){
+  gN.querySelectorAll('.gnode').forEach(g=>{
+    g.addEventListener('pointerdown',e=>{e.stopPropagation();const id=g.dataset.id;selId=id;
+      const n=nodes.find(x=>x.id===id);n._dragging=true;nodeDrag={id,n};render();});
+  });
+}
+svg.addEventListener('pointerdown',e=>{if(e.target.closest('.gnode'))return;panDrag={sx:e.clientX,sy:e.clientY,vx:view.x,vy:view.y};svg.classList.add('panning');});
+window.addEventListener('pointermove',e=>{
+  if(nodeDrag){const p=svgPt(e);pos[nodeDrag.id]={x:p.x,y:p.y};render();}
+  else if(panDrag){view.x=panDrag.vx+(e.clientX-panDrag.sx);view.y=panDrag.vy+(e.clientY-panDrag.sy);render();}
+});
+window.addEventListener('pointerup',()=>{if(nodeDrag){nodeDrag.n._dragging=false;nodeDrag=null;}panDrag=null;svg.classList.remove('panning');});
+host.addEventListener('wheel',e=>{e.preventDefault();const f=e.deltaY<0?1.12:0.9;const r=svg.getBoundingClientRect();
+  const mx=e.clientX-r.left,my=e.clientY-r.top;view.x=mx-(mx-view.x)*f;view.y=my-(my-view.y)*f;view.k*=f;render();},{passive:false});
+svg.addEventListener('dblclick',e=>{const g=e.target.closest('.gnode');if(g)editWit(g.dataset.id);});
+
+function resetView(){view={x:0,y:0,k:1};applyLayout();}
+
+/* ── EDIT WITNESSES ── */
+function toggleWit(id){const n=nodes.find(x=>x.id===id);n.on=!n.on;buildWitList();render();}
+function addWit(){
+  const label=prompt('Witness label (e.g. "Damascus Pentateuch"):');if(!label)return;
+  const id=prompt('Short ID / sigla:',label.slice(0,6))||('N'+nodes.length);
+  const tiers=Object.keys(TIERS);const tier=prompt('Tier:\n'+tiers.map((t,i)=>i+'='+t).join('\n'),'1');
+  const t=tiers[parseInt(tier)]||tiers[1];
+  nodes.push({id,label,tier:t,on:true});pos[id]={x:W()/2,y:H()/2};buildWitList();render();toast('Added '+label);
+}
+function editWit(id){
+  const n=nodes.find(x=>x.id===id);if(!n)return;
+  const nl=prompt('Rename witness:',n.label);if(nl){n.label=nl;buildWitList();render();}
+}
+
+/* ── EXPORT ── */
+function dl(name,c,m){const b=new Blob([c],{type:m});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();}
+function exportSVG(){
+  const clone=svg.cloneNode(true);clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  clone.setAttribute('width',W());clone.setAttribute('height',H());
+  clone.style.background='#fff';
+  dl('cbgm_stemma.svg','<?xml version="1.0"?>\n'+new XMLSerializer().serializeToString(clone),'image/svg+xml');toast('SVG exported');
+}
+function exportGEXF(){
+  const ns=nodes.filter(n=>n.on).map(n=>`      <node id="${n.id}" label="${n.label}"/>`).join('\n');
+  const es=visEdges().map((e,i)=>`      <edge id="${i}" source="${e.s}" target="${e.t}" weight="${e.w}"/>`).join('\n');
+  const g=`<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://gexf.net/1.3" version="1.3"><graph defaultedgetype="directed">
+    <nodes>\n${ns}\n    </nodes>
+    <edges>\n${es}\n    </edges>
+</graph></gexf>`;
+  dl('cbgm_stemma.gexf',g,'application/xml');toast('GEXF exported');
+}
+
+/* ── MISC ── */
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2000);}
+async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+function start(){buildWitList();buildLegend();applyLayout();probeAPI();setInterval(probeAPI,9000);window.addEventListener('resize',()=>render());}
+start();
+</script>
+</body>
+</html>

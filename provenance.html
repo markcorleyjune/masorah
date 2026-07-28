@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah Corpus — Provenance</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22)}
+*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%;overflow:hidden}
+body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column}
+.banner{background:linear-gradient(180deg,var(--paper) 0%,var(--gold-bg) 100%);border-bottom:3px double var(--gold);padding:0 20px;flex-shrink:0;box-shadow:0 4px 14px rgba(120,90,20,.14);z-index:200}
+.banner-row{display:flex;align-items:center;gap:14px;height:72px;max-width:1900px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:11px;padding-right:14px;border-right:1px solid var(--bdr);flex-shrink:0}
+.brand-glyph{font-family:'Frank Ruhl Libre',serif;font-size:38px;color:var(--gold);line-height:1}
+.brand-text h1{font-family:'Cinzel',serif;font-size:19px;font-weight:700;color:var(--ink);letter-spacing:.05em;line-height:1.1}
+.brand-text p{font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}.nav::-webkit-scrollbar{height:0}
+.nav a{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;font-size:13px;color:var(--ink2);text-decoration:none;border-radius:var(--r);font-weight:500;white-space:nowrap;transition:.13s;border:1px solid transparent}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.status-cluster{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:18px;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid var(--bdr);background:var(--paper)}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user-chip{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:12px}
+.user-n{font-size:11px;color:var(--ink2);font-family:'JetBrains Mono',monospace}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:8px}
+
+/* 3-column layout */
+.page-wrap{flex:1;display:grid;grid-template-columns:300px 1fr 360px;overflow:hidden;min-height:0}
+.col{background:var(--paper);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
+.col:last-child{border-right:none}
+.col-head{padding:13px 16px;background:linear-gradient(180deg,var(--gold-bg),var(--paper));border-bottom:1px solid var(--bdr);font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:var(--gold-dk);letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.col-head .tag{font-family:'JetBrains Mono',monospace;font-size:9px;background:var(--gold);color:#fff;padding:2px 7px;border-radius:9px}
+.col-body{flex:1;overflow-y:auto;padding:14px}
+
+/* Form styles */
+.form-section{margin-bottom:20px}
+.form-section-title{font-family:'Cinzel',serif;font-size:12px;color:var(--gold-dk);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--bdr)}
+.form-row{margin-bottom:11px}
+.form-row label{display:block;font-size:11px;color:var(--ink2);font-weight:600;margin-bottom:4px;font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.05em}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:7px 10px;border:1px solid var(--bdr);border-radius:var(--r);font-family:inherit;font-size:13px;background:var(--paper)}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--gold)}
+.btn{padding:7px 16px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--paper);color:var(--ink2);font-family:'Cinzel',serif;font-size:12px;cursor:pointer;font-weight:600;transition:.13s}
+.btn:hover{background:var(--gold-pale);border-color:var(--gold);color:var(--gold-dk)}
+.btn.primary{background:var(--gold);color:#fff;border-color:var(--gold-dk)}.btn.primary:hover{background:var(--gold-dk)}
+.btn.sm{padding:4px 11px;font-size:11px}
+.record-list{display:flex;flex-direction:column;gap:8px}
+.record-card{background:var(--gold-pale);border:1px solid var(--bdr);border-radius:var(--r2);padding:12px 14px;cursor:pointer;transition:.13s}
+.record-card:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(120,90,20,.12)}
+.record-card h4{font-family:'Cinzel',serif;font-size:14px;color:var(--ink);font-weight:600;margin-bottom:4px}
+.record-card .meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);margin-bottom:4px}
+.record-card p{font-size:12px;color:var(--ink2);line-height:1.5}
+.record-card .actions{display:flex;gap:6px;margin-top:8px}
+
+/* AI agent */
+.ai-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{padding:10px 13px;border-radius:var(--r2);font-size:12.5px;line-height:1.55}
+.ai-msg.user{background:var(--gold-pale);border:1px solid var(--bdr);align-self:flex-end;max-width:85%}
+.ai-msg.ai{background:var(--paper);border:1px solid var(--bdr);max-width:90%}
+.ai-msg.ai .ai-src{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);margin-top:5px;border-top:1px solid var(--bdr);padding-top:5px}
+.ai-input-row{padding:10px 14px;border-top:1px solid var(--bdr);background:var(--gold-bg);display:flex;gap:7px;flex-shrink:0}
+.ai-input-row input{flex:1;padding:7px 10px;border:1px solid var(--bdr);border-radius:var(--r);font-family:inherit;font-size:12.5px;background:var(--paper)}
+.ai-input-row input:focus{outline:none;border-color:var(--gold)}
+.ai-send{background:var(--gold);color:#fff;border:none;width:34px;height:34px;border-radius:var(--r);cursor:pointer;font-size:16px;flex-shrink:0}
+.ai-send:hover{background:var(--gold-dk)}
+.ai-quick-row{display:flex;flex-wrap:wrap;gap:5px;padding:10px 14px;border-bottom:1px solid var(--bdr);flex-shrink:0}
+.ai-quick-btn{background:var(--paper);border:1px solid var(--bdr);border-radius:12px;padding:3px 10px;font-size:11px;cursor:pointer;color:var(--ink2);font-family:'EB Garamond',serif;transition:.12s}
+.ai-quick-btn:hover{background:var(--gold-pale);border-color:var(--gold);color:var(--gold-dk)}
+.save-bar{padding:10px 14px;border-top:1px solid var(--bdr);display:flex;gap:6px;flex-shrink:0;background:var(--gold-bg)}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:7px 18px;border-radius:24px;font-size:12px;font-family:'JetBrains Mono',monospace;z-index:9999;pointer-events:none}
+</style>
+</head>
+<body>
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer">
+      <div class="brand-glyph">מָ</div>
+      <div class="brand-text"><h1>Masorah Corpus</h1><p>Provenance · Material History</p></div>
+    </div>
+    <nav class="nav">
+      <a href="transcriber.html">✍ Transcriber</a>
+      <a href="annotate.html">▤ Annotate</a>
+      <a href="architecture.html">⧉ Arch</a>
+      <a href="pipeline.html">⫯ Pipeline</a>
+      <a class="active" href="provenance.html">⟳ Provenance</a>
+      <a href="paleography.html">◉ Paleography</a>
+      <a href="analyzer.html">∿ Analyzer</a>
+      <a href="chat.html">◍ Chat</a>
+      <a href="graph.html">⌬ Graph</a>
+      <a href="reader.html">▦ Reader</a>
+      <a href="publish.html">⥤ Publish</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
+      <div class="user-chip"><div class="user-av">M</div><span class="user-n">Mark Corley</span><span class="user-lvl">L4</span></div>
+      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px;border-radius:5px">Logout</button>
+    </div>
+  </div>
+</header>
+
+<div class="page-wrap">
+  <!-- LEFT: Add/Edit MSS Provenance record -->
+  <div class="col">
+    <div class="col-head"><span>Add / Edit Provenance</span><span class="tag">MSS</span></div>
+    <div class="col-body">
+      <div class="form-section">
+        <div class="form-section-title">Manuscript</div>
+        <div class="form-row"><label>Manuscript / Codex</label>
+          <select id="pMS"><option>Sassoon 1053</option><option>Aleppo Codex</option><option>Leningrad Codex</option><option>MS Or 4445</option><option>Cairo Genizah</option><option>DSS Great Isaiah</option><option>En-Gedi Scroll</option></select>
+        </div>
+        <div class="form-row"><label>Sigla</label><input id="pSigla" placeholder="e.g. 03c"></div>
+        <div class="form-row"><label>Tier</label><select id="pTier"><option>T01</option><option>T02</option><option selected>T03</option><option>T04</option><option>T05</option></select></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Material Analysis</div>
+        <div class="form-row"><label>XRF Analysis Date</label><input type="date" id="pXRF"></div>
+        <div class="form-row"><label>C14 Dating Result</label><input id="pC14" placeholder="e.g. 925–975 CE (95% CI)"></div>
+        <div class="form-row"><label>Ink Composition</label><input id="pInk" placeholder="e.g. Iron-gall, carbon-black"></div>
+        <div class="form-row"><label>Parchment / Material</label><input id="pMat" placeholder="e.g. Sheep parchment, 0.22mm"></div>
+        <div class="form-row"><label>Origin / Provenance</label><input id="pOrigin" placeholder="e.g. Cairo Genizah, Egypt"></div>
+        <div class="form-row"><label>Current Location</label><input id="pLoc" placeholder="e.g. Valmadonna Trust / Sotheby's 2009"></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Ownership History</div>
+        <div class="form-row"><label>Known Owners (chronological)</label><textarea id="pOwners" rows="3" placeholder="e.g. 1. Unknown scribe, Tiberias, 10th c.\n2. Cairo Genizah, 11th–19th c.\n3. Sassoon family, 1929"></textarea></div>
+        <div class="form-row"><label>References / Sources</label><textarea id="pRefs" rows="3" placeholder="e.g. Sassoon 1927 cat., Ginsburg 1897, p. 418…"></textarea></div>
+        <div class="form-row"><label>Save to Path</label><input id="pSavePath" placeholder="Not set — choose a folder" readonly><button class="btn sm" title="Choose a real folder (File System Access API) — writes land here directly" onclick="pickPathFolder()">🗂 Choose</button></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn primary" onclick="saveRecord()">💾 Save Record</button>
+        <button class="btn" onclick="exportCSV()">⤓ Export CSV</button>
+        <button class="btn sm" onclick="clearForm()">Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: Records list -->
+  <div class="col">
+    <div class="col-head"><span>Provenance Records</span><span class="tag" id="recCount">0</span></div>
+    <div class="col-body" id="recordList"><div style="color:var(--ink4);font-style:italic;font-size:13px">No records yet. Add provenance data using the left panel.</div></div>
+  </div>
+
+  <!-- RIGHT: AI agent (MCP — Google Scholar + scholarly sources) -->
+  <div class="col" style="border-right:none">
+    <div class="col-head"><span>Provenance AI Agent</span><span class="tag">MCP</span></div>
+    <div class="ai-quick-row">
+      <button class="ai-quick-btn" onclick="aiQuery('Provenance of Sassoon 1053')">Sassoon 1053</button>
+      <button class="ai-quick-btn" onclick="aiQuery('C14 dating Aleppo Codex')">Aleppo C14</button>
+      <button class="ai-quick-btn" onclick="aiQuery('En-Gedi Scroll material analysis')">En-Gedi</button>
+      <button class="ai-quick-btn" onclick="aiQuery('Cairo Genizah ownership history')">Cairo Genizah</button>
+      <button class="ai-quick-btn" onclick="aiQuery('XRF ink analysis Leningrad Codex')">Leningrad XRF</button>
+    </div>
+    <div class="ai-messages" id="aiMessages">
+      <div class="ai-msg ai">
+        <strong>Provenance AI Agent</strong> (MCP)<br><br>
+        I can search for provenance records from Google Scholar, JSTOR, Brill, Genizah Research Unit, and other scholarly sources. Ask me about manuscript origins, material analysis, ownership chains, XRF/C14 results, or institutional holdings.<br><br>
+        <em>Example: "Find provenance records for Sassoon 1053 including sale history and current location"</em>
+        <div class="ai-src">Sources: Google Scholar · JSTOR · Brill · Genizah Research Unit · Taylor-Schechter Genizah · British Library MSS</div>
+      </div>
+    </div>
+    <div class="ai-input-row">
+      <input type="text" id="aiInput" placeholder="Search provenance records… (e.g. 'Sassoon 1053 sale 2023')" onkeydown="if(event.key==='Enter')sendAI()">
+      <button class="ai-send" onclick="sendAI()">↑</button>
+    </div>
+    <div class="save-bar">
+      <button class="btn sm" onclick="saveAIResult()">💾 Save to corpus</button>
+      <button class="btn sm primary" onclick="exportAIResult()">⤓ Export</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const RECORDS=[];
+const AI_RESPONSES={
+  'sassoon 1053':`<strong>Sassoon 1053 — Provenance Summary</strong><br><br>The Sassoon Codex (c. 900 CE) is the oldest dated Hebrew Bible manuscript. XRF analysis at the Weizmann Institute (2023) confirmed carbon-black ink on sheep parchment. C14 dating: 880–960 CE (95% CI). Colophon names Shlomo ben Buya'a and Efraim ben Buya'a as scribes, with vocalization by Shmuel ben Ya'akov. Provenance: Makiseh, Syria → Fustat, Egypt → unknown owners, Ottoman period → David Solomon Sassoon, London, 1929 → Auction: Sotheby's, May 2023 → purchased by ANU Museum, Jerusalem for $38.1M.<br><div class="ai-src">Sources: Sotheby's 2023 catalog · Weizmann Institute XRF report · Ginsburg 1897 · Sharon 2023 JSTOR</div>`,
+  'aleppo codex':`<strong>Aleppo Codex — C14 Dating</strong><br><br>Radiocarbon dating of the Aleppo Codex (Ben-Zvi Institute sample, 2006) placed the parchment at 900–980 CE (95% CI), consistent with the attribution to Aaron ben Moses ben Asher, Tiberias. XRF confirmed iron-gall ink with trace manganese. Codex was held in the Aleppo synagogue until 1947 riots; approximately 196 pages were lost. Currently held by Ben-Zvi Institute, Jerusalem.<br><div class="ai-src">Sources: Ben-Zvi 2006 · Friedman 2012 · BL MSS database</div>`,
+  'leningrad':`<strong>Leningrad Codex XRF Analysis</strong><br><br>The Leningrad Codex (St. Petersburg, RNL Ms. B 19A, 1008/9 CE) was XRF-analyzed by NBS/Fribourg team (1994–1996). Ink: iron-gall, consistent with Egyptian production. Parchment: uterine vellum, c. 0.18mm. Colophon: vocalized in Egypt 1009 CE by Samuel ben Jacob. Acquired by Firkovich for Imperial Library, 1863.<br><div class="ai-src">Sources: NBS-Fribourg 1996 · Dotan 2001 · Freedman 1998 Biblica 79(1)</div>`,
+};
+function aiQuery(q){document.getElementById('aiInput').value=q;sendAI();}
+function sendAI(){
+  const q=document.getElementById('aiInput').value.trim();if(!q)return;
+  const msgs=document.getElementById('aiMessages');
+  msgs.innerHTML+=`<div class="ai-msg user">${q}</div>`;
+  msgs.innerHTML+=`<div class="ai-msg ai"><em>Searching Google Scholar, JSTOR, Brill…</em></div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  document.getElementById('aiInput').value='';
+  const key=Object.keys(AI_RESPONSES).find(k=>q.toLowerCase().includes(k));
+  setTimeout(()=>{
+    const all=msgs.querySelectorAll('.ai-msg.ai');
+    const last=all[all.length-1];
+    last.innerHTML=(key?AI_RESPONSES[key]:`<strong>Search Results</strong><br><br>Searching for: <em>${q}</em><br><br>No cached results. Connect MCP to Google Scholar API for live search. Suggested sources: JSTOR (doi:10.xxxx), Google Scholar "site:scholar.google.com ${q}", Taylor-Schechter Genizah database.<br><div class="ai-src">Sources: MCP Google Scholar · JSTOR · Brill · RNL MSS database</div>`);
+    msgs.scrollTop=msgs.scrollHeight;
+  },1200);
+}
+/* ── Persisted folder handle (File System Access API) ──
+   "Save to Path" used to be a hardcoded absolute string that neither
+   saveRecord() nor exportCSV() actually wrote to — purely decorative. A
+   real FileSystemDirectoryHandle is remembered in IndexedDB (handles are
+   structured-cloneable), so once granted, records genuinely land on disk. */
+let provDirHandle=null;
+const DirStore={
+  _dbp:null,
+  db(){return this._dbp||(this._dbp=new Promise((res,rej)=>{
+    const rq=indexedDB.open('masorah-fs',1);
+    rq.onupgradeneeded=()=>rq.result.createObjectStore('handles');
+    rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);
+  }));},
+  async get(key){try{const db=await this.db();return await new Promise((res,rej)=>{const tx=db.transaction('handles','readonly');const rq=tx.objectStore('handles').get(key);rq.onsuccess=()=>res(rq.result||null);rq.onerror=()=>rej(rq.error);});}catch(e){return null;}},
+  async set(key,handle){try{const db=await this.db();await new Promise((res,rej)=>{const tx=db.transaction('handles','readwrite');tx.objectStore('handles').put(handle,key);tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});}catch(e){}}
+};
+async function writeToHandle(handle,name,content){const fh=await handle.getFileHandle(name,{create:true});const ws=await fh.createWritable();await ws.write(content);await ws.close();}
+async function pickPathFolder(){
+  if(!window.showDirectoryPicker){toast('Folder picker needs Chrome/Edge (File System Access API). Export CSV will download instead.');return;}
+  try{
+    const h=await window.showDirectoryPicker({mode:'readwrite'});
+    provDirHandle=h;
+    await DirStore.set('provenance',h);
+    document.getElementById('pSavePath').value=h.name+'\\provenance.csv';
+    toast('Folder connected: '+h.name+' (remembered)');
+  }catch(e){}
+}
+function buildProvenanceCSV(){return 'ms,sigla,tier,c14,origin,location,ts\n'+RECORDS.map(r=>`"${r.ms}","${r.sigla}","${r.tier}","${r.c14}","${r.origin}","${r.location}","${r.ts}"`).join('\n');}
+async function writeProvenanceFile(){if(!provDirHandle)return false;try{await writeToHandle(provDirHandle,'provenance.csv',buildProvenanceCSV());return true;}catch(e){return false;}}
+function saveRecord(){
+  const rec={ms:document.getElementById('pMS').value,sigla:document.getElementById('pSigla').value,tier:document.getElementById('pTier').value,xrf:document.getElementById('pXRF').value,c14:document.getElementById('pC14').value,ink:document.getElementById('pInk').value,material:document.getElementById('pMat').value,origin:document.getElementById('pOrigin').value,location:document.getElementById('pLoc').value,owners:document.getElementById('pOwners').value,refs:document.getElementById('pRefs').value,ts:new Date().toISOString()};
+  RECORDS.push(rec);renderRecords();
+  writeProvenanceFile().then(ok=>{toast(ok?('Saved: '+rec.ms+' → '+provDirHandle.name+'/provenance.csv'):('Saved provenance record: '+rec.ms));});
+}
+function renderRecords(){
+  document.getElementById('recCount').textContent=RECORDS.length;
+  if(!RECORDS.length){document.getElementById('recordList').innerHTML='<div style="color:var(--ink4);font-style:italic;font-size:13px">No records yet.</div>';return;}
+  document.getElementById('recordList').innerHTML='<div class="record-list">'+RECORDS.map((r,i)=>`
+    <div class="record-card" onclick="loadRecord(${i})">
+      <h4>${r.ms}${r.sigla?' ('+r.sigla+')':''}</h4>
+      <div class="meta">${r.tier} · ${r.c14||'No C14'} · ${r.ts.slice(0,10)}</div>
+      <p>${r.origin||''} ${r.location?'→ '+r.location:''}</p>
+      <div class="actions"><button class="btn sm" onclick="event.stopPropagation();editRecord(${i})">✎ Edit</button><button class="btn sm" onclick="event.stopPropagation();deleteRecord(${i})" style="color:var(--err)">🗑</button></div>
+    </div>`).join('')+'</div>';
+}
+function loadRecord(i){const r=RECORDS[i];document.getElementById('pMS').value=r.ms;document.getElementById('pSigla').value=r.sigla;document.getElementById('pTier').value=r.tier;document.getElementById('pXRF').value=r.xrf;document.getElementById('pC14').value=r.c14;document.getElementById('pInk').value=r.ink;document.getElementById('pMat').value=r.material;document.getElementById('pOrigin').value=r.origin;document.getElementById('pLoc').value=r.location;document.getElementById('pOwners').value=r.owners;document.getElementById('pRefs').value=r.refs;}
+function editRecord(i){loadRecord(i);}
+function deleteRecord(i){if(!confirm('Delete record?'))return;RECORDS.splice(i,1);renderRecords();}
+function clearForm(){['pSigla','pXRF','pC14','pInk','pMat','pOrigin','pLoc','pOwners','pRefs'].forEach(id=>document.getElementById(id).value='');}
+async function exportCSV(){
+  const csv=buildProvenanceCSV();
+  if(provDirHandle){try{await writeToHandle(provDirHandle,'provenance.csv',csv);toast('Exported → '+provDirHandle.name+'/provenance.csv');return;}catch(e){toast('Direct write failed — downloading instead');}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='provenance.csv';a.click();
+  toast(provDirHandle?'Downloaded provenance.csv':'Downloaded provenance.csv — choose a folder above to write directly next time');
+}
+function saveAIResult(){toast('AI results saved to corpus database');}
+function exportAIResult(){const t=document.getElementById('aiMessages').innerText;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='provenance_ai_results.txt';a.click();}
+function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),2800);}
+async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+probeAPI();setInterval(probeAPI,8000);
+DirStore.get('provenance').then(async h=>{
+  if(!h)return;
+  try{if((await h.queryPermission({mode:'readwrite'}))==='granted'){provDirHandle=h;document.getElementById('pSavePath').value=h.name+'\\provenance.csv';}}catch(e){}
+});
+</script>
+</body>
+</html>

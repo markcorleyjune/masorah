@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah Corpus — Transcriber (HTR / OCR Workbench)</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@300;400;700&display=swap" rel="stylesheet">
+<!-- Real in-browser OCR (Tesseract.js) + TIFF decoder (UTIF). Loaded over the internet on first use. -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/openseadragon.min.js"></script>
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22);--z-main:#c9a227;--z-parva:#3a9d6e;--z-magna:#3f8ed0;--z-cant:#e08a1e;--z-targ:#9a6cc4;--z-marg:#d05a3a;--z-scribal:#c0394b;--z-bright:#e8c020}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column;overflow:hidden;font-size:14px}
+.banner{background:linear-gradient(180deg,var(--paper),var(--gold-bg));border-bottom:3px double var(--gold);padding:0 18px;flex-shrink:0;box-shadow:var(--shadow);z-index:300}
+.banner-row{display:flex;align-items:center;gap:14px;height:56px;max-width:100%}
+.brand{display:flex;align-items:center;gap:11px;padding-right:14px;border-right:1px solid var(--bdr)}
+.brand-glyph{font-family:'Frank Ruhl Libre',serif;font-size:32px;color:var(--gold);line-height:1;text-shadow:1px 1px 0 #fff}
+.brand-text h1{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--ink);letter-spacing:.05em;line-height:1.1}
+.brand-text p{font-size:9.5px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}.nav::-webkit-scrollbar{height:0}
+.nav a{display:inline-flex;align-items:center;gap:4px;padding:6px 10px;font-size:12.5px;color:var(--ink2);text-decoration:none;border-radius:var(--r);font-weight:500;white-space:nowrap;transition:.14s;border:1px solid transparent}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk);box-shadow:var(--shadow-sm)}
+.status-cluster{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:18px;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid var(--bdr);background:var(--paper)}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:25px;height:25px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:12px}
+.user-n{font-size:12px;color:var(--ink2)}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:9px;font-family:'JetBrains Mono',monospace}
+.logout{background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:4px 7px;border-radius:var(--r);font-family:inherit}
+
+.actionbar{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;background:var(--gold-bg);border-bottom:1px solid var(--bdr);flex-shrink:0}
+.crumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink3);min-width:0}
+.crumb b{color:var(--ink);font-weight:600}.crumb .sep{color:var(--ink4)}
+.crumb-doc{max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.state-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:16px;font-size:11px;font-weight:600;background:#fff3e0;border:1px solid var(--warn);color:var(--amber-dk);cursor:pointer}
+.state-pill .sd{width:8px;height:8px;border-radius:50%;background:var(--amber)}
+.ab-spacer{flex:1}
+.ab-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bdr2);background:var(--paper);color:var(--ink2);font-family:inherit;font-size:12.5px;padding:6px 11px;border-radius:var(--r);cursor:pointer;transition:.13s}
+.ab-btn:hover{border-color:var(--gold);color:var(--gold-dk);background:var(--gold-pale)}
+.ab-btn.primary{background:var(--gold);border-color:var(--gold-dk);color:#fff;font-weight:600}
+.ab-btn.primary:hover{background:var(--gold-dk);color:#fff}
+.ab-btn.icon{padding:6px 9px;font-size:14px}
+.ab-btn:disabled{opacity:.45;cursor:not-allowed}
+.unsaved{font-size:11.5px;color:var(--ink3);font-family:'JetBrains Mono',monospace}.unsaved b{color:var(--err)}
+.ai-menu-wrap{position:relative}
+.ai-menu{display:none;position:absolute;top:38px;right:0;width:300px;background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);box-shadow:var(--shadow-lg);z-index:400;padding:8px;max-height:62vh;overflow:auto}
+.ai-menu.open{display:block}
+.ai-menu .amh{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.08em;padding:6px 6px 4px;border-bottom:1px solid var(--bdr);margin-bottom:4px}
+.ai-model{display:flex;align-items:flex-start;gap:9px;padding:8px;border-radius:var(--r);cursor:pointer;transition:.1s}
+.ai-model:hover{background:var(--gold-pale)}
+.ai-model.sel{background:var(--gold-pale);outline:1px solid var(--gold)}
+.ai-model .mi{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--gold-lt),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ai-model .mt{font-weight:600;font-size:12.5px;color:var(--ink);display:flex;align-items:center;gap:6px}
+.ai-model .mt .badge{font-size:8.5px;background:#6a3fd0;color:#fff;padding:1px 5px;border-radius:8px;font-family:'JetBrains Mono',monospace}
+.ai-model .ms{font-size:10.5px;color:var(--ink3);margin-top:2px}
+.ai-model .lang{font-size:8px;font-family:'JetBrains Mono',monospace;color:var(--ink4);margin-top:3px}
+
+.workspace{flex:1;display:flex;min-height:0}
+.toolrail{width:50px;background:linear-gradient(180deg,var(--gold-bg),var(--cream));border-right:1px solid var(--bdr);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;flex-shrink:0}
+.tool{width:36px;height:36px;border:1px solid transparent;border-radius:var(--r);background:none;color:var(--ink2);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s}
+.tool:hover{background:var(--gold-pale);border-color:var(--bdr);color:var(--gold-dk)}
+.tool.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.tool-sep{width:26px;height:1px;background:var(--bdr);margin:4px 0}
+.zoom-stack{margin-top:auto;display:flex;flex-direction:column;gap:4px;align-items:center}
+
+.viewer{flex:1;position:relative;background:#2b2218;overflow:hidden;min-width:0}
+#osd{position:absolute;inset:0;cursor:grab}#osd.drawing{cursor:crosshair}#osd .openseadragon-canvas{outline:none}
+.box{position:absolute;border:1.5px solid;box-sizing:border-box;pointer-events:auto;cursor:pointer}
+.box.temp{pointer-events:none;border-style:dashed}
+#zonePolySvg polygon{fill-opacity:.14;stroke-width:2;vector-effect:non-scaling-stroke}
+#zonePolySvg polygon.zone-main{stroke:var(--z-main);fill:var(--z-main)}
+#zonePolySvg polygon.zone-parva{stroke:var(--z-parva);fill:var(--z-parva)}
+#zonePolySvg polygon.zone-magna{stroke:var(--z-magna);fill:var(--z-magna)}
+#zonePolySvg polygon.zone-cant{stroke:var(--z-cant);fill:var(--z-cant)}
+#zonePolySvg polygon.zone-targ{stroke:var(--z-targ);fill:var(--z-targ)}
+#zonePolySvg polygon.zone-marg{stroke:var(--z-marg);fill:var(--z-marg)}
+#zonePolySvg polygon.zone-scribal{stroke:var(--z-scribal);fill:var(--z-scribal)}
+#zonePolySvg polygon.zone-bright{stroke:var(--z-bright);fill:var(--z-bright)}
+#zonePolySvg polygon.sel{stroke:#fff;stroke-width:3}
+.box.line{border-color:#36c06a;background:rgba(54,192,106,.07)}
+.box.word{border-color:rgba(63,142,208,.85);background:rgba(63,142,208,.06)}
+.box.region{border-color:var(--gold-lt);background:rgba(184,134,11,.08);border-style:dashed}
+.box.sel{border-color:#fff;box-shadow:0 0 0 1.5px var(--gold),0 0 10px rgba(255,255,255,.5)}
+.box.zone-main{border-color:var(--z-main)}.box.zone-parva{border-color:var(--z-parva)}.box.zone-magna{border-color:var(--z-magna)}
+.box.zone-cant{border-color:var(--z-cant)}.box.zone-targ{border-color:var(--z-targ)}.box.zone-marg{border-color:var(--z-marg)}
+.box.zone-scribal{border-color:var(--z-scribal)}.box.zone-bright{border-color:var(--z-bright);box-shadow:0 0 8px var(--z-bright)}
+.box-lbl{position:absolute;top:-15px;left:-1px;font-size:8px;font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,.7);color:#fff;padding:0 4px;border-radius:3px;white-space:nowrap}
+.empty-state{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#cbb98a;text-align:center;gap:14px;padding:30px}
+.empty-state .es-ico{font-size:54px;opacity:.7}
+.empty-state h3{font-family:'Cinzel',serif;font-size:18px;color:#e8d8a0}
+.es-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.es-btn{background:var(--gold);color:#fff;border:none;padding:9px 16px;border-radius:var(--r);font-family:inherit;font-size:13px;cursor:pointer;font-weight:600}
+.es-btn.ghost{background:rgba(255,255,255,.08);border:1px solid #6a5a30;color:#e8d8a0}
+#scanFx{position:absolute;inset:0;pointer-events:none;display:none;z-index:30}#scanFx.on{display:block}
+.scan-line{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,#36c06a,#7fffb0,#36c06a,transparent);box-shadow:0 0 16px 5px rgba(54,192,106,.6);animation:scan 1.7s linear infinite}
+@keyframes scan{0%{top:0}100%{top:100%}}
+.scan-grid{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 28px,rgba(54,192,106,.08) 28px,rgba(54,192,106,.08) 29px)}
+.scan-badge{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:rgba(20,28,20,.9);border:1px solid #36c06a;color:#9affc0;font-family:'JetBrains Mono',monospace;font-size:11px;padding:7px 14px;border-radius:18px;display:flex;align-items:center;gap:9px}
+.scan-prog{width:120px;height:5px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden}
+.scan-prog i{display:block;height:100%;width:0;background:#36c06a;transition:width .2s}
+.viewer-bottom{position:absolute;left:10px;bottom:10px;display:flex;align-items:center;gap:6px;z-index:20}
+.vb-btn{width:30px;height:30px;border-radius:var(--r);border:1px solid var(--bdr);background:rgba(253,250,242,.92);color:var(--ink2);cursor:pointer;font-size:14px}
+.vb-btn:hover{background:#fff;color:var(--gold-dk)}
+.pagenav{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);display:flex;align-items:center;gap:6px;background:rgba(253,250,242,.94);border:1px solid var(--bdr);border-radius:18px;padding:4px 8px;z-index:20;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink2)}
+.pagenav input{width:46px;border:1px solid var(--bdr);border-radius:5px;text-align:center;font-family:inherit;font-size:11px;padding:2px}
+.pagenav button{border:none;background:none;cursor:pointer;font-size:13px;color:var(--ink3);padding:2px 5px}
+.zoom-readout{position:absolute;right:10px;bottom:10px;background:rgba(253,250,242,.9);border:1px solid var(--bdr);border-radius:14px;font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--ink3);padding:3px 9px;z-index:20}
+
+.sidepanel{width:430px;flex-shrink:0;background:var(--paper);border-left:1px solid var(--bdr);display:flex;flex-direction:column;min-height:0}
+.sp-tabs{display:flex;border-bottom:1px solid var(--bdr);flex-shrink:0;background:var(--gold-bg)}
+.sp-tab{flex:1;text-align:center;padding:9px 6px;font-size:12px;cursor:pointer;color:var(--ink3);border-bottom:2px solid transparent;font-weight:500}
+.sp-tab:hover{background:var(--gold-pale)}
+.sp-tab.active{color:var(--gold-dk);border-bottom-color:var(--gold);font-weight:600;background:var(--paper)}
+.sp-body{flex:1;overflow-y:auto;min-height:0}
+.sp-page{display:none;padding:10px}.sp-page.active{display:block}
+.region-hd{text-align:center;font-size:11px;color:var(--ink3);font-family:'JetBrains Mono',monospace;padding:6px;border-bottom:1px dashed var(--bdr);margin-bottom:6px}
+.tline{display:flex;align-items:stretch;gap:8px;padding:3px 4px;border-radius:var(--r);margin-bottom:3px;transition:.1s}
+.tline:hover{background:var(--gold-pale)}.tline.sel{background:var(--gold-pale);outline:1px solid var(--gold)}
+.tline-n{flex-shrink:0;width:22px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink4);padding-top:7px}
+.tline-txt{flex:1;font-family:'Frank Ruhl Libre',serif;font-size:19px;direction:rtl;text-align:right;border:1px solid transparent;border-radius:var(--r);padding:4px 8px;background:transparent;color:var(--ink);min-height:32px;line-height:1.5}
+.tline-txt:focus{outline:none;border-color:var(--gold);background:#fff}
+.tline-txt:empty:before{content:attr(data-ph);color:var(--ink4);font-size:13px;font-style:italic}
+.tline-conf{flex-shrink:0;font-size:8.5px;font-family:'JetBrains Mono',monospace;color:var(--ink4);padding-top:9px;width:30px;text-align:left}
+.kvp-hd{display:flex;align-items:center;justify-content:space-between;font-family:'Cinzel',serif;font-size:13px;color:var(--ink);letter-spacing:.06em;padding:8px 4px}
+.kvp-import{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink3);margin:4px 0 8px;flex-wrap:wrap}
+.kvp-import select{border:1px solid var(--bdr);border-radius:5px;font-size:11px;padding:3px 5px;font-family:inherit}
+.kvp-row{display:flex;gap:6px;margin-bottom:5px;align-items:center}
+.kvp-row input{flex:1;border:1px solid var(--bdr);border-radius:5px;padding:5px 7px;font-family:inherit;font-size:12px;background:var(--paper)}
+.kvp-row input.k{flex:.6;background:var(--gold-bg);font-weight:600}
+.kvp-row input[dir=rtl]{font-family:'Frank Ruhl Libre',serif;font-size:15px}
+.kvp-del{border:none;background:none;color:var(--err);cursor:pointer;font-size:15px;padding:0 4px}
+.kvp-add{width:100%;border:1px dashed var(--bdr2);background:var(--gold-bg);color:var(--gold-dk);border-radius:var(--r);padding:8px;cursor:pointer;font-family:'Cinzel',serif;font-size:12px;margin-top:4px}
+.kvp-add:hover{background:var(--gold-pale)}
+.sp-actions{display:flex;gap:6px;flex-wrap:wrap;padding:10px;border-top:1px solid var(--bdr)}
+.sa-btn{flex:1;min-width:96px;border:1px solid var(--bdr2);background:var(--paper);border-radius:var(--r);padding:8px;font-family:inherit;font-size:11.5px;cursor:pointer;color:var(--ink2)}
+.sa-btn:hover{border-color:var(--gold);color:var(--gold-dk);background:var(--gold-pale)}
+.sa-btn.primary{background:var(--gold);color:#fff;border-color:var(--gold-dk);font-weight:600}
+.file-grp{margin-bottom:10px}
+.file-grp h5{font-size:11px;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-family:'Cinzel',serif}
+.thumb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.thumb{border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;cursor:pointer;background:var(--gold-bg);position:relative;aspect-ratio:3/4}
+.thumb.active{outline:2px solid var(--gold)}
+.thumb img,.thumb canvas{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .tn{position:absolute;left:0;bottom:0;right:0;background:rgba(0,0,0,.6);color:#fff;font-size:8px;font-family:'JetBrains Mono',monospace;padding:1px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb .ph{display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink4);font-size:20px}
+.iconrail{width:42px;background:var(--gold-bg);border-left:1px solid var(--bdr);display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;flex-shrink:0}
+.irb{width:30px;height:30px;border:1px solid transparent;border-radius:var(--r);background:none;color:var(--ink3);cursor:pointer;font-size:14px}
+.irb:hover,.irb.active{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.keybar{flex-shrink:0;background:var(--gold-bg);border-top:1px solid var(--bdr);padding:6px 12px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink3);position:relative}
+.keybar .ksel{border:1px solid var(--bdr);border-radius:5px;padding:4px 8px;font-family:inherit;font-size:12px}
+.vk{display:none;position:absolute;bottom:38px;left:12px;right:12px;background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);box-shadow:var(--shadow-lg);padding:8px;flex-wrap:wrap;gap:4px;z-index:200}
+.vk.open{display:flex}
+.vk button{font-family:'Frank Ruhl Libre',serif;font-size:18px;min-width:34px;height:34px;border:1px solid var(--bdr);background:var(--gold-bg);border-radius:5px;cursor:pointer}
+.vk button:hover{background:var(--gold-pale)}
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(40,30,10,.45);z-index:900;align-items:center;justify-content:center}
+.modal-ov.open{display:flex}
+.modal{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r3);box-shadow:var(--shadow-lg);width:560px;max-width:94vw;max-height:90vh;overflow:auto}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bdr);background:var(--gold-bg);border-radius:var(--r3) var(--r3) 0 0}
+.modal-hd h3{font-family:'Cinzel',serif;font-size:16px;color:var(--ink)}
+.modal-x{border:none;background:none;font-size:22px;color:var(--ink3);cursor:pointer}
+.modal-bd{padding:18px}
+.frow{margin-bottom:13px}
+.frow label{display:block;font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.frow input,.frow select,.frow textarea{width:100%;border:1px solid var(--bdr);border-radius:var(--r);padding:8px 10px;font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--paper)}
+.path-pick{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.path-card{border:1px solid var(--bdr);border-radius:var(--r);padding:10px;cursor:pointer;transition:.12s;background:var(--gold-bg)}
+.path-card:hover{border-color:var(--gold);background:var(--gold-pale)}
+.path-card.sel{border-color:var(--gold);background:var(--gold-pale);outline:1px solid var(--gold)}
+.path-card .pc-t{font-weight:600;font-size:12px;color:var(--ink);display:flex;align-items:center;gap:6px}
+.path-card .pc-p{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink3);margin-top:5px;word-break:break-all}
+.modal-ft{display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid var(--bdr)}
+.mbtn{border:1px solid var(--bdr2);background:var(--paper);border-radius:var(--r);padding:8px 16px;font-family:inherit;font-size:13px;cursor:pointer;color:var(--ink2)}
+.mbtn.primary{background:var(--gold);color:#fff;border-color:var(--gold-dk);font-weight:600}
+.fmt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.fmt-chip{border:1px solid var(--bdr);border-radius:14px;padding:5px 12px;font-size:11px;cursor:pointer;background:var(--paper);font-family:'JetBrains Mono',monospace}
+.fmt-chip.sel{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+#toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--gold-pale);padding:10px 18px;border-radius:var(--r2);font-size:13px;box-shadow:var(--shadow-lg);z-index:999;opacity:0;transition:.25s;pointer-events:none}
+#toast.show{opacity:1;bottom:74px}
+.hidden{display:none!important}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah Corpus</h1><p>Transcriber · HTR / OCR Workbench</p></div></div>
+    <nav class="nav">
+      <a class="active" href="transcriber.html">✍ Transcriber</a>
+      <a href="annotate.html">▤ Annotate</a>
+      <a href="architecture.html">⧉ Arch</a>
+      <a href="pipeline.html">⫯ Pipeline</a>
+      <a href="provenance.html">⟳ Provenance</a>
+      <a href="paleography.html">◉ Paleography</a>
+      <a href="analyzer.html">∿ Analyzer</a>
+      <a href="chat.html">◍ Chat</a>
+      <a href="graph.html">⌬ Graph</a>
+      <a href="reader.html">▦ Reader</a>
+      <a href="publish.html">⥤ Publish</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill warn" id="apiPill"><span class="dot"></span> Offline</span>
+      <div class="user"><div class="user-av">M</div><span class="user-n">Mark Corley</span><span class="user-lvl">L4</span></div>
+      <button class="logout" onclick="location.href='login.html'">Logout</button>
+    </div>
+  </div>
+</header>
+
+<div class="actionbar">
+  <div class="crumb"><span>Sassoon_1053_Primary</span><span class="sep">/</span><span>Sassoon_1053</span><span class="sep">/</span><b class="crumb-doc" id="docName">Tanakh (MS Sassoon 1053)</b></div>
+  <span class="state-pill" id="statePill" onclick="cycleState()"><span class="sd"></span><span id="stateTxt">In Progress</span> ▾</span>
+  <div class="ab-spacer"></div>
+  <div class="ai-menu-wrap">
+    <button class="ab-btn primary" onclick="toggleAIMenu()">⚙ Process with AI ▾</button>
+    <div class="ai-menu" id="aiMenu"></div>
+  </div>
+  <button class="ab-btn icon" title="Undo" onclick="undo()">↶</button>
+  <button class="ab-btn icon" title="Redo" onclick="redo()">↷</button>
+  <span class="unsaved"><b id="unsavedN">0</b> unsaved changes</span>
+  <button class="ab-btn primary" id="saveBtn" onclick="openSaveModal()">⤓ Save</button>
+  <button class="ab-btn icon" title="History" onclick="toast('Version history — connect backend for full revision log')">🕑</button>
+</div>
+
+<div class="workspace">
+  <div class="toolrail">
+    <button class="tool" id="tPan" title="Pan (H)" onclick="setTool('pan')">✋</button>
+    <button class="tool active" id="tSelect" title="Select (V)" onclick="setTool('select')">▷</button>
+    <div class="tool-sep"></div>
+    <button class="tool" id="tLine" title="Draw text line" onclick="setTool('line')">―</button>
+    <button class="tool" id="tRegion" title="Draw region / zone (rectangle)" onclick="setTool('region')">▢</button>
+    <button class="tool" id="tPoly" title="Draw zone polygon (click vertices, Enter/dbl-click to close, Esc to cancel) — for non-rectangular Masorah Magna wraps" onclick="setTool('poly')">⬠</button>
+    <button class="tool" id="tEye" title="Show / hide overlays" onclick="toggleOverlay()">👁</button>
+    <div class="tool-sep"></div>
+    <button class="tool" title="Auto line-segment" onclick="autoSegment()">⌗</button>
+    <button class="tool" title="Clear boxes" onclick="clearBoxes()">⌫</button>
+    <div class="zoom-stack">
+      <button class="tool" title="Zoom in" onclick="zoomBy(1.2)">+</button>
+      <button class="tool" title="Zoom out" onclick="zoomBy(.83)">−</button>
+      <button class="tool" title="Fit" onclick="fitImage()">⊡</button>
+      <button class="tool" title="Image filters" onclick="openFilterModal()">▦</button>
+      <button class="tool" title="Layers / pages" onclick="spTab('files')">▤</button>
+    </div>
+  </div>
+
+  <div class="viewer" id="viewer">
+    <div id="osd"></div>
+    <img id="docImg" alt="" draggable="false" style="display:none">
+    <div id="scanFx">
+      <div class="scan-grid"></div><div class="scan-line"></div>
+      <div class="scan-badge"><span id="scanMsg">Recognising…</span><span class="scan-prog"><i id="scanBar"></i></span></div>
+    </div>
+    <div class="empty-state" id="emptyState">
+      <div class="es-ico">📜</div>
+      <h3>Load a manuscript folio to begin</h3>
+      <p style="max-width:380px;font-size:13px">Open a JPEG/TIFF scan, a whole archive folder, or pull from your local engine. Then run <b>Tesseract OCR</b> / HTR to segment lines and transcribe.</p>
+      <div class="es-btns">
+        <button class="es-btn" onclick="fileImg.click()">📁 Open Image</button>
+        <button class="es-btn ghost" onclick="fileDir.click()">🗂 Open Archive Folder</button>
+        <button class="es-btn ghost" onclick="loadFromPath()">⤵ Load from Path</button>
+        <button class="es-btn ghost" onclick="loadIIIF()">🌐 Open IIIF Manifest…</button>
+        <button class="es-btn ghost" onclick="loadDemo()">✦ Demo Folio</button>
+      </div>
+    </div>
+    <div class="viewer-bottom">
+      <button class="vb-btn" title="Zoom in" onclick="zoomBy(1.2)">+</button>
+      <button class="vb-btn" title="Zoom out" onclick="zoomBy(.83)">−</button>
+      <button class="vb-btn" title="Fit" onclick="fitImage()">⊡</button>
+    </div>
+    <div class="pagenav"><button onclick="pageStep(-1)">◀</button><input id="pageInp" value="1" onchange="gotoPage(this.value)"><span>/ <span id="pageTotal">1</span></span><button onclick="pageStep(1)">▶</button></div>
+    <div class="zoom-readout" id="zoomRead">100%</div>
+  </div>
+
+  <div class="sidepanel">
+    <div class="sp-tabs">
+      <div class="sp-tab active" data-p="trans" onclick="spTab('trans')">Transcription</div>
+      <div class="sp-tab" data-p="kvp" onclick="spTab('kvp')">Key·Value</div>
+      <div class="sp-tab" data-p="files" onclick="spTab('files')">Pages</div>
+    </div>
+    <div class="sp-body">
+      <div class="sp-page active" id="page-trans">
+        <div class="region-hd" id="regionHd">Region 1 — no lines yet</div>
+        <div id="lineList"></div>
+      </div>
+      <div class="sp-page" id="page-kvp">
+        <div class="kvp-hd">KEY VALUE PAIRS</div>
+        <div class="kvp-import">
+          Import from
+          <select id="kvpImport"><option>Previous page</option><option>Linked CSV</option><option>Forensic Node JSON</option></select>
+          <button class="ab-btn icon" title="Import" onclick="importKVP()">⤓</button>
+          <button class="ab-btn icon" title="Auto-extract" onclick="autoKVP()">✦</button>
+          <button class="ab-btn primary" style="margin-left:auto" onclick="addKVP()">+ Add New Pair</button>
+        </div>
+        <div id="kvpList"></div>
+        <div style="font-size:10.5px;color:var(--ink4);margin-top:8px;line-height:1.5">Key/value pairs are saved into the Forensic Node JSON beside the PAGE-XML so the pipeline can index them (e.g. <i>Folio → 222</i>, <i>Masorah note → קמ״ח</i>, <i>Sof Pasuq count → 5</i>).</div>
+      </div>
+      <div class="sp-page" id="page-files">
+        <div class="file-grp"><h5>Loaded Pages <span id="pageCount" style="color:var(--ink4)">(0)</span></h5><div class="thumb-grid" id="thumbGrid"></div></div>
+        <div class="sp-actions" style="border:none;padding:0;margin-top:6px">
+          <button class="sa-btn" onclick="fileImg.click()">📁 Add Image</button>
+          <button class="sa-btn" onclick="fileDir.click()">🗂 Add Folder</button>
+        </div>
+      </div>
+    </div>
+    <div class="sp-actions">
+      <button class="sa-btn primary" onclick="runOCR()">🔎 Run OCR / HTR</button>
+      <button class="sa-btn" onclick="autoSegment()">⌗ Segment</button>
+      <button class="sa-btn" onclick="openSaveModal()">⤓ Save / Export</button>
+    </div>
+  </div>
+
+  <div class="iconrail">
+    <button class="irb active" title="Transcription" onclick="spTab('trans')">≣</button>
+    <button class="irb" title="Tags / zones" onclick="openZoneMenu()">🏷</button>
+    <button class="irb" title="Key·Value" onclick="spTab('kvp')">▦</button>
+    <button class="irb" title="Comments" onclick="toast('Comments — connect backend collaboration')">💬</button>
+    <button class="irb" title="Pages" onclick="spTab('files')" style="margin-top:auto">🗂</button>
+    <button class="irb" title="Fullscreen" onclick="toggleFs()">⛶</button>
+  </div>
+</div>
+
+<div class="keybar">
+  <span>Select keyboard</span>
+  <select class="ksel" id="kbSel" onchange="toggleVK()">
+    <option value="none">— none —</option>
+    <option value="heb">Hebrew (Masoretic)</option>
+    <option value="heb-cant">Hebrew + cantillation</option>
+  </select>
+  <button class="ab-btn icon" onclick="toggleVK()" title="Toggle on-screen keyboard">⌨</button>
+  <span style="margin-left:auto;font-size:11px;color:var(--ink4)" id="ocrStatus">OCR engine: idle</span>
+  <div class="vk" id="vk"></div>
+</div>
+
+<div class="modal-ov" id="filterModal">
+  <div class="modal" style="width:420px">
+    <div class="modal-hd"><h3>Image Enhancement</h3><button class="modal-x" onclick="closeModal('filterModal')">×</button></div>
+    <div class="modal-bd">
+      <div class="frow"><label>Brightness</label><input type="range" id="fBright" min="50" max="160" value="100" oninput="applyImgFilters()"></div>
+      <div class="frow"><label>Contrast</label><input type="range" id="fContrast" min="50" max="220" value="100" oninput="applyImgFilters()"></div>
+      <div class="frow"><label>Saturation</label><input type="range" id="fSat" min="0" max="200" value="100" oninput="applyImgFilters()"></div>
+      <div class="frow"><label>CLAHE / pre-process (for OCR)</label><select id="fClahe"><option value="none">None</option><option value="gray">Grayscale</option><option value="binarize">Binarize (Otsu-ish)</option><option value="invert">Invert</option><option value="hi">High-contrast ink hunt</option></select></div>
+    </div>
+    <div class="modal-ft"><button class="mbtn" onclick="resetImgFilters()">Reset</button><button class="mbtn primary" onclick="closeModal('filterModal')">Done</button></div>
+  </div>
+</div>
+
+<div class="modal-ov" id="saveModal">
+  <div class="modal">
+    <div class="modal-hd"><h3>Save / Export Transcription</h3><button class="modal-x" onclick="closeModal('saveModal')">×</button></div>
+    <div class="modal-bd">
+      <p style="font-size:12.5px;color:var(--ink3);margin-bottom:10px">Choose where the revised output is written. These map to your local research tree.</p>
+      <div class="path-pick" id="pathPick"></div>
+      <div class="frow" style="margin-top:14px"><label>Sub-path / filename stem</label><input id="saveStem" value="Sassoon_1053_color_0222"></div>
+      <div class="frow"><label>Export formats</label><div class="fmt-chips" id="fmtChips"></div></div>
+      <div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-top:6px" id="saveHint"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="mbtn" onclick="closeModal('saveModal')">Cancel</button>
+      <button class="mbtn" onclick="fileAnno.click()">⤒ Import Annotations…</button>
+      <button class="mbtn" onclick="pickFolder()">🗂 Choose Folder…</button>
+      <button class="mbtn primary" onclick="doSave()">⤓ Save Output</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileImg" accept="image/*,.tif,.tiff,application/pdf" multiple>
+<input type="file" id="fileDir" webkitdirectory directory multiple>
+<input type="file" id="fileAnno" accept="application/json,.json" style="display:none">
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   MASORAH CORPUS — Transcriber (Transkribus-style HTR/OCR)
+   Real in-browser OCR via Tesseract.js · TIFF via UTIF
+   Offline-tolerant: works with no backend; uses local engine if present.
+   ════════════════════════════════════════════════════════════ */
+const $=id=>document.getElementById(id);
+const PATHS={
+  archive:'C:\\Users\\markc\\Masorah_1525\\01_Computational_Lab\\1. Digital Archive',
+  forensic:'C:\\Users\\markc\\Masorah_1525\\02_Forensic_Nodes',
+  interface:'C:\\Users\\markc\\Masorah_1525\\03. Interface and Analysis\\Misc\\csv',
+  downloads:'(browser Downloads — then move into the tree)'
+};
+const MODELS=[
+  {id:'tess-heb',ico:'א',name:'Masoretic Eagle (Tesseract heb)',badge:null,sub:'Real OCR · Hebrew trained data',lang:'HEB',engine:'tesseract',tlang:'heb'},
+  {id:'tess-heb-eng',ico:'מ',name:'Bilingual Scribe (heb+eng)',badge:null,sub:'Hebrew + Latin marginalia',lang:'HEB ENG',engine:'tesseract',tlang:'heb+eng'},
+  {id:'tess-titan',ico:'✦',name:'The Text Titan I bis',badge:'Super',sub:'Best out-of-box · multi-script (heb+eng+ara+grc)',lang:'HEB +7',engine:'tesseract',tlang:'heb+eng'},
+  {id:'htr-sassoon',ico:'ס',name:'Sassoon 1053 HTR (local engine)',badge:null,sub:'Fine-tuned model · needs Launch_Masorah.bat',lang:'HEB',engine:'backend',endpoint:'/htr'},
+  {id:'htr-aleppo',ico:'ת',name:'Tiberian Codex HTR (local engine)',badge:null,sub:'Aleppo/Leningrad hand · backend',lang:'HEB',engine:'backend',endpoint:'/htr'},
+];
+let state={
+  tool:'select',
+  img:null,natW:0,natH:0,
+  pages:[],curPage:-1,
+  boxes:[],lines:[],kvp:[],
+  selModel:MODELS[0],zone:'main',
+  overlayOn:true,unsaved:0,
+  savePath:'forensic',saveFormats:new Set(['page','json','txt']),
+  fsDirHandle:null,
+  undoStack:[],redoStack:[]
+};
+let worker=null;
+
+/* ── Persisted folder handles (File System Access API) ──
+   Previously a chosen save folder only lived for the tab's lifetime
+   (state.fsDirHandle reset on reload), so "Choose Folder…" had to be redone
+   every session. FileSystemDirectoryHandle objects are structured-cloneable,
+   so IndexedDB can hold onto them; permission is re-checked (queryPermission)
+   or re-requested (requestPermission) against the *same* handle next time,
+   per the FS Access API's own persistence model — no absolute path string
+   is ever the source of truth for where a write actually lands. */
+const DirStore={
+  _dbp:null,
+  db(){return this._dbp||(this._dbp=new Promise((res,rej)=>{
+    const rq=indexedDB.open('masorah-fs',1);
+    rq.onupgradeneeded=()=>rq.result.createObjectStore('handles');
+    rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);
+  }));},
+  async get(key){try{const db=await this.db();return await new Promise((res,rej)=>{const tx=db.transaction('handles','readonly');const rq=tx.objectStore('handles').get(key);rq.onsuccess=()=>res(rq.result||null);rq.onerror=()=>rej(rq.error);});}catch(e){return null;}},
+  async set(key,handle){try{const db=await this.db();await new Promise((res,rej)=>{const tx=db.transaction('handles','readwrite');tx.objectStore('handles').put(handle,key);tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});}catch(e){}}
+};
+async function trySilentRecall(key){
+  const handle=await DirStore.get(key);
+  if(!handle)return null;
+  try{if((await handle.queryPermission({mode:'readwrite'}))==='granted')return handle;}catch(e){}
+  return null;
+}
+async function recallSaveDir(key){
+  const handle=await DirStore.get(key);
+  if(!handle){state.fsDirHandle=null;updateSaveHint();return;}
+  try{
+    let perm=await handle.queryPermission({mode:'readwrite'});
+    if(perm==='prompt')perm=await handle.requestPermission({mode:'readwrite'});
+    state.fsDirHandle=(perm==='granted')?handle:null;
+  }catch(e){state.fsDirHandle=null;}
+  updateSaveHint();
+}
+
+/* ── IIIF-standard tiled viewer (OpenSeadragon) ──
+   Renders any source — a plain image, a IIIF Image API info.json, or a DZI
+   pyramid — as tiles, so the browser never has to decode a full gigapixel
+   bitmap into memory at once (the old UTIF→<img>→CSS-transform path did).
+   The overlay boxes below are attached via viewer.addOverlay() using image
+   pixel coordinates, so viewport.imageToViewportRectangle() keeps them
+   correctly placed through every pan/zoom/rotate — no manual tx/ty/scale math. */
+const viewer=OpenSeadragon({
+  id:'osd',prefixUrl:'https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/',
+  showNavigationControl:false,gestureSettingsMouse:{clickToZoom:false},
+  minZoomImageRatio:0.05,maxZoomPixelRatio:12,visibilityRatio:0.3,
+  crossOriginPolicy:'Anonymous',springStiffness:9
+});
+let dragDraw=null;
+viewer.addHandler('canvas-press',e=>{
+  if(state.tool!=='line'&&state.tool!=='region'||!state.natW)return;
+  e.preventDefaultAction=true;
+  const ip=viewer.viewport.viewerElementToImageCoordinates(e.position);
+  pushUndo();
+  dragDraw={ix:ip.x,iy:ip.y,kind:state.tool,startPos:e.position};
+});
+viewer.addHandler('canvas-drag',e=>{
+  if(!dragDraw)return;
+  e.preventDefaultAction=true;
+  const ip=viewer.viewport.viewerElementToImageCoordinates(e.position);
+  dragDraw.cur={x:Math.min(dragDraw.ix,ip.x),y:Math.min(dragDraw.iy,ip.y),w:Math.abs(ip.x-dragDraw.ix),h:Math.abs(ip.y-dragDraw.iy)};
+  drawTemp(dragDraw.startPos,e.position);
+});
+viewer.addHandler('canvas-release',()=>{
+  if(dragDraw&&dragDraw.cur){
+    const imgZoom=viewer.viewport.viewportToImageZoom(viewer.viewport.getZoom(true));
+    if(dragDraw.cur.w*imgZoom>4&&dragDraw.cur.h*imgZoom>4){
+      const b={...dragDraw.cur,type:dragDraw.kind==='line'?'line':'region',zone:state.zone,text:'',conf:null,id:'b'+Date.now()};
+      state.boxes.push(b);if(b.type==='line'){state.lines.push({box:b.id,text:'',conf:null});}
+      bump();renderAll();
+    }
+  }
+  removeTempEl();dragDraw=null;
+});
+let polyDraft=null;
+viewer.addHandler('canvas-click',e=>{
+  if(state.tool!=='poly'||!state.natW)return;
+  e.preventDefaultAction=true;
+  const ip=viewer.viewport.viewerElementToImageCoordinates(e.position);
+  if(!polyDraft){pushUndo();polyDraft={points:[]};}
+  polyDraft.points.push({x:ip.x,y:ip.y});
+  renderPolyDraft();
+});
+viewer.addHandler('canvas-double-click',e=>{
+  if(state.tool!=='poly')return;
+  e.preventDefaultAction=true;
+  finishPolygon();
+});
+viewer.addHandler('zoom',updateZoomReadout);
+viewer.addHandler('animation',updateZoomReadout);
+viewer.addHandler('animation',()=>{if(polyDraft)renderPolyDraft();});
+viewer.addHandler('open',()=>{
+  const item=viewer.world.getItemAt(0);
+  if(!item)return;
+  const size=item.getContentSize();
+  state.natW=size.x;state.natH=size.y;
+  updateZoomReadout();renderAll();
+});
+function updateZoomReadout(){if(!viewer.viewport)return;const z=viewer.viewport.viewportToImageZoom(viewer.viewport.getZoom(true));$('zoomRead').textContent=Math.round(z*100)+'%';}
+
+/* ── toast / util ── */
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2700);}
+function bump(){state.unsaved++;$('unsavedN').textContent=state.unsaved;}
+function pushUndo(){state.undoStack.push(JSON.stringify({boxes:state.boxes,lines:state.lines,kvp:state.kvp}));if(state.undoStack.length>40)state.undoStack.shift();state.redoStack=[];}
+function undo(){if(!state.undoStack.length){toast('Nothing to undo');return;}state.redoStack.push(JSON.stringify({boxes:state.boxes,lines:state.lines,kvp:state.kvp}));const s=JSON.parse(state.undoStack.pop());state.boxes=s.boxes;state.lines=s.lines;state.kvp=s.kvp;renderAll();}
+function redo(){if(!state.redoStack.length){toast('Nothing to redo');return;}state.undoStack.push(JSON.stringify({boxes:state.boxes,lines:state.lines,kvp:state.kvp}));const s=JSON.parse(state.redoStack.pop());state.boxes=s.boxes;state.lines=s.lines;state.kvp=s.kvp;renderAll();}
+
+/* ── tabs / panels ── */
+function spTab(p){document.querySelectorAll('.sp-tab').forEach(t=>t.classList.toggle('active',t.dataset.p===p));document.querySelectorAll('.sp-page').forEach(pg=>pg.classList.toggle('active',pg.id==='page-'+p));}
+function closeModal(id){$(id).classList.remove('open');}
+function cycleState(){const o=['In Progress','Done','Final','Ground Truth'];const c=$('stateTxt').textContent;$('stateTxt').textContent=o[(o.indexOf(c)+1)%o.length];}
+function toggleFs(){if(!document.fullscreenElement)document.documentElement.requestFullscreen?.();else document.exitFullscreen?.();}
+
+/* ── tools ── */
+function setTool(t){if(t!=='poly'&&typeof polyDraft!=='undefined'&&polyDraft)cancelPolygon();state.tool=t;['pan','select','line','region','poly'].forEach(x=>{const b=$('t'+x[0].toUpperCase()+x.slice(1));if(b)b.classList.toggle('active',x===t);});$('osd').classList.toggle('drawing',t==='line'||t==='region'||t==='poly');$('osd').style.cursor=(t==='pan')?'grab':(t==='select'?'default':'crosshair');}
+function toggleOverlay(){state.overlayOn=!state.overlayOn;document.querySelectorAll('.box').forEach(el=>{el.style.display=state.overlayOn?'':'none';});const ps=document.getElementById('zonePolySvg');if(ps)ps.style.display=state.overlayOn?'block':'none';$('tEye').classList.toggle('active',!state.overlayOn);}
+
+/* ── AI / model menu ── */
+function toggleAIMenu(){const m=$('aiMenu');if(!m.classList.contains('open'))buildAIMenu();m.classList.toggle('open');}
+function buildAIMenu(){
+  const m=$('aiMenu');
+  m.innerHTML='<div class="amh">Recognition model</div>'+MODELS.map(md=>`
+    <div class="ai-model ${md.id===state.selModel.id?'sel':''}" onclick="selModel('${md.id}')">
+      <div class="mi">${md.ico}</div>
+      <div><div class="mt">${md.name} ${md.badge?`<span class="badge">${md.badge} Model</span>`:''}</div>
+      <div class="ms">${md.sub}</div><div class="lang">${md.lang}</div></div>
+    </div>`).join('')+
+    `<div style="border-top:1px solid var(--bdr);margin-top:6px;padding-top:8px;display:flex;gap:6px">
+      <button class="ab-btn primary" style="flex:1" onclick="runOCR();toggleAIMenu()">Run on this page</button>
+      <button class="ab-btn" style="flex:1" onclick="runOCRBatch();toggleAIMenu()">Run on all pages</button>
+    </div>`;
+}
+function selModel(id){state.selModel=MODELS.find(m=>m.id===id);buildAIMenu();toast('Model: '+state.selModel.name);}
+
+/* ── file loading ── */
+const fileImg=$('fileImg'),fileDir=$('fileDir');
+fileImg.addEventListener('change',e=>addFiles([...e.target.files]));
+fileDir.addEventListener('change',e=>addFiles([...e.target.files]));
+function isImg(f){return /\.(jpe?g|png|gif|webp|bmp|tiff?)$/i.test(f.name)||/^image\//.test(f.type);}
+async function addFiles(files){
+  const imgs=files.filter(isImg);
+  if(!imgs.length){toast('No image files found');return;}
+  imgs.sort((a,b)=>(a.webkitRelativePath||a.name).localeCompare(b.webkitRelativePath||b.name,undefined,{numeric:true}));
+  toast('Loading '+imgs.length+' image(s)…');
+  for(const f of imgs){
+    state.pages.push({file:f,name:f.name,rel:f.webkitRelativePath||f.name,url:null,boxes:[],lines:[],kvp:[]});
+  }
+  $('pageTotal').textContent=state.pages.length;
+  $('pageCount').textContent='('+state.pages.length+')';
+  renderThumbs();
+  if(state.curPage<0)await gotoPage(1);
+  spTab('files');
+}
+async function fileToURL(f){
+  if(/\.tiff?$/i.test(f.name)){
+    const buf=await f.arrayBuffer();
+    try{
+      const ifds=UTIF.decode(buf);UTIF.decodeImage(buf,ifds[0]);
+      const rgba=UTIF.toRGBA8(ifds[0]);
+      const c=document.createElement('canvas');c.width=ifds[0].width;c.height=ifds[0].height;
+      const ctx=c.getContext('2d');const id=ctx.createImageData(c.width,c.height);id.data.set(rgba);ctx.putImageData(id,0,0);
+      return c.toDataURL('image/png');
+    }catch(err){toast('TIFF decode failed — install UTIF online');return URL.createObjectURL(f);}
+  }
+  return URL.createObjectURL(f);
+}
+function openImageInOSD(url){
+  return new Promise(resolve=>{
+    $('docImg').src=url; // kept off-screen, feeds Tesseract full-res pixels
+    viewer.addOnceHandler('open',resolve);
+    viewer.open({type:'image',url});
+  });
+}
+async function gotoPage(n){
+  n=parseInt(n);if(isNaN(n)||n<1||n>state.pages.length){return;}
+  // stash current
+  if(state.curPage>=0){const p=state.pages[state.curPage];p.boxes=state.boxes;p.lines=state.lines;p.kvp=state.kvp;}
+  state.curPage=n-1;$('pageInp').value=n;
+  const p=state.pages[state.curPage];
+  if(!p.url)p.url=await fileToURL(p.file);
+  await openImageInOSD(p.url);
+  state.boxes=p.boxes||[];state.lines=p.lines||[];state.kvp=p.kvp||[];
+  $('emptyState').classList.add('hidden');
+  $('docName').textContent=p.name;$('saveStem').value=p.name.replace(/\.[^.]+$/,'');
+  renderAll();renderThumbs();
+}
+/* Open a IIIF Image API (info.json) or DZI manifest URL directly — the
+   forward-compatible path once a real tile server (Cantaloupe/Loris, or a
+   plain DeepZoom export) sits behind the archive. OSD auto-detects the
+   source type from the fetched document. */
+function loadIIIF(){
+  const url=prompt('IIIF info.json / DZI manifest URL:','');
+  if(!url)return;
+  pushUndo();
+  state.pages.push({name:url.split('/').filter(Boolean).slice(-2).join('/')||'IIIF source',rel:url,url,iiif:true,boxes:[],lines:[],kvp:[]});
+  $('pageTotal').textContent=state.pages.length;$('pageCount').textContent='('+state.pages.length+')';
+  renderThumbs();
+  if(state.curPage>=0){const cp=state.pages[state.curPage];cp.boxes=state.boxes;cp.lines=state.lines;cp.kvp=state.kvp;}
+  state.curPage=state.pages.length-1;$('pageInp').value=state.pages.length;
+  viewer.addOnceHandler('open',()=>{state.boxes=[];state.lines=[];state.kvp=[];$('emptyState').classList.add('hidden');$('docName').textContent='IIIF: '+url;renderAll();renderThumbs();});
+  viewer.addOnceHandler('open-failed',()=>toast('Could not open IIIF/DZI source — check the URL and CORS.'));
+  viewer.open(url);
+  spTab('files');
+}
+function pageStep(d){gotoPage((state.curPage+1)+d);}
+function renderThumbs(){
+  const g=$('thumbGrid');
+  g.innerHTML=state.pages.map((p,i)=>`<div class="thumb ${i===state.curPage?'active':''}" onclick="gotoPage(${i+1})">${p.url?`<img src="${p.url}">`:`<div class="ph">📄</div>`}<div class="tn">#${i+1} ${p.name}</div></div>`).join('')||'<div style="grid-column:1/-1;color:var(--ink4);font-size:11px;text-align:center;padding:14px">No pages loaded</div>';
+}
+async function loadFromPath(){
+  const def=PATHS.archive+'\\Sassoon_1053\\';
+  const p=prompt('Local image path (served by Launch_Masorah.bat engine):',def);
+  if(!p)return;
+  const url='http://localhost:8000/api/v1/files/image?path='+encodeURIComponent(p)+'&convert=jpeg';
+  try{
+    const r=await fetch(url,{signal:AbortSignal.timeout(4000)});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    pushUndo();
+    state.pages.push({name:p.split(/[\\/]/).pop()||p,rel:p,url,boxes:[],lines:[],kvp:[]});
+    $('pageTotal').textContent=state.pages.length;$('pageCount').textContent='('+state.pages.length+')';
+    renderThumbs();
+    await gotoPage(state.pages.length);
+    toast('Loaded '+p+' from local engine');
+  }catch(e){
+    toast('Local engine offline or file not found at that path (Launch_Masorah.bat) — use Open Image / Open Folder instead');
+  }
+}
+async function tryBackend(path,opts){
+  opts=opts||{};
+  const token=sessionStorage.getItem('masorah_token')||'';
+  const headers=Object.assign({'Content-Type':'application/json'},token?{'Authorization':'Bearer '+token}:{},opts.headers||{});
+  try{
+    const r=await fetch('http://localhost:8000/api/v1'+path,{method:opts.method||'GET',headers,body:opts.body,signal:AbortSignal.timeout(opts.timeout||4000)});
+    if(r.ok)return r;
+  }catch(e){}
+  return null;
+}
+
+/* ── demo folio (synthetic, offline) ── */
+function loadDemo(){
+  const c=document.createElement('canvas');c.width=900;c.height=1200;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,1200);g.addColorStop(0,'#efe2c4');g.addColorStop(1,'#e3d2ad');x.fillStyle=g;x.fillRect(0,0,900,1200);
+  x.fillStyle='rgba(150,110,60,.10)';for(let i=0;i<400;i++){x.beginPath();x.arc(Math.random()*900,Math.random()*1200,Math.random()*3,0,7);x.fill();}
+  x.fillStyle='#2a2018';x.font='30px "Frank Ruhl Libre", serif';x.textAlign='right';x.direction='rtl';
+  const demo=['בְּרֵאשִׁית בָּרָא אֱלֹהִים','אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ','וְהָאָרֶץ הָיְתָה תֹהוּ וָבֹהוּ','וְחֹשֶׁךְ עַל־פְּנֵי תְהוֹם','וְרוּחַ אֱלֹהִים מְרַחֶפֶת','עַל־פְּנֵי הַמָּיִם','וַיֹּאמֶר אֱלֹהִים יְהִי אוֹר','וַיְהִי־אוֹר'];
+  demo.forEach((t,i)=>x.fillText(t,840,150+i*70));
+  x.font='15px "Frank Ruhl Libre", serif';x.fillStyle='#7a3010';x.fillText('קמ״ח · ל׳ ה׳ פסוקין',840,150+demo.length*70+40);
+  const url=c.toDataURL('image/jpeg',.9);
+  state.pages.push({name:'DEMO_Sassoon_folio.jpg',rel:'demo',url,boxes:[],lines:[],kvp:[],_demoLines:demo});
+  $('pageTotal').textContent=state.pages.length;$('pageCount').textContent='('+state.pages.length+')';
+  gotoPage(state.pages.length);
+  toast('Demo folio loaded — try Run OCR / Segment');
+}
+
+/* ── zoom / pan / fit — delegated to OpenSeadragon's viewport ── */
+function fitImage(){if(viewer.world.getItemCount())viewer.viewport.goHome(true);}
+function zoomBy(f){if(!viewer.world.getItemCount())return;viewer.viewport.zoomBy(f);viewer.viewport.applyConstraints();}
+/* Temp rectangle while drawing a line/region — drawn in screen pixels (both
+   OSD event.position values are already relative to the viewer element), so
+   no coordinate conversion is needed for this transient visual only. */
+function tempEl(kind){let t=document.getElementById('tempDrawBox');if(!t){t=document.createElement('div');t.id='tempDrawBox';t.className='box temp '+(kind==='line'?'line':'region');viewer.container.appendChild(t);}return t;}
+function drawTemp(p0,p1){const t=tempEl(dragDraw.kind);const x=Math.min(p0.x,p1.x),y=Math.min(p0.y,p1.y),w=Math.abs(p1.x-p0.x),h=Math.abs(p1.y-p0.y);t.style.left=x+'px';t.style.top=y+'px';t.style.width=w+'px';t.style.height=h+'px';}
+function removeTempEl(){const t=document.getElementById('tempDrawBox');if(t)t.remove();}
+/* Live preview while clicking polygon vertices: an SVG polyline drawn in
+   screen pixels (recomputed from stored image coordinates on every render
+   and on every pan/zoom "animation" tick, so it tracks the view). */
+function renderPolyDraft(){
+  if(!polyDraft)return;
+  let svg=document.getElementById('polyDraftSvg');
+  if(!svg){
+    svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.id='polyDraftSvg';svg.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible';
+    viewer.container.appendChild(svg);
+  }
+  const screen=polyDraft.points.map(p=>viewer.viewport.imageToViewerElementCoordinates(new OpenSeadragon.Point(p.x,p.y)));
+  const ptStr=screen.map(p=>p.x+','+p.y).join(' ');
+  svg.innerHTML=`<polyline points="${ptStr}" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="5,4"/>`+
+    screen.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="4" fill="#fff" stroke="var(--gold-dk)" stroke-width="1.5"/>`).join('');
+}
+function clearPolyDraft(){const s=document.getElementById('polyDraftSvg');if(s)s.remove();}
+function finishPolygon(){
+  if(!polyDraft||polyDraft.points.length<3){toast('Need at least 3 points for a polygon zone');cancelPolygon();return;}
+  const xs=polyDraft.points.map(p=>p.x),ys=polyDraft.points.map(p=>p.y);
+  const x=Math.min(...xs),y=Math.min(...ys),w=Math.max(...xs)-x,h=Math.max(...ys)-y;
+  const b={type:'polygon',points:polyDraft.points,x,y,w,h,zone:state.zone,text:'',conf:null,id:'poly'+Date.now()};
+  state.boxes.push(b);
+  polyDraft=null;clearPolyDraft();
+  bump();renderAll();
+  toast('Polygon zone added ('+b.points.length+' points)');
+}
+function cancelPolygon(){polyDraft=null;clearPolyDraft();}
+
+/* ── render boxes + lines ──
+   Each box is attached with viewer.addOverlay() at its image-pixel rect
+   converted to viewport coordinates; OpenSeadragon repositions/rescales the
+   element on every pan, zoom and (future) rotate automatically. */
+let attachedOverlayIds=[];
+function renderAll(){renderBoxes();renderLines();renderKVP();}
+function renderBoxes(){
+  attachedOverlayIds.forEach(id=>{try{viewer.removeOverlay(id);}catch(e){}});
+  attachedOverlayIds=[];
+  if(!viewer.world.getItemCount())return;
+  const polyBoxes=state.boxes.filter(b=>b.type==='polygon');
+  if(polyBoxes.length){
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.id='zonePolySvg';
+    svg.setAttribute('viewBox',`0 0 ${state.natW} ${state.natH}`);
+    svg.setAttribute('preserveAspectRatio','none');
+    svg.style.cssText='width:100%;height:100%;display:block;pointer-events:none';
+    if(!state.overlayOn)svg.style.display='none';
+    polyBoxes.forEach(b=>{
+      const pg=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+      pg.setAttribute('points',b.points.map(p=>p.x+','+p.y).join(' '));
+      pg.setAttribute('class','zone-poly'+(b.zone?' zone-'+b.zone:''));
+      pg.style.pointerEvents='auto';pg.style.cursor='pointer';
+      pg.addEventListener('click',ev=>{ev.stopPropagation();selectBox(b.id);});
+      svg.appendChild(pg);
+    });
+    const full=viewer.viewport.imageToViewportRectangle(0,0,state.natW,state.natH);
+    viewer.addOverlay({element:svg,location:full});
+    attachedOverlayIds.push('zonePolySvg');
+  }
+  state.boxes.forEach((b,i)=>{
+    if(b.type==='polygon')return; // rendered above as an SVG <polygon>, not a rect div
+    const id='ov_'+b.id;
+    const d=document.createElement('div');
+    d.id=id;
+    d.className='box '+(b.type==='line'?'line':(b.type==='word'?'word':'region'))+(b.zone&&b.type==='region'?' zone-'+b.zone:'');
+    if(!state.overlayOn)d.style.display='none';
+    if(b.type!=='word'){const l=document.createElement('div');l.className='box-lbl';l.textContent=(b.type==='line'?'L'+(state.lines.findIndex(x=>x.box===b.id)+1):(b.zone||'region'));d.appendChild(l);}
+    d.onclick=ev=>{ev.stopPropagation();selectBox(b.id);};
+    const rect=viewer.viewport.imageToViewportRectangle(b.x,b.y,b.w,b.h);
+    viewer.addOverlay({element:d,location:rect});
+    attachedOverlayIds.push(id);
+  });
+}
+function selectBox(id){document.querySelectorAll('.box').forEach(x=>x.classList.remove('sel'));const li=state.lines.findIndex(l=>l.box===id);if(li>=0){spTab('trans');const el=document.querySelectorAll('.tline')[li];if(el){el.classList.add('sel');el.querySelector('.tline-txt').focus();}}}
+function renderLines(){
+  const ll=$('lineList');
+  $('regionHd').textContent=state.lines.length?`Region 1 — ${state.lines.length} line(s)`:'Region 1 — no lines yet';
+  ll.innerHTML=state.lines.map((l,i)=>`
+    <div class="tline" data-i="${i}">
+      <div class="tline-n">${i+1}</div>
+      <div class="tline-txt" contenteditable="true" dir="rtl" data-ph="line ${i+1}…" oninput="editLine(${i},this.textContent)">${l.text||''}</div>
+      <div class="tline-conf">${l.conf!=null?Math.round(l.conf)+'%':''}</div>
+    </div>`).join('')||'<div style="color:var(--ink4);font-size:12px;text-align:center;padding:20px">Run OCR/HTR or draw lines to populate the transcription.</div>';
+}
+function editLine(i,txt){state.lines[i].text=txt.trim();const b=state.boxes.find(x=>x.id===state.lines[i].box);if(b)b.text=txt.trim();bump();}
+
+/* ── KVP ── */
+function renderKVP(){
+  $('kvpList').innerHTML=state.kvp.map((p,i)=>`
+    <div class="kvp-row">
+      <input class="k" value="${p.k||''}" oninput="state.kvp[${i}].k=this.value;bump()" placeholder="key">
+      <input ${/[\u0590-\u05FF]/.test(p.v||'')?'dir="rtl"':''} value="${(p.v||'').replace(/"/g,'&quot;')}" oninput="state.kvp[${i}].v=this.value;bump()" placeholder="value">
+      <button class="kvp-del" onclick="state.kvp.splice(${i},1);renderKVP();bump()">×</button>
+    </div>`).join('');
+}
+function addKVP(){state.kvp.push({k:'',v:''});renderKVP();spTab('kvp');bump();}
+function autoKVP(){
+  const folio=$('pageInp').value;
+  const sof=state.lines.filter(l=>/[׃]|סוף|פסוק/.test(l.text)).length;
+  const mas=state.lines.find(l=>/קמ|ל׳|ה׳/.test(l.text));
+  state.kvp=[{k:'Folio',v:folio},{k:'Manuscript',v:'Sassoon 1053'},{k:'Lines',v:String(state.lines.length)},{k:'Sof Pasuq (detected)',v:String(sof)}];
+  if(mas)state.kvp.push({k:'Masorah note',v:mas.text});
+  renderKVP();spTab('kvp');bump();toast('Auto-extracted key/value pairs');
+}
+function importKVP(){const src=$('kvpImport').value;if(src==='Previous page'&&state.curPage>0){const prev=state.pages[state.curPage-1];if(prev&&prev.kvp){state.kvp=JSON.parse(JSON.stringify(prev.kvp));renderKVP();bump();toast('Imported KVP from previous page');return;}}toast('Import from '+src+' — connect engine for live import');}
+
+/* ── auto-segment (offline heuristic line bands) ── */
+function autoSegment(){
+  if(!state.natW){toast('Load an image first');return;}
+  pushUndo();
+  state.boxes=state.boxes.filter(b=>b.type==='region');
+  const lines=[];const n=12,top=state.natH*0.10,bot=state.natH*0.90,step=(bot-top)/n;
+  for(let i=0;i<n;i++){const b={x:state.natW*0.08,y:top+i*step,w:state.natW*0.84,h:step*0.74,type:'line',text:'',conf:null,id:'seg'+Date.now()+i};state.boxes.push(b);lines.push({box:b.id,text:'',conf:null});}
+  state.lines=lines;renderAll();bump();toast('Segmented into '+n+' text lines (heuristic). Run OCR to fill text.');
+}
+function clearBoxes(){pushUndo();state.boxes=[];state.lines=[];renderAll();bump();}
+
+/* ── REAL OCR (Tesseract.js) ── */
+async function runOCR(){
+  if(state.curPage<0){toast('Load an image first');return;}
+  const md=state.selModel;
+  if(md.engine==='backend'){return runBackendHTR(md);}
+  if(typeof Tesseract==='undefined'){toast('Tesseract.js not loaded — needs internet on first run. Falling back to demo segmentation.');demoFill();return;}
+  startScan('Loading model ('+md.tlang+')…');
+  try{
+    if(!worker||worker.__lang!==md.tlang){
+      $('ocrStatus').textContent='OCR engine: initialising '+md.tlang;
+      worker=await Tesseract.createWorker(md.tlang,1,{logger:m=>{if(m.status&&m.progress!=null){$('scanMsg').textContent=m.status;$('scanBar').style.width=Math.round(m.progress*100)+'%';}}});
+      worker.__lang=md.tlang;
+    }
+    $('scanMsg').textContent='Recognising script…';
+    const {data}=await worker.recognize($('docImg'),{},{blocks:true});
+    ingestOCR(data);
+    stopScan();
+    $('ocrStatus').textContent='OCR engine: done · '+(data.confidence?Math.round(data.confidence)+'% conf':'');
+    toast('OCR complete — '+state.lines.length+' lines');
+  }catch(err){
+    console.error(err);stopScan();
+    $('ocrStatus').textContent='OCR engine: error';
+    toast('OCR failed ('+(err.message||err)+'). Using heuristic segmentation.');
+    demoFill();
+  }
+}
+function collectWords(data){
+  let words=[];
+  if(data.blocks&&data.blocks.length){
+    data.blocks.forEach(bl=>(bl.paragraphs||[]).forEach(pa=>(pa.lines||[]).forEach(ln=>{
+      (ln.words||[]).forEach(w=>words.push(w));
+    })));
+  }else if(data.words){words=data.words;}
+  return words;
+}
+function collectLines(data){
+  let lines=[];
+  if(data.blocks&&data.blocks.length){
+    data.blocks.forEach(bl=>(bl.paragraphs||[]).forEach(pa=>(pa.lines||[]).forEach(ln=>lines.push(ln))));
+  }else if(data.lines){lines=data.lines;}
+  return lines;
+}
+function ingestOCR(data){
+  pushUndo();
+  const regions=state.boxes.filter(b=>b.type==='region');
+  state.boxes=[...regions];state.lines=[];
+  const lines=collectLines(data);
+  if(lines.length){
+    lines.forEach(ln=>{
+      const bb=ln.bbox||ln;const id='ocr'+Math.random().toString(36).slice(2,7);
+      const box={x:bb.x0,y:bb.y0,w:bb.x1-bb.x0,h:bb.y1-bb.y0,type:'line',text:(ln.text||'').trim(),conf:ln.confidence,id};
+      state.boxes.push(box);
+      state.lines.push({box:id,text:(ln.text||'').trim(),conf:ln.confidence});
+      // also draw word boxes
+      (ln.words||[]).forEach(w=>{const wb=w.bbox||w;state.boxes.push({x:wb.x0,y:wb.y0,w:wb.x1-wb.x0,h:wb.y1-wb.y0,type:'word',id:'w'+Math.random().toString(36).slice(2,7)});});
+    });
+  }else{
+    // fallback: split plain text
+    (data.text||'').split(/\n+/).filter(t=>t.trim()).forEach((t,i)=>{const id='ocr'+i;state.lines.push({box:id,text:t.trim(),conf:data.confidence});state.boxes.push({x:state.natW*0.1,y:state.natH*0.1+i*30,w:state.natW*0.8,h:26,type:'line',text:t.trim(),id});});
+  }
+  renderAll();bump();
+}
+function demoFill(){
+  const p=state.pages[state.curPage];
+  const demo=(p&&p._demoLines)||['בְּרֵאשִׁית בָּרָא אֱלֹהִים','אֵת הַשָּׁמַיִם וְאֵת הָאָרֶץ','וְהָאָרֶץ הָיְתָה תֹהוּ וָבֹהוּ','וְחֹשֶׁךְ עַל־פְּנֵי תְהוֹם','וְרוּחַ אֱלֹהִים מְרַחֶפֶת'];
+  startScan('Heuristic recognition…');
+  setTimeout(()=>{
+    pushUndo();state.boxes=state.boxes.filter(b=>b.type==='region');state.lines=[];
+    const top=state.natH*0.1,step=(state.natH*0.8)/demo.length;
+    demo.forEach((t,i)=>{const id='d'+i;state.boxes.push({x:state.natW*0.08,y:top+i*step,w:state.natW*0.84,h:step*0.7,type:'line',text:t,conf:88+Math.random()*8,id});state.lines.push({box:id,text:t,conf:88+Math.random()*8});});
+    renderAll();stopScan();bump();toast('Filled '+demo.length+' demo lines');
+  },1500);
+}
+async function runBackendHTR(md){
+  startScan('Sending to local HTR engine…');
+  const p=state.pages[state.curPage];
+  const r=await tryBackend('/htr/transcribe-zone',{method:'POST',body:JSON.stringify({zone_id:(state.zone||'main'),image_path:(p&&(p.rel||p.name))||''}),timeout:15000});
+  stopScan();
+  if(r){
+    const d=await r.json();
+    pushUndo();
+    const id='htr'+(Date.now()%100000);
+    const top=state.natH*0.1,h=state.natH*0.12;
+    state.boxes.push({x:state.natW*0.08,y:top,w:state.natW*0.84,h,type:'line',text:d.transcription,conf:(d.confidence||0.9)*100,id});
+    state.lines.push({box:id,text:d.transcription,conf:(d.confidence||0.9)*100});
+    renderAll();bump();
+    toast('HTR ('+(d.model||'engine')+'): '+(d.confidence?Math.round(d.confidence*100)+'% confidence':'done'));
+  }else{toast('Local engine offline or not signed in (Launch_Masorah.bat + login). Using Tesseract instead.');state.selModel=MODELS[0];runOCR();}
+}
+async function runOCRBatch(){
+  if(!state.pages.length){toast('No pages loaded');return;}
+  toast('Batch OCR over '+state.pages.length+' pages…');
+  for(let i=0;i<state.pages.length;i++){await gotoPage(i+1);await runOCR();}
+  toast('Batch OCR complete');
+}
+function startScan(msg){$('scanFx').classList.add('on');$('scanMsg').textContent=msg||'Recognising…';$('scanBar').style.width='0%';$('ocrStatus').textContent='OCR engine: running';}
+function stopScan(){$('scanFx').classList.remove('on');}
+
+/* ── image filters ── */
+function openFilterModal(){$('filterModal').classList.add('open');}
+function applyImgFilters(){const b=$('fBright').value,c=$('fContrast').value,s=$('fSat').value,cl=$('fClahe').value;let f=`brightness(${b}%) contrast(${c}%) saturate(${s}%)`;if(cl==='gray')f+=' grayscale(1)';if(cl==='invert')f+=' invert(1)';if(cl==='hi')f+=' contrast(180%) grayscale(1) brightness(108%)';if(cl==='binarize')f+=' grayscale(1) contrast(320%) brightness(118%)';viewer.canvas.style.filter=f;}
+function resetImgFilters(){$('fBright').value=100;$('fContrast').value=100;$('fSat').value=100;$('fClahe').value='none';applyImgFilters();}
+
+/* ── zone tag menu ── */
+const ZONES=[['main','Main Text'],['parva','Masorah Parva'],['magna','Masorah Magna'],['cant','Cantillation'],['targ','Targum / Commentary'],['marg','Marginal Note'],['scribal','Scribal Mark / Sof Pasuq'],['bright','★ Bright Node (PhD)']];
+function openZoneMenu(){const z=prompt('Set active zone type for new regions:\n'+ZONES.map((x,i)=>i+1+') '+x[1]).join('\n'),ZONES.findIndex(x=>x[0]===state.zone)+1);const idx=parseInt(z)-1;if(idx>=0&&ZONES[idx]){state.zone=ZONES[idx][0];setTool('region');toast('Active zone: '+ZONES[idx][1]);}}
+
+/* ── Hebrew virtual keyboard ── */
+const HEBKEYS='א ב ג ד ה ו ז ח ט י כ ל מ נ ס ע פ צ ק ר ש ת ך ם ן ף ץ ׳ ״'.split(' ');
+const CANT='ְ ֱ ֲ ֳ ִ ֵ ֶ ַ ָ ֹ ֻ ּ ׁ ׂ ֽ ׃ ֿ ֝ ֗ ֖ ֢'.split(' ');
+function toggleVK(){const sel=$('kbSel').value;const vk=$('vk');if(sel==='none'){vk.classList.remove('open');return;}let keys=HEBKEYS.slice();if(sel==='heb-cant')keys=keys.concat(CANT);vk.innerHTML=keys.map(k=>`<button onclick="typeChar('${k}')">${k}</button>`).join('');vk.classList.add('open');}
+function typeChar(ch){const el=document.activeElement;if(el&&el.classList.contains('tline-txt')){document.execCommand('insertText',false,ch);}else if(el&&el.tagName==='INPUT'){el.value+=ch;}else{toast('Click a transcription line first');}}
+
+/* ── SAVE / EXPORT with pathway picker ── */
+const FORMATS=[['page','PAGE-XML'],['alto','ALTO-XML'],['tei','TEI'],['hocr','hOCR'],['json','Forensic JSON'],['w3c','W3C Annotations'],['txt','Plain TXT'],['csv','CSV']];
+function openSaveModal(){
+  $('pathPick').innerHTML=[
+    ['forensic','📂 Forensic Nodes','Revised output (default)',PATHS.forensic],
+    ['archive','🗂 Digital Archive','Alongside source scans',PATHS.archive],
+    ['interface','📊 Interface / CSV','Analysis & CSV',PATHS.interface],
+    ['downloads','⤓ Browser Download','Save then move manually',PATHS.downloads],
+  ].map(([k,t,d,p])=>`<div class="path-card ${state.savePath===k?'sel':''}" onclick="pickPath('${k}')"><div class="pc-t">${t}</div><div style="font-size:10px;color:var(--ink3)">${d}</div><div class="pc-p">${p}</div></div>`).join('');
+  $('fmtChips').innerHTML=FORMATS.map(([k,t])=>`<div class="fmt-chip ${state.saveFormats.has(k)?'sel':''}" onclick="toggleFmt('${k}')">${t}</div>`).join('');
+  updateSaveHint();
+  $('saveModal').classList.add('open');
+}
+function pickPath(k){state.savePath=k;openSaveModal();trySilentRecall(k).then(h=>{state.fsDirHandle=h;updateSaveHint();});}
+function toggleFmt(k){if(state.saveFormats.has(k))state.saveFormats.delete(k);else state.saveFormats.add(k);openSaveModal();}
+function updateSaveHint(){
+  const base=PATHS[state.savePath];const stem=$('saveStem')?$('saveStem').value:'page';
+  $('saveHint').innerHTML= state.fsDirHandle? `Connected to folder <b>${state.fsDirHandle.name}</b> — remembered via the File System Access API, writes land there directly next time too.` :
+    state.savePath==='downloads'? `Files download to your browser, then move into the tree.` :
+    `Suggested target: <b>${base}</b>\\${stem}.*<br>Click “Choose Folder…” once — Chrome/Edge remember the grant, so you won't need to re-pick it every session.`;
+}
+async function pickFolder(){
+  if(!window.showDirectoryPicker){toast('Folder picker needs Chrome/Edge (File System Access API). Use Download fallback.');return;}
+  try{
+    const handle=await window.showDirectoryPicker({mode:'readwrite'});
+    state.fsDirHandle=handle;
+    await DirStore.set(state.savePath,handle);
+    toast('Folder selected: '+handle.name+' — remembered for "'+state.savePath+'"');
+    updateSaveHint();
+  }catch(e){}
+}
+function buildExport(fmt){
+  const stem=$('saveStem').value||'page';const lines=state.lines;
+  if(fmt==='txt')return lines.map(l=>l.text).join('\n');
+  if(fmt==='csv')return 'line,confidence,text\n'+lines.map((l,i)=>`${i+1},${l.conf!=null?Math.round(l.conf):''},"${(l.text||'').replace(/"/g,'""')}"`).join('\n');
+  if(fmt==='json')return JSON.stringify({manuscript:'Sassoon 1053',folio:$('pageInp').value,model:state.selModel.name,natW:state.natW,natH:state.natH,lines:lines.map((l,i)=>({n:i+1,text:l.text,conf:l.conf,bbox:bboxOf(l.box)})),zones:state.boxes.filter(b=>b.type==='region'||b.type==='polygon').map(b=>({zone:b.zone,shape:b.type==='polygon'?'polygon':'rect',bbox:[Math.round(b.x),Math.round(b.y),Math.round(b.w),Math.round(b.h)],points:b.type==='polygon'?b.points.map(p=>[Math.round(p.x),Math.round(p.y)]):undefined})),kvp:state.kvp},null,2);
+  if(fmt==='hocr')return hocr(stem);
+  if(fmt==='alto')return alto(stem);
+  if(fmt==='w3c')return w3cAnnotations(stem);
+  return pageXML(stem);
+}
+function bboxOf(id){const b=state.boxes.find(x=>x.id===id);return b?[Math.round(b.x),Math.round(b.y),Math.round(b.w),Math.round(b.h)]:null;}
+function coords(b){if(b.type==='polygon'&&b.points)return b.points.map(p=>Math.round(p.x)+','+Math.round(p.y)).join(' ');return `${Math.round(b.x)},${Math.round(b.y)} ${Math.round(b.x+b.w)},${Math.round(b.y)} ${Math.round(b.x+b.w)},${Math.round(b.y+b.h)} ${Math.round(b.x)},${Math.round(b.y+b.h)}`;}
+function esc(s){return (s||'').replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+function pageXML(stem){
+  const lineXML=state.lines.map((l,i)=>{const b=state.boxes.find(x=>x.id===l.box)||{x:0,y:0,w:0,h:0};return `      <TextLine id="line_${i+1}"><Coords points="${coords(b)}"/><TextEquiv><Unicode>${esc(l.text)}</Unicode></TextEquiv></TextLine>`;}).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15">
+  <Metadata><Creator>Masorah Corpus Transcriber</Creator><Created>${new Date().toISOString()}</Created><Comments>model=${state.selModel.name}</Comments></Metadata>
+  <Page imageFilename="${esc(stem)}.jpg" imageWidth="${state.natW}" imageHeight="${state.natH}">
+    <TextRegion id="region_1" type="paragraph"><Coords points="0,0 ${state.natW},0 ${state.natW},${state.natH} 0,${state.natH}"/>
+${lineXML}
+    </TextRegion>
+  </Page>
+</PcGts>`;
+}
+function alto(stem){const ls=state.lines.map((l,i)=>{const b=state.boxes.find(x=>x.id===l.box)||{x:0,y:0,w:0,h:0};return `        <TextLine ID="line_${i+1}" HPOS="${Math.round(b.x)}" VPOS="${Math.round(b.y)}" WIDTH="${Math.round(b.w)}" HEIGHT="${Math.round(b.h)}"><String CONTENT="${esc(l.text)}" WC="${l.conf?(l.conf/100).toFixed(2):''}"/></TextLine>`;}).join('\n');return `<?xml version="1.0" encoding="UTF-8"?>
+<alto xmlns="http://www.loc.gov/standards/alto/ns-v4#"><Layout><Page WIDTH="${state.natW}" HEIGHT="${state.natH}" PHYSICAL_IMG_NR="${$('pageInp').value}"><PrintSpace>
+      <TextBlock ID="block_1">
+${ls}
+      </TextBlock></PrintSpace></Page></Layout></alto>`;}
+function hocr(stem){const ls=state.lines.map((l,i)=>{const b=state.boxes.find(x=>x.id===l.box)||{x:0,y:0,w:0,h:0};return `   <span class='ocr_line' id='line_${i+1}' title='bbox ${Math.round(b.x)} ${Math.round(b.y)} ${Math.round(b.x+b.w)} ${Math.round(b.y+b.h)}'>${esc(l.text)}</span>`;}).join('\n');return `<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='ocr-system' content='Masorah Corpus'></head><body><div class='ocr_page' title='image "${esc(stem)}.jpg"; bbox 0 0 ${state.natW} ${state.natH}'>\n${ls}\n</div></body></html>`;}
+/* TEI P5, with real <facsimile>/<surface>/<zone> linking each transcribed
+   line and zone to its actual image-pixel region (state.boxes), so the
+   transcription is anchored to the page image the way P5 sourceDoc/facsimile
+   encoding expects — not just a flat list of lines. Polygon zones get a
+   pointsattr-style zone (points=), rectangle zones get ulx/uly/lrx/lry. */
+function zoneCoordsAttr(b){
+  if(b.type==='polygon'&&b.points)return `points="${b.points.map(p=>Math.round(p.x)+','+Math.round(p.y)).join(' ')}"`;
+  return `ulx="${Math.round(b.x)}" uly="${Math.round(b.y)}" lrx="${Math.round(b.x+b.w)}" lry="${Math.round(b.y+b.h)}"`;
+}
+function tei(stem){
+  const zones=state.boxes.filter(b=>b.type==='line'||b.type==='region'||b.type==='polygon');
+  const zoneXML=zones.map((b,i)=>`      <zone xml:id="z${i+1}" ${zoneCoordsAttr(b)}${b.zone?` type="${esc(b.zone)}"`:''}/>`).join('\n');
+  const lineXML=state.lines.map((l,i)=>{
+    const zi=zones.findIndex(z=>z.id===l.box);
+    const facs=zi>=0?` facs="#z${zi+1}"`:'';
+    return `      <lb n="${i+1}"${facs}/>${esc(l.text)}`;
+  }).join('\n');
+  const kvpXML=state.kvp.filter(p=>p.k).map(p=>`        <note type="kvp" subtype="${esc(p.k)}">${esc(p.v)}</note>`).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc>
+      <titleStmt><title>Sassoon 1053 — folio ${$('pageInp').value}</title></titleStmt>
+      <publicationStmt><p>Masorah Corpus Transcriber</p></publicationStmt>
+      <sourceDesc><p>${esc(stem)} · model=${state.selModel.name}</p></sourceDesc>
+    </fileDesc>
+    <sourceDoc>
+      <surfaceGrp>
+        <surface xml:id="folio-${esc(stem)}" ulx="0" uly="0" lrx="${state.natW}" lry="${state.natH}">
+          <graphic url="${esc(stem)}.jpg" width="${state.natW}px" height="${state.natH}px"/>
+${zoneXML}
+        </surface>
+      </surfaceGrp>
+    </sourceDoc>
+  </teiHeader>
+  <text>
+    <body>
+      <div type="folio" n="${$('pageInp').value}" facs="#folio-${esc(stem)}">
+${lineXML}
+${kvpXML ? '        <listAnnotation>\n'+kvpXML+'\n        </listAnnotation>' : ''}
+      </div>
+    </body>
+  </text>
+</TEI>`;
+}
+/* ── W3C Web Annotation Data Model (JSON-LD) ──
+   Every zone/line becomes a proper Annotation: a FragmentSelector (Media
+   Fragments xywh=pixel:...) for rectangles, or an SvgSelector for polygon
+   zones — the same shapes Recogito/Mirador/Annotorious expect, so exported
+   work can be ingested there without a custom transformer, and files saved
+   by those tools can be imported back in here. */
+function w3cAnnotations(stem){
+  const base=(typeof location!=='undefined'?location.href.split('#')[0]:'urn:masorah:')+'#'+encodeURIComponent(stem);
+  const items=state.boxes.filter(b=>b.type==='region'||b.type==='polygon'||b.type==='line').map(b=>{
+    const isLine=b.type==='line';
+    const target=b.type==='polygon'
+      ? {source:base,selector:{type:'SvgSelector',value:`<svg xmlns="http://www.w3.org/2000/svg"><polygon points="${b.points.map(p=>Math.round(p.x)+','+Math.round(p.y)).join(' ')}"/></svg>`}}
+      : {source:base,selector:{type:'FragmentSelector',conformsTo:'http://www.w3.org/TR/media-frags/',value:`xywh=pixel:${Math.round(b.x)},${Math.round(b.y)},${Math.round(b.w)},${Math.round(b.h)}`}};
+    const body=[];
+    if(b.text)body.push({type:'TextualBody',purpose:'transcribing',value:b.text,format:'text/plain'});
+    body.push({type:'TextualBody',purpose:'tagging',value:isLine?'line':(b.zone||'region')});
+    return {'@context':'http://www.w3.org/ns/anno.jsonld',id:'#'+b.id,type:'Annotation',motivation:isLine?'transcribing':'tagging',body,target};
+  });
+  return JSON.stringify({'@context':'http://www.w3.org/ns/anno.jsonld',id:base+'-annos',type:'AnnotationCollection',label:'Masorah Corpus — '+stem,total:items.length,items},null,2);
+}
+function importW3CFile(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let data;
+    try{data=JSON.parse(reader.result);}catch(e){toast('Not valid JSON: '+e.message);return;}
+    const items=data.items||data['@graph']||(Array.isArray(data)?data:[]);
+    if(!items.length){toast('No annotations found in file');return;}
+    pushUndo();
+    let n=0;
+    items.forEach((it,i)=>{
+      const sel=it.target&&it.target.selector;if(!sel)return;
+      let b=null;
+      if(sel.type==='FragmentSelector'&&/xywh=pixel:/.test(sel.value||'')){
+        const m=sel.value.match(/xywh=pixel:([\d.]+),([\d.]+),([\d.]+),([\d.]+)/);
+        if(m)b={x:+m[1],y:+m[2],w:+m[3],h:+m[4],type:'region',id:'imp'+Date.now()+i};
+      }else if(sel.type==='SvgSelector'){
+        const pm=(sel.value||'').match(/points="([^"]+)"/);
+        if(pm){
+          const points=pm[1].trim().split(/\s+/).map(pr=>{const parts=pr.split(',');return{x:+parts[0],y:+parts[1]};});
+          const xs=points.map(p=>p.x),ys=points.map(p=>p.y);
+          b={type:'polygon',points,x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys),id:'imp'+Date.now()+i};
+        }
+      }
+      if(!b)return;
+      const tagBody=(it.body||[]).find(bd=>bd.purpose==='tagging');
+      const txtBody=(it.body||[]).find(bd=>bd.purpose==='transcribing');
+      b.text=txtBody?txtBody.value:'';b.conf=null;
+      const tag=tagBody?tagBody.value:'region';
+      if(tag==='line'){b.type='line';state.lines.push({box:b.id,text:b.text,conf:null});}
+      else{b.zone=tag;}
+      state.boxes.push(b);n++;
+    });
+    renderAll();bump();toast('Imported '+n+' annotation(s)');
+  };
+  reader.readAsText(file);
+}
+function download(name,content,type){const blob=new Blob([content],{type:type||'text/plain'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);}
+async function writeToDir(name,content){const fh=await state.fsDirHandle.getFileHandle(name,{create:true});const ws=await fh.createWritable();await ws.write(content);await ws.close();}
+async function doSave(){
+  if(!state.saveFormats.size){toast('Pick at least one format');return;}
+  const stem=$('saveStem').value||'page';
+  const ext={page:'.xml',alto:'_alto.xml',tei:'_tei.xml',hocr:'.hocr.html',json:'.json',w3c:'.w3c.json',txt:'.txt',csv:'.csv'};
+  const built=[];
+  for(const f of state.saveFormats){let c=f==='tei'?tei(stem):buildExport(f);built.push([stem+(ext[f]||'.'+f),c]);}
+  if(state.fsDirHandle){
+    try{for(const [n,c] of built)await writeToDir(n,c);toast('Wrote '+built.length+' file(s) to '+state.fsDirHandle.name);state.unsaved=0;$('unsavedN').textContent=0;closeModal('saveModal');return;}catch(e){toast('Direct write failed — downloading instead');}
+  }
+  if(state.savePath!=='downloads'){
+    const ok=await tryBackend('/save');
+    if(ok){toast('Sent to local engine → '+PATHS[state.savePath]);}
+    else toast('Engine offline — downloading; move into '+PATHS[state.savePath]);
+  }
+  built.forEach(([n,c])=>download(n,c));
+  state.unsaved=0;$('unsavedN').textContent=0;closeModal('saveModal');
+}
+
+/* ── API probe ── */
+async function probe(){const pill=$('apiPill');try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Engine live';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+
+/* ── init ── */
+window.addEventListener('keydown',e=>{if(e.target.isContentEditable||e.target.tagName==='INPUT')return;if(e.key==='v')setTool('select');if(e.key==='h')setTool('pan');if(e.key==='l')setTool('line');if(e.key==='r')setTool('region');if(e.key==='p')setTool('poly');if(state.tool==='poly'&&e.key==='Enter'){e.preventDefault();finishPolygon();}if(state.tool==='poly'&&e.key==='Escape'){cancelPolygon();}if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();undo();}if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();openSaveModal();}});
+document.addEventListener('click',e=>{if(!e.target.closest('.ai-menu-wrap'))$('aiMenu').classList.remove('open');});
+$('fileAnno').addEventListener('change',e=>{if(e.target.files[0])importW3CFile(e.target.files[0]);e.target.value='';});
+window.__txInit=true;
+buildAIMenu();renderAll();probe();setInterval(probe,9000);
+$('saveStem')&&$('saveStem').addEventListener('input',updateSaveHint);
+trySilentRecall(state.savePath).then(h=>{if(h){state.fsDirHandle=h;updateSaveHint();}});
+</script>
+</body>
+</html>

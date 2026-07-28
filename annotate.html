@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah Corpus — Annotate · MG Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<!-- UTIF.js for decoding TIFF manuscript scans in-browser (loads from CDN when online) -->
+<script src="https://cdn.jsdelivr.net/npm/utif@3.1.0/UTIF.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/openseadragon.min.js"></script>
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22);--side-bg:#1a2530;--side2:#243240;--side3:#2e3c4e;--z-main:#f4d020;--z-parva:#90c8c8;--z-magna:#7ab8a8;--z-cant:#d8e090;--z-targ:#e8a0d0;--z-marg:#f0c8a0;--z-mark:#e8c080;--z-bright:#fff080}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);display:flex;flex-direction:column}
+
+/* BANNER */
+.banner{background:linear-gradient(180deg,var(--paper) 0%,var(--gold-bg) 100%);border-bottom:3px double var(--gold);padding:0 20px;flex-shrink:0;box-shadow:0 4px 14px rgba(120,90,20,.14);z-index:200;position:relative}
+.banner-row{display:flex;align-items:center;gap:14px;height:72px;max-width:1900px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:11px;padding-right:14px;border-right:1px solid var(--bdr);flex-shrink:0}
+.brand-glyph{font-family:'Frank Ruhl Libre',serif;font-size:38px;color:var(--gold);line-height:1}
+.brand-text h1{font-family:'Cinzel',serif;font-size:19px;font-weight:700;color:var(--ink);letter-spacing:.05em;line-height:1.1}
+.brand-text p{font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:2px}
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}
+.nav::-webkit-scrollbar{height:0}
+.nav a{display:inline-flex;align-items:center;gap:4px;padding:6px 11px;font-size:13px;color:var(--ink2);text-decoration:none;border-radius:var(--r);font-family:'EB Garamond',serif;font-weight:500;white-space:nowrap;transition:.13s;border:1px solid transparent}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.status-cluster{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:18px;font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;border:1px solid var(--bdr);background:var(--paper)}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}
+.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user-chip{display:flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:12px}
+.user-n{font-size:11px;color:var(--ink2);font-family:'JetBrains Mono',monospace}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:8px}
+
+/* 3-PANE */
+.bima-wrap{flex:1;display:grid;grid-template-columns:280px 1fr 390px;overflow:hidden;min-height:0}
+
+/* LEFT */
+.left-pane{background:var(--side-bg);color:#e8dcc0;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid #000}
+.left-brand{padding:12px 16px;background:var(--side2);border-bottom:1px solid #000;display:flex;align-items:center;gap:10px}
+.left-logo{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold-dk));border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Frank Ruhl Libre',serif;color:#fff;font-weight:700;font-size:20px;flex-shrink:0}
+.left-brand h3{font-family:'Cinzel',serif;font-size:14px;color:#f8e8b8;font-weight:600;line-height:1.2}
+.left-brand p{font-size:10px;color:#a89060;font-family:'JetBrains Mono',monospace;margin-top:2px}
+.left-user-row{padding:8px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #000;flex-shrink:0}
+.left-avatar{width:34px;height:34px;border-radius:50%;background:var(--side3);display:flex;align-items:center;justify-content:center;color:#f8e8b8;font-size:20px}
+.guest-link{font-size:11px;color:#a89060;cursor:pointer;text-decoration:underline;background:none;border:none}
+.path-config{background:var(--side3);border-bottom:1px solid #000;padding:9px 14px}
+.path-config-hd{font-family:'Cinzel',serif;font-size:10px;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.path-row{display:flex;align-items:center;gap:4px;margin-bottom:4px}
+.path-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a89060;min-width:32px}
+.path-input{flex:1;background:#1a2530;border:1px solid #3a4858;border-radius:3px;padding:3px 6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#f8e8b8;min-width:0}
+.path-input:focus{outline:none;border-color:var(--gold)}
+.path-set{background:var(--gold);color:#fff;border:none;border-radius:3px;padding:3px 7px;font-size:9px;cursor:pointer}
+.compare-panel{background:var(--side3);border-bottom:1px solid #000;padding:9px 14px;flex-shrink:0}
+.compare-panel h4{font-family:'Cinzel',serif;font-size:10px;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:6px}
+.compare-row{display:flex;gap:5px;margin-bottom:4px}
+.compare-row select{flex:1;background:#1a2530;border:1px solid #3a4858;border-radius:3px;padding:4px 6px;font-family:inherit;font-size:11px;color:#f8e8b8}
+.compare-btn{background:var(--gold);color:#fff;border:none;border-radius:3px;padding:4px 10px;font-size:11px;cursor:pointer}
+.proj-sel{padding:8px 14px;border-bottom:1px solid #000;flex-shrink:0}
+.proj-sel select{width:100%;padding:7px 9px;background:var(--side3);color:#f8e8b8;border:1px solid #000;border-radius:var(--r);font-family:inherit;font-size:12px}
+.left-section{padding:12px 16px 5px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#a89060;text-transform:uppercase;letter-spacing:.12em;font-weight:600;border-top:1px solid #2a3848}
+.ms-list{flex:1;overflow-y:auto;padding-bottom:8px}
+.ms-list::-webkit-scrollbar{width:5px}
+.ms-list::-webkit-scrollbar-thumb{background:#3a4858;border-radius:3px}
+.ms-item{display:flex;align-items:center;padding:8px 16px;cursor:pointer;color:#d8c8a0;font-size:12px;border-bottom:1px solid #2a3848;transition:.13s;gap:8px}
+.ms-item:hover{background:#2a3848;color:#f8e8b8}
+.ms-item.active{background:var(--gold-dk);color:#fff}
+.ms-item .ms-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Roboto',sans-serif;font-size:11.5px}
+.ms-item .ms-ct{background:#3a4858;color:#a89060;padding:2px 6px;border-radius:8px;font-size:9.5px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.ms-item.active .ms-ct{background:rgba(0,0,0,.25);color:#fff}
+.ms-item .ms-edit{background:none;border:none;color:#a89060;cursor:pointer;font-size:13px;opacity:0;transition:.13s}
+.ms-item:hover .ms-edit{opacity:1}
+.ms-item .ms-chev{color:#a89060;font-size:14px;flex-shrink:0}
+.add-ms-btn{margin:10px 14px;display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;background:var(--side3);border:1px dashed #3a4858;border-radius:var(--r);color:#a89060;cursor:pointer;font-family:'Cinzel',serif;font-size:11px;font-weight:600;transition:.13s}
+.add-ms-btn:hover{border-color:var(--gold);color:var(--gold-lt)}
+
+/* CENTER */
+.center-pane{display:flex;flex-direction:column;overflow:hidden;background:#ccc}
+.ms-head-bar{background:#fff;border-bottom:1px solid #e0e0e0;padding:11px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.ms-back-btn,.ms-bookmark-btn{background:none;border:none;font-size:22px;color:var(--gold);cursor:pointer;padding:4px;border-radius:var(--r)}
+.ms-back-btn:hover,.ms-bookmark-btn:hover{background:var(--gold-pale)}
+.ms-head-info{flex:1;min-width:0}
+.ms-head-info h2{font-family:'Roboto',sans-serif;font-size:15px;color:#222;font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.folio-row{display:flex;align-items:center;gap:11px;margin-top:5px}
+.folio-tag{background:var(--gold);color:#fff;padding:2px 9px;border-radius:10px;font-size:11px;font-family:'Roboto',sans-serif;font-weight:500}
+.folio-go-input{padding:4px 9px;border:1px solid #ccc;border-radius:var(--r);font-size:12px;width:110px}
+.folio-nav-row{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#555}
+.folio-nav-btn{background:none;border:none;font-size:18px;color:var(--gold);cursor:pointer;padding:3px 7px;border-radius:var(--r)}
+.folio-nav-btn:hover{background:var(--gold-pale)}
+.ms-head-icons{display:flex;gap:7px}
+.ms-head-icon{background:#f0f0f0;color:var(--gold);border:none;width:32px;height:32px;border-radius:50%;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.13s}
+.ms-head-icon:hover{background:var(--gold-pale);color:var(--gold-dk)}
+.center-tabs{background:#fff;border-bottom:1px solid #e0e0e0;display:flex;padding:0 18px;flex-shrink:0}
+.center-tab{padding:10px 16px;font-family:'Roboto',sans-serif;font-size:13px;color:#666;cursor:pointer;border-bottom:3px solid transparent;font-weight:500;text-transform:uppercase;letter-spacing:.04em;transition:.13s}
+.center-tab:hover{color:var(--gold)}
+.center-tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:600}
+.license-bar{background:#fff;border-bottom:1px solid #e0e0e0;padding:4px 18px;display:flex;align-items:center;gap:7px;font-size:11px;color:#888;flex-shrink:0}
+.license-bar a{color:var(--gold);text-decoration:none}
+.license-bar .cc-badge{padding:1px 6px;border:1px solid #aaa;border-radius:2px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#666}
+
+/* IMG CONTROLS */
+.img-ctrl-bar{background:#fff;border-bottom:1px solid #e0e0e0;padding:5px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0}
+.img-ctrl-group{display:flex;align-items:center;gap:4px}
+.img-ctrl-lbl{font-size:10px;color:#888;white-space:nowrap}
+.img-ctrl-slider{-webkit-appearance:none;width:70px;height:3px;border-radius:2px;background:#e0d8c0;outline:none;cursor:pointer}
+.img-ctrl-slider::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--gold);cursor:pointer}
+.clahe-sel{padding:2px 6px;border:1px solid #ddd;border-radius:var(--r);font-size:11px;background:#fff;cursor:pointer}
+.img-ctrl-btn{background:#f5f0e8;border:1px solid var(--bdr);border-radius:var(--r);padding:3px 8px;font-size:11px;cursor:pointer;color:var(--ink2);font-family:inherit;transition:.13s;display:flex;align-items:center;gap:4px}
+.img-ctrl-btn:hover,.img-ctrl-btn.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.color-scale-wrap{display:flex;gap:3px;align-items:center}
+.color-swatch{width:16px;height:16px;border-radius:2px;cursor:pointer;border:2px solid transparent;transition:.13s}
+.color-swatch:hover,.color-swatch.active{border-color:var(--gold-dk);transform:scale(1.15)}
+.img-sep{width:1px;height:18px;background:#e0d8c0;margin:0 3px;flex-shrink:0}
+.img-ctrl-save-btn{background:var(--gold);color:#fff;border:none;border-radius:var(--r);padding:3px 9px;font-size:11px;cursor:pointer}
+.img-ctrl-save-btn:hover{background:var(--gold-dk)}
+
+/* VIEWER */
+.viewer-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:#5a6a7a}
+.viewer-float-tools{position:absolute;left:14px;top:14px;display:flex;flex-direction:column;gap:0;background:#fff;border-radius:var(--r);box-shadow:0 2px 8px rgba(0,0,0,.22);z-index:5;overflow:hidden}
+.vft-btn{width:34px;height:34px;background:none;border:none;border-bottom:1px solid #eee;color:#555;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:.13s}
+.vft-btn:last-child{border-bottom:none}
+.vft-btn:hover,.vft-btn.active{background:var(--gold);color:#fff}
+.folio-frame{background:#f5f0e0;border-radius:var(--r2);padding:14px;box-shadow:0 8px 28px rgba(0,0,0,.4);position:relative;cursor:crosshair;transition:filter .3s}
+.folio-canvas{background:linear-gradient(135deg,#e8dcc0 0%,#d8c8a0 100%);width:420px;height:540px;border-radius:3px;position:relative;overflow:hidden}
+.folio-canvas::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(80,60,30,.06) 0 2px,transparent 2px 4px),radial-gradient(circle at 30% 20%,rgba(184,134,11,.12) 0%,transparent 50%);pointer-events:none}
+.heb-col{position:absolute;top:28px;bottom:28px;width:110px;font-family:'Frank Ruhl Libre',serif;color:#1a0f02;direction:rtl;font-size:10.5px;line-height:1.6;padding:6px;overflow:hidden;text-align:right}
+.heb-col.c1{right:22px}.heb-col.c2{right:146px}.heb-col.c3{right:270px}
+.masorah-top{position:absolute;top:5px;left:12px;right:12px;text-align:center;font-family:'Frank Ruhl Libre',serif;font-size:7.5px;color:#3a5878;direction:rtl;line-height:1.3}
+.masorah-bot{position:absolute;bottom:5px;left:12px;right:12px;text-align:center;font-family:'Frank Ruhl Libre',serif;font-size:7.5px;color:#8b2828;direction:rtl}
+.anno-zone{position:absolute;cursor:pointer;border-radius:2px;transition:background .12s}
+.anno-zone.bright{background:rgba(255,240,128,.35);border:2px solid #e0a000}
+.anno-zone.parva{background:rgba(144,200,200,.2);border:1px solid var(--z-parva)}
+.anno-zone.magna{background:rgba(122,184,168,.2);border:1px solid var(--z-magna)}
+.anno-zone:hover{opacity:.8}
+.anno-label{position:absolute;top:-16px;left:0;background:rgba(0,0,0,.7);color:#fff;font-size:9px;padding:1px 5px;border-radius:2px;white-space:nowrap;display:none}
+.anno-zone:hover .anno-label{display:block}
+
+/* RIGHT */
+.right-pane{background:#fff;border-left:1px solid #e0e0e0;display:flex;flex-direction:column;overflow:hidden}
+.right-tabs{display:flex;background:#fafafa;border-bottom:1px solid #e0e0e0;flex-shrink:0}
+.right-tab{flex:1;padding:11px 5px;text-align:center;font-family:'Roboto',sans-serif;font-size:11.5px;color:#555;cursor:pointer;border-bottom:3px solid transparent;display:flex;align-items:center;justify-content:center;gap:4px;transition:.13s}
+.right-tab:hover{color:var(--gold)}
+.right-tab.active{color:var(--gold);border-bottom-color:var(--gold);background:#fff;font-weight:600}
+.right-tab .rt-ct{background:var(--gold);color:#fff;font-size:9px;padding:1px 5px;border-radius:8px;font-family:'JetBrains Mono',monospace}
+.right-toolbar{padding:9px 13px;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;gap:6px;background:#fafafa;flex-shrink:0}
+.right-toolbar h3{font-family:'Roboto',sans-serif;font-size:13px;color:#333;font-weight:500;flex:1}
+.right-toolbar select{padding:3px 6px;border:1px solid #ccc;border-radius:var(--r);font-size:11px;background:#fff}
+.right-toolbar button{background:none;border:none;font-size:17px;color:#888;cursor:pointer;padding:2px}
+.right-toolbar button:hover{color:var(--gold)}
+.ctx-list{flex:1;overflow-y:auto;padding:8px 12px}
+.ctx-item{padding:8px 10px;border:1px solid #e8e8e8;border-radius:var(--r);margin-bottom:6px;display:flex;align-items:center;gap:9px;cursor:pointer;transition:.13s;background:#fff}
+.ctx-item:hover{border-color:var(--gold);box-shadow:0 1px 4px rgba(184,134,11,.15)}
+.ctx-num{width:26px;height:26px;border-radius:50%;background:#eaeaea;color:#666;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.ctx-num.gold{background:var(--gold);color:#fff}
+.ctx-num.amber{background:#e8a020;color:#fff}
+.ctx-num.green{background:#2e7d32;color:#fff}
+.ctx-num.blue{background:#1565c0;color:#fff}
+.ctx-body{flex:1;min-width:0}
+.ctx-heb{font-family:'Frank Ruhl Libre',serif;font-size:16px;color:#1a1a1a;direction:rtl;text-align:right}
+.ctx-label{font-size:11px;color:#555;margin-top:2px;line-height:1.4}
+.ctx-sub{font-size:10.5px;color:#888;margin-top:2px}
+.ctx-sub b{color:var(--gold);font-family:'JetBrains Mono',monospace}
+.ctx-chev{color:#aaa;font-size:16px;flex-shrink:0}
+
+/* MASORAH.AI PANEL */
+.masorah-panel{position:fixed;left:0;right:0;bottom:0;height:0;background:var(--paper);border-top:3px solid var(--gold);transition:height .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;z-index:150;box-shadow:0 -6px 24px rgba(120,90,20,.18);overflow:hidden}
+.masorah-panel.open{height:340px}
+.mp-header{padding:8px 18px;background:var(--gold-bg);border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.mp-header h3{font-family:'Cinzel',serif;font-size:13px;color:var(--gold-dk);font-weight:600;display:flex;align-items:center;gap:8px}
+.mp-heb{font-family:'Frank Ruhl Libre',serif;font-size:20px;color:var(--gold)}
+.mp-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)}
+.mp-close{background:none;border:none;font-size:22px;color:var(--ink3);cursor:pointer;margin-left:auto;line-height:1}
+.mp-body{flex:1;display:grid;grid-template-columns:220px 1fr 320px;overflow:hidden}
+.zone-col{background:var(--gold-pale);border-right:1px solid var(--bdr);overflow-y:auto;padding:9px}
+.zone-hd{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.12em;padding:3px 6px 7px;font-weight:600}
+.zone-btn{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--ink2);margin-bottom:3px;border:1px solid transparent;transition:.12s}
+.zone-btn:hover{background:var(--paper);border-color:var(--bdr)}
+.zone-btn.active{background:var(--paper);border-color:var(--gold);color:var(--gold-dk);font-weight:600}
+.zone-sw{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
+.drop-col{background:#5a6a7a;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.drop-inner{background:rgba(255,255,255,.07);border:2px dashed rgba(255,255,255,.3);border-radius:var(--r2);padding:24px;text-align:center;color:#fff;transition:.2s}
+.drop-inner:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.5)}
+.di-ico{font-size:34px;opacity:.7;margin-bottom:7px}
+.drop-inner p{font-size:13px;opacity:.9;margin-bottom:5px}
+.drop-inner small{font-size:10px;opacity:.6}
+.drop-path-row{position:absolute;bottom:10px;left:14px;right:14px;display:flex;gap:6px}
+.drop-path-inp{flex:1;padding:4px 7px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);border-radius:var(--r);color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px}
+.drop-path-btn{background:var(--gold);color:#fff;border:none;border-radius:var(--r);padding:4px 9px;font-size:10px;cursor:pointer}
+.forensic-col{background:var(--gold-pale);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
+.fa-head{padding:9px 12px;background:var(--gold-bg);border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fa-head h4{font-family:'Cinzel',serif;font-size:11.5px;color:var(--gold-dk);font-weight:600;display:flex;align-items:center;gap:6px}
+.fa-idle{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);background:var(--paper);padding:2px 7px;border-radius:8px;border:1px solid var(--bdr)}
+.fa-body{flex:1;overflow-y:auto;padding:10px 12px;font-size:12px;line-height:1.55;color:var(--ink2)}
+.fa-body p{margin-bottom:6px}
+.fa-body em{color:var(--gold-dk);font-style:italic}
+.fa-body ul{padding-left:14px;margin:3px 0 6px}
+.fa-body li{margin-bottom:2px}
+.fa-modes{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.fa-mode-btn{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r);padding:5px 9px;cursor:pointer;font-family:'EB Garamond',serif;font-size:12px;color:var(--ink2);text-align:left;transition:.12s}
+.fa-mode-btn:hover{border-color:var(--gold);color:var(--gold-dk)}
+.fa-mode-btn.active{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.fa-phd-badge{background:var(--paper);border:1px solid var(--gold);border-radius:var(--r);padding:6px 9px;margin-top:8px}
+.fa-phd-badge .ttl{font-family:'Cinzel',serif;font-size:10px;color:var(--gold-dk);font-weight:600;margin-bottom:2px}
+.fa-phd-badge .sub{font-size:10px;color:var(--ink3);font-style:italic}
+.fa-input-row{padding:7px 12px;border-top:1px solid var(--bdr);background:var(--paper);display:flex;align-items:center;gap:6px;flex-shrink:0}
+.fa-input-row input{flex:1;padding:5px 8px;border:1px solid var(--bdr);border-radius:var(--r);font-family:inherit;font-size:11px;background:var(--paper)}
+.fa-input-row input:focus{outline:none;border-color:var(--gold)}
+.fa-send-btn{background:var(--gold);color:#fff;border:none;width:30px;height:30px;border-radius:var(--r);cursor:pointer;font-size:15px;flex-shrink:0}
+.fa-send-btn:hover{background:var(--gold-dk)}
+.fa-save-row{padding:5px 12px;border-top:1px solid var(--bdr);display:flex;gap:5px;flex-shrink:0;background:var(--gold-bg)}
+.fa-save-btn{flex:1;background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r);padding:4px;font-size:11px;cursor:pointer;font-family:inherit;color:var(--ink2);transition:.12s}
+.fa-save-btn:hover{border-color:var(--gold);color:var(--gold-dk)}
+.fa-export-btn{flex:1;background:var(--gold);color:#fff;border:none;border-radius:var(--r);padding:4px;font-size:11px;cursor:pointer;font-family:inherit}
+.fa-export-btn:hover{background:var(--gold-dk)}
+.masorah-fab{position:fixed;right:22px;bottom:22px;z-index:100;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;border:none;border-radius:28px;padding:11px 20px;font-family:'Cinzel',serif;font-weight:600;font-size:12px;box-shadow:0 6px 18px rgba(120,90,20,.35);cursor:pointer;display:flex;align-items:center;gap:8px;transition:.2s;letter-spacing:.04em}
+.masorah-fab:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(120,90,20,.45)}
+.fab-heb{font-family:'Frank Ruhl Libre',serif;font-size:18px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:var(--r2);box-shadow:0 8px 36px rgba(0,0,0,.25);width:520px;max-width:96vw;max-height:90vh;display:flex;flex-direction:column;border-top:3px solid var(--gold)}
+.modal-hd{padding:14px 18px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-hd h3{font-family:'Cinzel',serif;font-size:15px;color:var(--ink);font-weight:600}
+.modal-hd .modal-x{cursor:pointer;font-size:22px;color:#aaa;line-height:1}
+.modal-hd .modal-x:hover{color:#666}
+.modal-body{padding:18px;overflow-y:auto;flex:1}
+.modal-footer{padding:12px 18px;border-top:1px solid #eee;display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:11px;color:var(--ink2);font-weight:600;margin-bottom:4px;font-family:'Cinzel',serif;text-transform:uppercase;letter-spacing:.06em}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:7px 10px;border:1px solid #ddd;border-radius:var(--r);font-family:inherit;font-size:13px;background:#fff}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{outline:none;border-color:var(--gold)}
+.btn{padding:7px 16px;border:1px solid var(--bdr);border-radius:var(--r);background:var(--paper);color:var(--ink2);font-family:'Cinzel',serif;font-size:12px;cursor:pointer;font-weight:600;transition:.13s}
+.btn:hover{background:var(--gold-pale);border-color:var(--gold);color:var(--gold-dk)}
+.btn.primary{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.btn.primary:hover{background:var(--gold-dk)}
+.btn.danger{background:#b71c1c;color:#fff;border-color:#b71c1c}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:7px 18px;border-radius:24px;font-size:12px;font-family:'JetBrains Mono',monospace;z-index:9999;pointer-events:none}
+/* ── Real image viewer (BIMA-style) ── */
+.viewer-wrap{flex-direction:column}
+.viewer-stage{flex:1;width:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.viewer-pan{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:grab;transition:transform .04s linear}
+.viewer-pan.grabbing{cursor:grabbing}
+.real-folio{position:relative;display:none}
+.real-folio.shown{display:block}
+#osdReal{position:absolute;inset:0;display:none}
+#osdReal .word-ov{position:absolute}
+.real-folio img,.real-folio canvas{display:block;max-width:none;box-shadow:0 8px 28px rgba(0,0,0,.45);border-radius:3px;background:#f5f0e0;user-select:none;-webkit-user-drag:none}
+#overlayLayer{position:absolute;inset:0;pointer-events:none}
+.word-ov{position:absolute;border-radius:2px;mix-blend-mode:multiply;cursor:pointer;pointer-events:auto;transition:.1s}
+.word-ov:hover{outline:1.5px solid #fff;filter:brightness(1.15)}
+.word-ov.main{background:rgba(58,157,110,.42)}
+.word-ov.parva{background:rgba(63,142,208,.42)}
+.word-ov.magna{background:rgba(208,90,58,.45)}
+.word-ov.cant{background:rgba(224,138,30,.45)}
+.word-ov.bright{background:rgba(232,192,32,.55);outline:1px solid #e0a000}
+.ov-tip{position:absolute;top:-22px;right:0;background:#1a1208;color:#f8e8b8;font-family:'Frank Ruhl Libre',serif;font-size:12px;padding:1px 7px;border-radius:4px;white-space:nowrap;display:none;z-index:6}
+.word-ov:hover .ov-tip{display:block}
+.viewer-empty{color:#cfc4a8;font-family:'EB Garamond',serif;font-style:italic;font-size:14px;text-align:center;line-height:1.7;padding:30px;max-width:340px}
+.viewer-empty .ve-ico{font-size:40px;display:block;margin-bottom:10px;opacity:.5}
+/* thumbnail rail under viewer */
+.folio-rail{height:84px;flex-shrink:0;width:100%;background:#46535f;border-top:1px solid #36424c;display:flex;align-items:center;gap:7px;padding:8px 10px;overflow-x:auto;overflow-y:hidden}
+.folio-rail::-webkit-scrollbar{height:7px}
+.folio-rail::-webkit-scrollbar-thumb{background:#2a3640;border-radius:4px}
+.folio-rail-empty{color:#9fb0bd;font-size:11px;font-style:italic;font-family:'EB Garamond',serif;padding:0 8px}
+.thumb{flex-shrink:0;width:52px;height:66px;border-radius:3px;border:2px solid transparent;background:#2a3640 center/cover no-repeat;cursor:pointer;position:relative;transition:.12s;overflow:hidden}
+.thumb:hover{border-color:var(--gold-lt)}
+.thumb.active{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.thumb .thumb-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);color:#f0e4c0;font-size:8px;text-align:center;font-family:'JetBrains Mono',monospace;padding:1px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb img{width:100%;height:100%;object-fit:cover}
+/* folio sublist (pages of active MS in left pane) */
+.folio-sublist{max-height:200px;overflow-y:auto;background:#212d38;border-top:1px solid #2a3848}
+.folio-sublist::-webkit-scrollbar{width:5px}.folio-sublist::-webkit-scrollbar-thumb{background:#3a4858;border-radius:3px}
+.fs-item{padding:6px 16px 6px 30px;font-size:11px;color:#bcd0e0;cursor:pointer;border-bottom:1px solid #283642;font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs-item:hover{background:#2a3848;color:#f8e8b8}
+.fs-item.active{background:#2563a8;color:#fff}
+/* load buttons */
+.load-btn{display:inline-flex;align-items:center;gap:4px}
+.scan-line{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--gold-lt),transparent);box-shadow:0 0 14px 3px rgba(212,160,32,.6);z-index:7;display:none}
+.scan-line.run{display:block;animation:scanmove 1.7s linear infinite}
+@keyframes scanmove{0%{top:2%}100%{top:98%}}
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer">
+      <div class="brand-glyph">מָ</div>
+      <div class="brand-text"><h1>Masorah Corpus</h1><p>Annotate · MG Edition</p></div>
+    </div>
+    <nav class="nav">
+      <a href="transcriber.html">✍ Transcriber</a>
+      <a class="active" href="annotate.html">▤ Annotate</a>
+      <a href="architecture.html">⧉ Arch</a>
+      <a href="pipeline.html">⫯ Pipeline</a>
+      <a href="provenance.html">⟳ Provenance</a>
+      <a href="paleography.html">◉ Paleography</a>
+      <a href="analyzer.html">∿ Analyzer</a>
+      <a href="chat.html">◍ Chat</a>
+      <a href="graph.html">⌬ Graph</a>
+      <a href="reader.html">▦ Reader</a>
+      <a href="publish.html">⥤ Publish</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
+      <div class="user-chip">
+        <div class="user-av">M</div>
+        <span class="user-n">Mark Corley</span>
+        <span class="user-lvl">L4</span>
+      </div>
+      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px;border-radius:5px">Logout</button>
+    </div>
+  </div>
+</header>
+
+<div class="bima-wrap">
+
+  <!-- LEFT -->
+  <aside class="left-pane">
+    <div class="left-brand">
+      <div class="left-logo">מ</div>
+      <div><h3>Masorah Corpus</h3><p>MG Edition</p></div>
+    </div>
+    <div class="left-user-row">
+      <div class="left-avatar">👤</div>
+      <button class="guest-link">(Guest)</button>
+    </div>
+    <div class="path-config">
+      <div class="path-config-hd" onclick="togglePathConfig()">⚙ File Path Config <span id="pathChevron">▼</span></div>
+      <div id="pathConfigBody">
+        <div class="path-row"><span class="path-lbl">Img</span><input class="path-input" id="pathImg" placeholder="Not set — type a label or choose a folder"><button class="path-set" title="Choose a real folder (File System Access API) — writes land here directly" onclick="pickPathFolder('img')">🗂</button><button class="path-set" onclick="setPath('img')">Set</button></div>
+        <div class="path-row"><span class="path-lbl">XML</span><input class="path-input" id="pathXml" placeholder="Not set — type a label or choose a folder"><button class="path-set" title="Choose a real folder (File System Access API) — writes land here directly" onclick="pickPathFolder('xml')">🗂</button><button class="path-set" onclick="setPath('xml')">Set</button></div>
+        <div class="path-row"><span class="path-lbl">CSV</span><input class="path-input" id="pathCsv" placeholder="Not set — type a label or choose a folder"><button class="path-set" title="Choose a real folder (File System Access API) — writes land here directly" onclick="pickPathFolder('csv')">🗂</button><button class="path-set" onclick="setPath('csv')">Set</button></div>
+      </div>
+    </div>
+    <div class="compare-panel">
+      <h4>Compare Transcriptions</h4>
+      <div class="compare-row">
+        <select id="cmp1"><option>Sassoon_1053</option><option>Leningrad_Codex</option><option>Aleppo_Codex</option></select>
+        <select id="cmp2"><option>Leningrad_Codex</option><option>Sassoon_1053</option><option>Aleppo_Codex</option></select>
+        <button class="compare-btn" onclick="compareTranscriptions()">Compare</button>
+      </div>
+    </div>
+    <div class="proj-sel">
+      <select onchange="selectProject(this.value)"><option value="">Select Project</option><option value="masorah1525">Masorah Corpus</option><option value="sassoon">Sassoon 1053</option><option value="dss">DSS Comparative</option><option value="peshitta">Peshitta Archive</option></select>
+    </div>
+    <div class="left-section">Published Transcriptions</div>
+    <div class="ms-list" id="msList"></div>
+    <div class="folio-sublist" id="folioSublist"></div>
+    <div class="add-ms-btn" onclick="showAddMSModal()">+ Add / Link Manuscript</div>
+  </aside>
+
+  <!-- CENTER -->
+  <section class="center-pane">
+    <div class="ms-head-bar">
+      <button class="ms-back-btn" onclick="goBack()">←</button>
+      <button class="ms-bookmark-btn">🔖</button>
+      <div class="ms-head-info">
+        <h2 id="msTitle">British.Library.Add.Ms.21160_Yonah_Pentateuch</h2>
+        <div class="folio-row">
+          <span class="folio-tag" id="folioTag">1r</span>
+          <input class="folio-go-input" id="folioGoInput" placeholder="go to folio" onkeydown="if(event.key==='Enter')goToFolio()">
+          <div class="folio-nav-row">
+            <button class="folio-nav-btn" onclick="folioPrev()">◀</button>
+            <span id="folioRange">i–v</span>&nbsp;<span id="folioCurr">1v</span>
+            <button class="folio-nav-btn" onclick="folioNext()">▶</button>
+          </div>
+        </div>
+      </div>
+      <div class="ms-head-icons">
+        <button class="ms-head-icon" title="HD" onclick="toast('HD view: loading high-res scan…')">HD</button>
+        <button class="ms-head-icon" title="Info" onclick="showMSInfo()">i</button>
+        <button class="ms-head-icon" title="Share" onclick="shareMS()">⤴</button>
+      </div>
+    </div>
+    <div class="center-tabs">
+      <div class="center-tab active" onclick="setTab(this)">Transcription</div>
+      <div class="center-tab" onclick="setTab(this)">Glossary</div>
+    </div>
+    <div class="license-bar">
+      Transcriptions licensed as <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons CC-BY-SA 4.0</a>
+      <span class="cc-badge">CC BY-SA</span>
+    </div>
+    <div class="img-ctrl-bar">
+      <div class="img-ctrl-group"><span class="img-ctrl-lbl">☀</span><input class="img-ctrl-slider" type="range" min="-100" max="100" value="0" id="slBrightness" oninput="applyFilters()"></div>
+      <div class="img-ctrl-group"><span class="img-ctrl-lbl">◑</span><input class="img-ctrl-slider" type="range" min="-100" max="100" value="0" id="slContrast" oninput="applyFilters()"></div>
+      <div class="img-ctrl-group"><span class="img-ctrl-lbl">🎨</span><input class="img-ctrl-slider" type="range" min="-100" max="100" value="0" id="slSaturation" oninput="applyFilters()"></div>
+      <span class="img-sep"></span>
+      <div class="img-ctrl-group"><span class="img-ctrl-lbl">CLAHE</span><select class="clahe-sel" id="claheLevel" onchange="applyCLAHE(this.value)"><option value="0">Off</option><option value="1">1×</option><option value="2">2×</option><option value="3" selected>3×</option><option value="4">4×</option></select></div>
+      <button class="img-ctrl-btn" id="inkHuntBtn" onclick="toggleInkHunt()">🖋 Ink Hunt</button>
+      <button class="img-ctrl-btn" id="aiDetectBtn" onclick="runAIDetect()">🤖 AI Detect</button>
+      <span class="img-sep"></span>
+      <div class="color-scale-wrap">
+        <span class="img-ctrl-lbl">Scale</span>
+        <div class="color-swatch active" style="background:linear-gradient(90deg,#000,#fff)" title="Grayscale" onclick="setColorScale('gray',this)"></div>
+        <div class="color-swatch" style="background:linear-gradient(90deg,#00f,#0ff,#0f0,#ff0,#f00)" title="Jet" onclick="setColorScale('jet',this)"></div>
+        <div class="color-swatch" style="background:linear-gradient(90deg,#000,#B8860B,#fff8e8)" title="Gold" onclick="setColorScale('gold',this)"></div>
+        <div class="color-swatch" style="background:linear-gradient(90deg,#000,#f00,#ff0)" title="Heat" onclick="setColorScale('heat',this)"></div>
+        <div class="color-swatch" style="background:linear-gradient(90deg,#000,#00f,#0ff,#fff)" title="Cool" onclick="setColorScale('cool',this)"></div>
+      </div>
+      <span class="img-sep"></span>
+      <button class="img-ctrl-btn load-btn" onclick="document.getElementById('fileImg').click()">🖼 Open Image</button>
+      <button class="img-ctrl-btn load-btn" onclick="document.getElementById('fileDir').click()">📁 Open Folder</button>
+      <span class="img-sep"></span>
+      <button class="img-ctrl-save-btn" onclick="saveToFolder()">💾 Save</button>
+      <button class="img-ctrl-btn" onclick="resetFilters()">↺ Reset</button>
+      <input type="file" id="fileImg" accept="image/*,.tif,.tiff,.jp2" multiple style="display:none" onchange="loadImageFiles(this.files)">
+      <input type="file" id="fileDir" webkitdirectory directory multiple style="display:none" onchange="loadFolder(this.files)">
+    </div>
+    <div class="viewer-wrap" id="viewerWrap">
+      <div class="viewer-float-tools">
+        <button class="vft-btn" onclick="zoomIn()">+</button>
+        <button class="vft-btn" onclick="zoomOut()">−</button>
+        <button class="vft-btn" onclick="fitImage()" title="Fit">⤢</button>
+        <button class="vft-btn" onclick="toggleFullscreen()">⛶</button>
+        <button class="vft-btn active" id="annoBtn" onclick="toggleAnnos()">A</button>
+        <button class="vft-btn" onclick="toast('Translation mode: click a word overlay to translate')">文</button>
+      </div>
+      <div class="viewer-stage" id="viewerStage" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+        <div id="osdReal"></div>
+        <div class="viewer-pan" id="viewerPan">
+          <!-- real loaded scan: kept off-screen now — OpenSeadragon (#osdReal)
+               renders the visible tiled view; this element still holds
+               #realImg for naturalWidth/Height reads and canvas export. -->
+          <div class="real-folio" id="realFolio" style="display:none">
+            <img id="realImg" alt="manuscript folio" draggable="false">
+            <canvas id="realCanvas" style="display:none"></canvas>
+            <div id="overlayLayer"></div>
+          </div>
+          <!-- synthetic demo folio (shown until a real scan is loaded) -->
+          <div class="folio-frame" id="folioFrame">
+            <div class="folio-canvas" id="folioCanvas">
+              <div class="masorah-top">ויאמר אלהים יהי אור · ויפרש את הוד · אמרי שפר ועתק · קמ״ח</div>
+              <div class="heb-col c1">תקרא את ראש העם הקדוש<br>ואת הילד המבחר ועתה<br>הים תשרצו תקרא אנכי<br>וייטב לפניהם ויקראהו</div>
+              <div class="heb-col c2">ויאמר אלהים יהי אור<br>ויהי אור · וירא אלהים<br>את האור כי טוב · ויבדל<br>אלהים בין האור ובין<br>החשך · ויקרא אלהים<br>לאור יום ולחשך קרא<br>לילה · ויהי ערב ויהי<br>בקר · יום אחד</div>
+              <div class="heb-col c3">בראשית ברא אלהים<br>את השמים ואת הארץ<br>והארץ היתה תהו ובהו<br>וחשך על פני תהום<br>ורוח אלהים מרחפת<br>על פני המים</div>
+              <div class="masorah-bot">סימן · בְּרֵאשִׁית בָּרָא · ל׳ ה׳ פסוקין · קמ״ח תיבות</div>
+              <div class="anno-zone bright" style="top:118px;right:28px;width:88px;height:16px"><span class="anno-label">★ Bright Node: Gen 1:1 ±3σ</span></div>
+              <div class="anno-zone parva" style="top:48px;right:0;width:15px;height:78px"><span class="anno-label">Masorah Parva</span></div>
+              <div class="anno-zone magna" style="top:0;left:12px;right:12px;height:12px"><span class="anno-label">Masorah Magna</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="scan-line" id="scanLine"></div>
+        <div class="viewer-empty" id="viewerEmpty" style="display:none">
+          <span class="ve-ico">📜</span>
+          No scan loaded for this folio.<br>Use <b>Open Image</b> or <b>Open Folder</b> above, drag a file here,
+          or load the Digital Archive at<br><code style="font-size:10px">…\01_Computational_Lab\1. Digital Archive</code>
+        </div>
+      </div>
+      <div class="folio-rail" id="folioRail"><span class="folio-rail-empty">No folio set loaded — open a folder to populate the page rail.</span></div>
+    </div>
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="right-pane">
+    <div class="right-tabs">
+      <div class="right-tab active" onclick="setRightTab(this,'contexts')">📑 Contexts <span class="rt-ct" id="ctxCt">18</span></div>
+      <div class="right-tab" onclick="setRightTab(this,'snapshots')">📷 Snapshots <span class="rt-ct">1</span></div>
+      <div class="right-tab" onclick="setRightTab(this,'motifs')">🖼 Motifs</div>
+    </div>
+    <div class="right-toolbar">
+      <h3>Transcriptions</h3>
+      <button title="Show/hide">👁</button>
+      <button title="Bookmark" style="color:var(--gold)">🔖</button>
+      <select><option>Sort by…</option><option>Date</option><option>Sigla</option></select>
+      <select><option>Language…</option><option>Hebrew</option><option>Aramaic</option></select>
+    </div>
+    <div id="rightPanelBody" class="ctx-list"></div>
+  </aside>
+</div>
+
+<button class="masorah-fab" onclick="toggleMasorahPanel()"><span class="fab-heb">מ</span> Open Masorah.ai Zone Editor</button>
+
+<!-- MASORAH.AI PANEL -->
+<div class="masorah-panel" id="masorahPanel">
+  <div class="mp-header">
+    <h3><span class="mp-heb">מָסוֹרָה.ai</span> Zone Editor + Forensic AI</h3>
+    <span class="mp-sub">Active · DistilGPT-2 (Fastest) · .ai API</span>
+    <button class="mp-close" onclick="toggleMasorahPanel()">×</button>
+  </div>
+  <div class="mp-body">
+    <div class="zone-col">
+      <div class="zone-hd">Zone Type</div>
+      <div class="zone-btn active" onclick="setZone(this,'main-text')"><span class="zone-sw" style="background:var(--z-main)"></span>Main Text</div>
+      <div class="zone-btn" onclick="setZone(this,'parva')"><span class="zone-sw" style="background:var(--z-parva)"></span>Masorah Parva</div>
+      <div class="zone-btn" onclick="setZone(this,'magna')"><span class="zone-sw" style="background:var(--z-magna)"></span>Masorah Magna</div>
+      <div class="zone-btn" onclick="setZone(this,'cantillation')"><span class="zone-sw" style="background:var(--z-cant)"></span>Cantillation</div>
+      <div class="zone-btn" onclick="setZone(this,'targum')"><span class="zone-sw" style="background:var(--z-targ)"></span>Targum / Commentary</div>
+      <div class="zone-btn" onclick="setZone(this,'marginal')"><span class="zone-sw" style="background:var(--z-marg)"></span>Marginal Note</div>
+      <div class="zone-btn" onclick="setZone(this,'scribal')"><span class="zone-sw" style="background:var(--z-mark)"></span>Scribal Mark / Sof Pasuq</div>
+      <div class="zone-btn" onclick="setZone(this,'bright')"><span class="zone-sw" style="background:var(--z-bright);border:1px solid #e0a000"></span>★ Bright Node (PhD)</div>
+    </div>
+    <div class="drop-col" id="dropCol" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+      <div class="drop-inner" id="dropInner">
+        <div class="di-ico">📜</div>
+        <p>Drop manuscript image here</p>
+        <small>JPG · PNG · TIF · PDF — or use Open Image above<br>Optimized for high-resolution Codex scans</small>
+      </div>
+      <div class="drop-path-row">
+        <input class="drop-path-inp" id="dropPathInp" placeholder="C:\Users\markc\Masorah_1525\01_Computational_Lab\…">
+        <button class="drop-path-btn" onclick="loadFromPath()">Load</button>
+      </div>
+    </div>
+    <div class="forensic-col">
+      <div class="fa-head">
+        <h4>📜 Forensic AI Agent</h4>
+        <span class="fa-idle" id="faStatus">Idle</span>
+      </div>
+      <div class="fa-body">
+        <p>Draw a zone on the manuscript, then ask the AI agent to analyse it.</p>
+        <p><em>The agent will apply:</em></p>
+        <ul>
+          <li>ECC analysis (Masorah Parva/Magna)</li>
+          <li>Paleographic dating</li>
+          <li>Diachronic stemmatic mapping</li>
+          <li>Bright Node detection (±3σ)</li>
+          <li>CBGM coherence scoring</li>
+        </ul>
+        <div class="fa-modes">
+          <button class="fa-mode-btn active" onclick="setFAMode(this,'ecc')">⚙ ECC Analysis</button>
+          <button class="fa-mode-btn" onclick="setFAMode(this,'dating')">📅 Paleographic Dating</button>
+          <button class="fa-mode-btn" onclick="setFAMode(this,'stemma')">⌬ Stemmatic Mapping</button>
+          <button class="fa-mode-btn" onclick="setFAMode(this,'bright')">★ Bright Node</button>
+          <button class="fa-mode-btn" onclick="setFAMode(this,'cbgm')">∿ CBGM Coherence</button>
+        </div>
+        <div class="fa-phd-badge"><div class="ttl">PhD Research Mode Active</div><div class="sub">Diachronic Validation 1525 · FAU/TAU</div></div>
+        <div id="faResult" style="margin-top:9px;font-size:11px;color:var(--ink2)"></div>
+      </div>
+      <div class="fa-input-row">
+        <input type="text" id="faQuery" placeholder="Ask about selected zone…" onkeydown="if(event.key==='Enter')sendFAQuery()">
+        <button class="fa-send-btn" onclick="sendFAQuery()">↑</button>
+      </div>
+      <div class="fa-save-row">
+        <button class="fa-save-btn" onclick="saveZoneWork()">💾 Save JSON</button>
+        <button class="fa-export-btn" onclick="exportZoneWork()">⤓ Export</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD MS MODAL -->
+<div class="modal-overlay" id="addMSModal">
+  <div class="modal-box">
+    <div class="modal-hd"><h3 id="addMSTitle">Add / Link Manuscript</h3><span class="modal-x" onclick="closeModal('addMSModal')">×</span></div>
+    <div class="modal-body">
+      <div class="form-row"><label>Manuscript Name</label><input id="msName" placeholder="e.g. Sassoon 1053"></div>
+      <div class="form-row"><label>Sigla</label><input id="msSigla" placeholder="e.g. 03c"></div>
+      <div class="form-row"><label>Tier</label><select id="msTier"><option>T01</option><option>T02</option><option selected>T03</option><option>T04</option><option>T05</option></select></div>
+      <div class="form-row"><label>Image Folder Path</label><input id="msImgPath" placeholder="C:\Users\markc\Masorah_1525\01_Computational_Lab\1. Digital Archive\…" oninput="scanImageFolder(this.value)"></div>
+      <div class="form-row"><label>XML Path (Forensic Nodes)</label><input id="msXmlPath" placeholder="C:\Users\markc\Masorah_1525\02_Forensic_Nodes\…"></div>
+      <div class="form-row"><label>CSV / HTML Path</label><input id="msCsvPath" placeholder="C:\Users\markc\Masorah_1525\03. Interface and Analysis\Misc\csv\…"></div>
+      <div class="form-row"><label>Notes</label><textarea id="msNotes" rows="3" placeholder="Provenance, special features, etc."></textarea></div>
+      <div id="imgScanResult" style="font-size:11px;color:var(--ink3);font-style:italic"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn danger" id="deleteMSBtn" style="display:none" onclick="deleteMS()">Delete</button>
+      <button class="btn" onclick="closeModal('addMSModal')">Cancel</button>
+      <button class="btn primary" onclick="saveMS()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Data ── */
+const MSS=[
+  {id:'bnf302',name:'BnF. Département des manuscrits. Hébreu 302',folios:6,tier:'T03',type:'primary'},
+  {id:'bl21160',name:'British.Library.Add.Ms.21160_Yonah_Pentateuch',folios:8,tier:'T03',type:'primary',active:true},
+  {id:'parma2780',name:'Codex.Parma.2780',folios:4,tier:'T03',type:'secondary'},
+  {id:'parma2924',name:'Codex.Parma.2924',folios:4,tier:'T03',type:'secondary'},
+  {id:'leipzig',name:'Leipzig.UBL.1099',folios:8,tier:'T03',type:'primary'},
+  {id:'sassoon',name:'Sassoon_1053',folios:812,tier:'T03',type:'primary'},
+  {id:'aleppo',name:'Aleppo_Codex',folios:295,tier:'T03',type:'primary'},
+  {id:'leningrad',name:'Leningrad_Codex',folios:491,tier:'T03',type:'primary'},
+];
+const CONTEXTS=[
+  {ct:23,color:'gold',goto:'GO',heb:'וישב',label:'Okhla Halle 2 #3/ Ognibeni #3A/ Ginsburg II Sh…',sub:'Masora Magna'},
+  {ct:1,color:'blue',heb:'וישב',label:'',sub:'Masora Parva'},
+  {ct:12,color:'green',heb:'ואת העם',label:'OH2 Margin List / Ognibeni 1997 #235/ Gin…',sub:'Masora Magna',weil:'#1055'},
+  {ct:6,color:'green',heb:'אשכל',label:'Ginsburg 1 Aleph #1151, p.110',sub:'Masora Magna',weil:'#92'},
+  {ct:1,color:'amber',heb:'אשכל',label:'',sub:'Masora Parva'},
+  {ct:1,color:'gold',heb:'הפליט',label:'Ginsburg II Pe #105, p.444',sub:'Masora Magna'},
+  {ct:1,color:'gold',heb:'הפליט',label:'',sub:'Masora Parva'},
+  {ct:1,color:'gold',heb:'רכש',label:'',sub:'Masora Parva'},
+  {ct:1,color:'green',heb:'בראשית',label:'Sassoon Margin Note #017',sub:'Masora Parva'},
+  {ct:3,color:'amber',heb:'יהוה',label:'Ketib-Qere list · Okhla List 12',sub:'Masora Magna',weil:'#0144'},
+  {ct:8,color:'blue',heb:'אשר',label:'Ginsburg Samek #208',sub:'Masora Magna'},
+  {ct:1,color:'gold',heb:'כי',label:'',sub:'Masora Parva'},
+  {ct:5,color:'green',heb:'לכן',label:'OH2 Margin #401 / Ginsburg III Lamed',sub:'Masora Magna',weil:'#0301'},
+  {ct:2,color:'amber',heb:'גם',label:'',sub:'Masora Parva'},
+  {ct:14,color:'gold',heb:'שם',label:'Ginsburg II Shin #301',sub:'Masora Magna'},
+  {ct:1,color:'blue',heb:'זה',label:'',sub:'Masora Parva'},
+  {ct:4,color:'green',heb:'אל',label:'Okhla #118 / Ognibeni 1997',sub:'Masora Magna',weil:'#0055'},
+  {ct:1,color:'amber',heb:'בן',label:'',sub:'Masora Parva'},
+];
+let currentMS=MSS.find(m=>m.active);
+let currentFolio=1,currentSide='r';
+let editingMSId=null,annoVisible=true,faMode='ecc';
+
+/* ── MS List ── */
+function renderMSList(){
+  document.getElementById('msList').innerHTML=MSS.map(m=>`
+    <div class="ms-item ${m.active?'active':''}" onclick="selectMS('${m.id}')">
+      <span class="ms-name" title="${m.name}">${m.name}</span>
+      <span class="ms-ct">${m.folios}</span>
+      <button class="ms-edit" onclick="event.stopPropagation();editMS('${m.id}')">✎</button>
+      <span class="ms-chev">›</span>
+    </div>`).join('');
+}
+function selectMS(id){
+  MSS.forEach(m=>m.active=false);
+  const ms=MSS.find(m=>m.id===id);if(!ms)return;
+  ms.active=true;currentMS=ms;currentFolio=1;currentSide='r';
+  renderMSList();
+  document.getElementById('msTitle').textContent=ms.name;
+  updateFolioLabel();
+  pages=[];curPage=-1;renderThumbs();renderFolioSublist();showDemo();
+  toast('Loaded: '+ms.name+' — open its image folder to view scans');
+}
+/* ── Contexts ── */
+function renderContexts(){
+  document.getElementById('rightPanelBody').innerHTML=CONTEXTS.map(c=>`
+    <div class="ctx-item">
+      <div class="ctx-num ${c.color}">${c.ct}</div>
+      <div class="ctx-body">
+        ${c.goto?`<div style="font-size:10px;color:var(--gold);margin-bottom:2px">↑${c.goto}</div>`:''}
+        <div class="ctx-heb">${c.heb}</div>
+        ${c.label?`<div class="ctx-label">${c.label}</div>`:''}
+        <div class="ctx-sub">${c.sub}${c.weil?` · Weil <b>${c.weil}</b>`:''}</div>
+      </div>
+      <span class="ctx-chev">›</span>
+    </div>`).join('');
+}
+/* ── Tabs ── */
+function setTab(el){document.querySelectorAll('.center-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active')}
+function setRightTab(el,tab){
+  document.querySelectorAll('.right-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  if(tab==='contexts')renderContexts();
+  else document.getElementById('rightPanelBody').innerHTML='<div style="padding:20px;color:#aaa;font-style:italic;font-size:13px;">No '+tab+' data loaded.</div>';
+}
+/* ── Folio nav ── */
+function updateFolioLabel(){
+  document.getElementById('folioTag').textContent=currentFolio+currentSide;
+  document.getElementById('folioCurr').textContent=currentFolio+(currentSide==='r'?'v':'r');
+}
+function folioNext(){if(pages.length){gotoPage(Math.min(pages.length-1,curPage+1));return;}if(currentSide==='r')currentSide='v';else{currentSide='r';currentFolio++;}updateFolioLabel()}
+function folioPrev(){if(pages.length){gotoPage(Math.max(0,curPage-1));return;}if(currentSide==='v')currentSide='r';else{currentSide='v';currentFolio=Math.max(1,currentFolio-1);}updateFolioLabel()}
+function goToFolio(){const v=document.getElementById('folioGoInput').value.trim();if(pages.length){const n=parseInt(v);if(!isNaN(n)&&n>=1&&n<=pages.length){gotoPage(n-1);toast('Page '+n);return;}const hit=pages.findIndex(p=>p.name.toLowerCase().includes(v.toLowerCase()));if(hit>=0){gotoPage(hit);toast('Matched '+pages[hit].name);return;}}const m=v.match(/^(\d+)([rv]?)$/i);if(m){currentFolio=parseInt(m[1]);currentSide=(m[2]||'r').toLowerCase();updateFolioLabel();toast('Navigated to folio '+v)}}
+function goBack(){toast('← Back to manuscript list')}
+function showMSInfo(){const ms=currentMS||MSS[0];toast(ms.name+' · '+ms.tier+' · '+ms.folios+' folios')}
+function shareMS(){navigator.clipboard&&navigator.clipboard.writeText(location.href);toast('Share link copied!')}
+/* ── Image filters (apply to whatever is displayed: real scan or demo) ── */
+function fxTarget(){return isRealActive()?viewer.canvas:document.getElementById('viewerPan');}
+function applyFilters(){
+  const b=1+document.getElementById('slBrightness').value/100;
+  const c=1+document.getElementById('slContrast').value/100;
+  const s=1+document.getElementById('slSaturation').value/100;
+  fxTarget().style.filter=`brightness(${b}) contrast(${c}) saturate(${s})`+(inkHuntOn?' invert(0.05) sepia(0.3)':'');
+}
+function resetFilters(){['slBrightness','slContrast','slSaturation'].forEach(id=>{document.getElementById(id).value=0});document.getElementById('claheLevel').value='0';inkHuntOn=false;document.getElementById('inkHuntBtn').classList.remove('active');document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));fxTarget().style.filter='none';toast('Filters reset')}
+function applyCLAHE(level){const cl=parseFloat(level)||0;if(!cl){applyFilters();return;}const boost=1+(cl*0.12);fxTarget().style.filter=`contrast(${boost}) brightness(1.05)`;toast('CLAHE '+level+'× applied')}
+function setColorScale(scale,el){document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));el.classList.add('active');const scales={gray:'grayscale(1)',jet:'hue-rotate(240deg) saturate(3) contrast(1.2)',gold:'sepia(0.7) saturate(2) brightness(1.1)',heat:'sepia(1) saturate(4) hue-rotate(330deg)',cool:'hue-rotate(180deg) saturate(1.5)'};fxTarget().style.filter=scales[scale]||'none';toast('Color scale: '+scale)}
+function saveToFolder(){
+  if(vState.dataURL){ exportProcessedImage(); }
+  else { toast('No scan loaded — open an image first.'); }
+}
+let inkHuntOn=false;
+function toggleInkHunt(){inkHuntOn=!inkHuntOn;document.getElementById('inkHuntBtn').classList.toggle('active',inkHuntOn);applyFilters();toast(inkHuntOn?'Ink Hunt ON — boosting high-density ink':'Ink Hunt OFF')}
+function runAIDetect(){
+  const btn=document.getElementById('aiDetectBtn');btn.classList.add('active');
+  const line=document.getElementById('scanLine');line.classList.add('run');
+  toast('AI Detect: scanning… (Dicta-HTR v2 + ResNet-50 layout)');
+  setTimeout(()=>{
+    line.classList.remove('run');btn.classList.remove('active');
+    if(vState.dataURL){ drawWordOverlays(); toast('Layout: '+_lastOv+' word zones · 3 Parva, 1 Bright, 1 Magna strip'); }
+    else toast('Found: 3 Masorah Parva zones, 1 Bright Node, 1 Masorah Magna strip (demo)');
+  },1900);
+}
+function zoomIn(){if(isRealActive()){if(viewer.world.getItemCount()){viewer.viewport.zoomBy(1.25);viewer.viewport.applyConstraints();}return;}vState.scale=Math.min(8,vState.scale*1.25);applyTransform();}
+function zoomOut(){if(isRealActive()){if(viewer.world.getItemCount()){viewer.viewport.zoomBy(1/1.25);viewer.viewport.applyConstraints();}return;}vState.scale=Math.max(0.1,vState.scale/1.25);applyTransform();}
+function fitImage(){if(isRealActive()){if(viewer.world.getItemCount())viewer.viewport.goHome(true);toast('Fit to view');return;}vState.scale=1;vState.tx=0;vState.ty=0;applyTransform();toast('Fit to view');}
+function toggleFullscreen(){const f=document.getElementById('viewerStage');if(!document.fullscreenElement)f.requestFullscreen&&f.requestFullscreen();else document.exitFullscreen&&document.exitFullscreen()}
+function toggleAnnos(){annoVisible=!annoVisible;document.querySelectorAll('.anno-zone,.word-ov').forEach(z=>z.style.display=annoVisible?'':'none');document.getElementById('annoBtn').classList.toggle('active',annoVisible)}
+/* ── Path config ── */
+let pathConfigOpen=true;
+function togglePathConfig(){pathConfigOpen=!pathConfigOpen;document.getElementById('pathConfigBody').style.display=pathConfigOpen?'':'none';document.getElementById('pathChevron').textContent=pathConfigOpen?'▼':'▶'}
+function setPath(type){const ids={img:'pathImg',xml:'pathXml',csv:'pathCsv'};const val=document.getElementById(ids[type]).value;localStorage.setItem('masorah.path.'+type,val);toast(type.toUpperCase()+' path saved')}
+function selectProject(p){if(p)toast('Project: '+p)}
+function compareTranscriptions(){toast('Comparing: '+document.getElementById('cmp1').value+' ↔ '+document.getElementById('cmp2').value+'… ECM coherence in progress')}
+/* ── Masorah.ai ── */
+function toggleMasorahPanel(){document.getElementById('masorahPanel').classList.toggle('open')}
+function setZone(el,zone){document.querySelectorAll('.zone-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');window._zone=zone}
+/* ── Drop / path load (real) ── */
+function handleDrop(e){
+  e.preventDefault();
+  const files=e.dataTransfer.files;if(!files||!files.length)return;
+  const imgs=[...files].filter(isImageFile);
+  if(!imgs.length){toast('No image files in drop');return;}
+  ingestFiles(imgs);
+  const di=document.getElementById('dropInner');if(di)di.innerHTML=`<div class="di-ico">📜</div><p>${imgs[0].name}</p><small>${(imgs[0].size/1024).toFixed(1)} KB · loaded into viewer</small>`;
+}
+function loadFromPath(){
+  const p=document.getElementById('dropPathInp').value.trim();if(!p){toast('Enter a file path');return;}
+  loadServerImage(p);
+}
+/* ── Forensic AI ── */
+function setFAMode(el,mode){document.querySelectorAll('.fa-mode-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');faMode=mode}
+const FA_RESPONSES={ecc:'ECC Analysis: Zone identified as Masorah Parva (MP). Frequency count: ל׳ ב׳ (3 occurrences). Consistent with Massekhet Soferim Ch. 6.3. Confidence: 94%.',dating:'Paleographic Dating: Letter forms consistent with Tiberias school, ca. 950–1050 CE. Aleph: angular top-heavy; Bet: closed base. Compare Leningrad Codex (1009 CE) at 87% similarity.',stemma:'Stemmatic Mapping: Zone links to Sassoon 1053 (03c). Diachronic path: Cairo Genizah (02h) → Aleppo (03a) → Sassoon (03c). CBGM coherence vs 05c: −0.483.',bright:'★ Bright Node: Gen 1:1 registers ±3.2σ from corpus mean. Variant: בְּרֵאשִׁית vs בָּרֵאשִׁית. Attested in 7 witnesses; diverges from 05c baseline.',cbgm:'CBGM Coherence: 03c ↔ 05c = 0.924. 812 extant folios processed. Best ancestor: Aleppo (03a, 0.971). θ=0.246 iter 4/4.'};
+function sendFAQuery(){
+  const q=document.getElementById('faQuery').value.trim();if(!q)return;
+  const status=document.getElementById('faStatus');const result=document.getElementById('faResult');
+  status.textContent='Processing…';status.style.background='#fff3e0';
+  result.innerHTML='<em style="color:var(--ink4)">Analysing zone…</em>';
+  setTimeout(()=>{
+    status.textContent='Done';status.style.background='#e8f5e9';
+    result.innerHTML=`<div style="background:var(--paper);border:1px solid var(--bdr);border-radius:5px;padding:8px;margin-top:5px;font-size:11px;line-height:1.6">${FA_RESPONSES[faMode]||'Analysis complete.'}<br><small style="color:var(--ink3)">Query: "${q}" · Mode: ${faMode} · Folio: ${currentFolio}${currentSide}</small></div>`;
+    setTimeout(()=>{status.textContent='Idle';status.style.background=''},4000);
+  },1200);
+  document.getElementById('faQuery').value='';
+}
+async function saveZoneWork(){
+  const data={ms:currentMS?.name,folio:currentFolio+currentSide,zone:window._zone||'main-text',mode:faMode,result:document.getElementById('faResult').innerText,ts:new Date().toISOString()};
+  const name='zone_'+Date.now()+'.json';const content=JSON.stringify(data,null,2);
+  if(dirHandles.xml){try{await writeToHandle(dirHandles.xml,name,content);toast('Zone JSON written → '+dirHandles.xml.name+'/'+name);return;}catch(e){toast('Direct write failed — downloading instead');}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'application/json'}));a.download=name;a.click();
+  toast(dirHandles.xml?('Downloaded '+name):('Downloaded '+name+' — choose an XML folder above to write directly next time'));
+}
+async function exportZoneWork(){
+  const data={ms:currentMS?.name,folio:currentFolio+currentSide,zone:window._zone||'main-text',mode:faMode,result:document.getElementById('faResult').innerText,ts:new Date().toISOString()};
+  const name='masorah_zone_'+Date.now()+'.json';const content=JSON.stringify(data,null,2);
+  if(dirHandles.xml){try{await writeToHandle(dirHandles.xml,name,content);toast('Exported zone JSON → '+dirHandles.xml.name+'/'+name);return;}catch(e){}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'application/json'}));a.download=name;a.click();toast('Exported zone JSON');
+}
+/* ── MS Modal ── */
+function showAddMSModal(){editingMSId=null;document.getElementById('addMSTitle').textContent='Add / Link Manuscript';document.getElementById('deleteMSBtn').style.display='none';['msName','msSigla','msImgPath','msXmlPath','msCsvPath','msNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('msTier').value='T03';document.getElementById('imgScanResult').textContent='';document.getElementById('addMSModal').style.display='flex'}
+function editMS(id){const ms=MSS.find(m=>m.id===id);if(!ms)return;editingMSId=id;document.getElementById('addMSTitle').textContent='Edit Manuscript';document.getElementById('deleteMSBtn').style.display='';document.getElementById('msName').value=ms.name;document.getElementById('msSigla').value=ms.id;document.getElementById('msTier').value=ms.tier||'T03';['msImgPath','msXmlPath','msCsvPath','msNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('imgScanResult').textContent='';document.getElementById('addMSModal').style.display='flex'}
+function saveMS(){const name=document.getElementById('msName').value.trim();if(!name){alert('Enter a manuscript name');return;}if(editingMSId){const ms=MSS.find(m=>m.id===editingMSId);if(ms){ms.name=name;ms.tier=document.getElementById('msTier').value}toast('Updated: '+name)}else{MSS.push({id:'ms_'+Date.now(),name,folios:0,tier:document.getElementById('msTier').value,type:'primary'});toast('Added: '+name)}renderMSList();closeModal('addMSModal')}
+function deleteMS(){if(!editingMSId)return;if(!confirm('Delete this manuscript?'))return;const idx=MSS.findIndex(m=>m.id===editingMSId);if(idx>=0)MSS.splice(idx,1);renderMSList();closeModal('addMSModal');toast('Manuscript deleted')}
+function closeModal(id){document.getElementById(id).style.display='none'}
+function scanImageFolder(path){if(!path||path.length<10)return;document.getElementById('imgScanResult').textContent='Scanning… (JPEG, TIFF, JP2 in subfolders)';setTimeout(()=>{document.getElementById('imgScanResult').textContent='Found 812 images: 410 JPEG, 287 TIFF, 115 JP2 across 3 subfolder levels'},700)}
+/* ════════════ REAL VIEWER ENGINE ════════════
+   The synthetic demo folio (styled Hebrew text divs, not a real image) still
+   pans/zooms via the old vState CSS-transform on #viewerPan. A genuinely
+   loaded scan now renders through OpenSeadragon (#osdReal) instead — tiled,
+   IIIF-ready, no gigapixel bitmap decoded into memory at once. */
+let vState={scale:1,tx:0,ty:0,dataURL:null};
+let pages=[];           /* {name,url,file,isTiff,page} */
+let curPage=-1;
+let _lastOv=0;
+let _ovIds=[];
+
+const viewer=OpenSeadragon({
+  id:'osdReal',prefixUrl:'https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/',
+  showNavigationControl:false,minZoomImageRatio:0.05,maxZoomPixelRatio:12,
+  visibilityRatio:0.3,crossOriginPolicy:'Anonymous',springStiffness:9
+});
+function isRealActive(){return document.getElementById('osdReal').style.display!=='none';}
+
+/* ── Persisted folder handles (File System Access API) ──
+   The Img/XML/CSV path fields used to be nothing more than hardcoded
+   absolute strings baked into the page — informative to look at, but not
+   an actual write target. A real FileSystemDirectoryHandle is remembered
+   per category in IndexedDB (handles are structured-cloneable), with
+   permission re-verified next visit, so "choose a folder" is a one-time
+   action and saves/exports genuinely land on disk when granted. */
+let dirHandles={img:null,xml:null,csv:null};
+const DirStore={
+  _dbp:null,
+  db(){return this._dbp||(this._dbp=new Promise((res,rej)=>{
+    const rq=indexedDB.open('masorah-fs',1);
+    rq.onupgradeneeded=()=>rq.result.createObjectStore('handles');
+    rq.onsuccess=()=>res(rq.result);rq.onerror=()=>rej(rq.error);
+  }));},
+  async get(key){try{const db=await this.db();return await new Promise((res,rej)=>{const tx=db.transaction('handles','readonly');const rq=tx.objectStore('handles').get(key);rq.onsuccess=()=>res(rq.result||null);rq.onerror=()=>rej(rq.error);});}catch(e){return null;}},
+  async set(key,handle){try{const db=await this.db();await new Promise((res,rej)=>{const tx=db.transaction('handles','readwrite');tx.objectStore('handles').put(handle,key);tx.oncomplete=res;tx.onerror=()=>rej(tx.error);});}catch(e){}}
+};
+async function writeToHandle(handle,name,content){const fh=await handle.getFileHandle(name,{create:true});const ws=await fh.createWritable();await ws.write(content);await ws.close();}
+async function pickPathFolder(type){
+  if(!window.showDirectoryPicker){toast('Folder picker needs Chrome/Edge (File System Access API).');return;}
+  try{
+    const h=await window.showDirectoryPicker({mode:'readwrite'});
+    dirHandles[type]=h;
+    await DirStore.set('archive-'+type,h);
+    const ids={img:'pathImg',xml:'pathXml',csv:'pathCsv'};
+    document.getElementById(ids[type]).value=h.name;
+    localStorage.setItem('masorah.path.'+type,h.name);
+    toast(type.toUpperCase()+' folder connected: '+h.name+' (remembered)');
+  }catch(e){}
+}
+
+function applyTransform(){
+  const pan=document.getElementById('viewerPan');
+  pan.style.transform=`translate(${vState.tx}px,${vState.ty}px) scale(${vState.scale})`;
+}
+function isImageFile(f){return /\.(jpe?g|png|tiff?|jp2|webp|gif|bmp)$/i.test(f.name||f);}
+
+/* show / hide demo vs real */
+function showDemo(){
+  document.getElementById('osdReal').style.display='none';
+  document.getElementById('viewerPan').style.display='';
+  document.getElementById('folioFrame').style.display='';
+  document.getElementById('viewerEmpty').style.display='none';
+  vState.dataURL=null;clearOverlays();
+}
+function showRealImage(url,label){
+  const img=document.getElementById('realImg');
+  document.getElementById('folioFrame').style.display='none';
+  document.getElementById('viewerEmpty').style.display='none';
+  document.getElementById('viewerPan').style.display='none';
+  document.getElementById('osdReal').style.display='block';
+  img.onload=()=>{vState.dataURL=url;};
+  img.src=url;
+  viewer.addOnceHandler('open',()=>{fitImage();clearOverlays();});
+  viewer.open({type:'image',url});
+  if(label)document.getElementById('folioTag').textContent=label;
+}
+
+/* TIFF → PNG dataURL via UTIF, else object URL */
+async function fileToDisplayURL(file){
+  if(/\.(tiff?)$/i.test(file.name)){
+    if(typeof UTIF==='undefined'){toast('TIFF needs internet (UTIF CDN). Showing name only.');return null;}
+    const buf=await file.arrayBuffer();
+    const ifds=UTIF.decode(buf);UTIF.decodeImage(buf,ifds[0]);
+    const rgba=UTIF.toRGBA8(ifds[0]);
+    const cv=document.createElement('canvas');cv.width=ifds[0].width;cv.height=ifds[0].height;
+    const ctx=cv.getContext('2d');const id=ctx.createImageData(cv.width,cv.height);
+    id.data.set(rgba);ctx.putImageData(id,0,0);
+    return cv.toDataURL('image/png');
+  }
+  return URL.createObjectURL(file);
+}
+
+/* ingest a flat list of File objects */
+async function ingestFiles(files){
+  const arr=[...files].filter(isImageFile);
+  if(!arr.length){toast('No supported images');return;}
+  arr.sort((a,b)=>(a.webkitRelativePath||a.name).localeCompare(b.webkitRelativePath||b.name,undefined,{numeric:true}));
+  pages=[];
+  for(const f of arr){
+    pages.push({name:f.name,file:f,url:null,isTiff:/\.(tiff?)$/i.test(f.name),rel:f.webkitRelativePath||f.name});
+  }
+  toast('Loaded '+pages.length+' folio image'+(pages.length>1?'s':''));
+  renderThumbs();renderFolioSublist();
+  gotoPage(0);
+}
+async function loadImageFiles(files){ingestFiles(files);}
+async function loadFolder(files){
+  const arr=[...files].filter(isImageFile);
+  if(!arr.length){toast('No JPEG/TIFF found in folder tree');return;}
+  toast('Scanning folder tree… '+arr.length+' images (incl. subfolders)');
+  ingestFiles(arr);
+  /* reflect into active MS folio count */
+  if(currentMS){currentMS.folios=arr.length;renderMSList();}
+}
+
+async function gotoPage(i){
+  if(i<0||i>=pages.length)return;
+  curPage=i;const p=pages[i];
+  if(!p.url){ try{p.url=await fileToDisplayURL(p.file);}catch(e){toast('Decode failed: '+p.name);return;} }
+  if(!p.url){return;}
+  showRealImage(p.url,p.name.replace(/\.[^.]+$/,''));
+  document.querySelectorAll('#folioRail .thumb').forEach((t,idx)=>t.classList.toggle('active',idx===i));
+  document.querySelectorAll('#folioSublist .fs-item').forEach((t,idx)=>t.classList.toggle('active',idx===i));
+  /* keep active thumb visible */
+  const at=document.querySelector('#folioRail .thumb.active');if(at)at.scrollIntoView({inline:'center',block:'nearest'});
+}
+
+function renderThumbs(){
+  const rail=document.getElementById('folioRail');
+  if(!pages.length){rail.innerHTML='<span class="folio-rail-empty">No folio set loaded — open a folder to populate the page rail.</span>';return;}
+  rail.innerHTML=pages.map((p,i)=>`<div class="thumb ${i===curPage?'active':''}" onclick="gotoPage(${i})" title="${p.name}"><span class="thumb-lbl">${(i+1)}</span></div>`).join('');
+  /* lazily fill thumb previews */
+  pages.forEach((p,i)=>{
+    const el=rail.children[i];if(!el)return;
+    const fill=u=>{el.style.background=`#2a3640 url(${u}) center/cover no-repeat`;};
+    if(p.url)fill(p.url);
+    else if(!p.isTiff){const u=URL.createObjectURL(p.file);fill(u);}
+  });
+}
+function renderFolioSublist(){
+  const sl=document.getElementById('folioSublist');
+  if(!pages.length){sl.innerHTML='';return;}
+  sl.innerHTML=pages.map((p,i)=>`<div class="fs-item ${i===curPage?'active':''}" onclick="gotoPage(${i})" title="${p.rel||p.name}">${p.name}</div>`).join('');
+}
+
+/* word overlays (BIMA colored chips) generated from layout pass.
+   Attached to OpenSeadragon in real image-pixel coordinates (converted via
+   viewport.imageToViewportRectangle) instead of CSS percentages of a plain
+   <img> — so they stay correctly placed through OSD's tiled pan/zoom. */
+function clearOverlays(){
+  _ovIds.forEach(id=>{try{viewer.removeOverlay(id);}catch(e){}});
+  _ovIds=[];
+  const layer=document.getElementById('overlayLayer');if(layer)layer.innerHTML='';
+  _lastOv=0;
+}
+function drawWordOverlays(){
+  if(!isRealActive()||!viewer.world.getItemCount())return;
+  clearOverlays();
+  const size=viewer.world.getItemAt(0).getContentSize();
+  const W=size.x,H=size.y;
+  /* heuristic: 3 RTL columns of main text + parva margin + magna top/bottom strips */
+  const boxes=[];
+  const cols=3, colW=W*0.22, gap=W*0.04, startR=W*0.06, lines=14;
+  for(let c=0;c<cols;c++){
+    const right=startR + c*(colW+gap);
+    for(let l=0;l<lines;l++){
+      const top=H*0.12 + l*((H*0.74)/lines);
+      const w=colW*(0.55+Math.random()*0.4);
+      boxes.push({cls:'word-ov main',x:W-right-w,y:top,w,h:H*0.035,tip:'main · line '+(l+1)});
+    }
+  }
+  boxes.push({cls:'word-ov magna',x:W*0.08,y:H*0.05,w:W*0.84,h:H*0.03,tip:'Masorah Magna'});
+  boxes.push({cls:'word-ov magna',x:W*0.08,y:H*0.93,w:W*0.84,h:H*0.03,tip:'Masorah Magna'});
+  for(let l=0;l<6;l++){boxes.push({cls:'word-ov parva',x:W*0.94,y:H*(0.15+l*0.11),w:W*0.04,h:H*0.05,tip:'Masorah Parva'});}
+  boxes.push({cls:'word-ov bright',x:W*0.61,y:H*0.18,w:W*0.09,h:H*0.04,tip:'★ Bright Node ±3σ'});
+  boxes.forEach(b=>{
+    const id='wov_'+Math.random().toString(36).slice(2,8);
+    const d=document.createElement('div');d.id=id;d.className=b.cls;
+    const tip=document.createElement('span');tip.className='ov-tip';tip.textContent=b.tip;d.appendChild(tip);
+    d.addEventListener('click',()=>toast('Zone: '+b.tip+' — open Masorah.ai to analyse'));
+    const rect=viewer.viewport.imageToViewportRectangle(b.x,b.y,b.w,b.h);
+    viewer.addOverlay({element:d,location:rect});
+    _ovIds.push(id);
+  });
+  _lastOv=boxes.length;
+}
+
+/* backend image fetch by absolute path (when local engine running) */
+async function loadServerImage(path){
+  toast('Requesting from engine: …'+path.slice(-46));
+  for(const port of[8765,8000,5000]){
+    try{
+      const r=await fetch('http://127.0.0.1:'+port+'/file?path='+encodeURIComponent(path),{signal:AbortSignal.timeout(2500)});
+      if(r.ok){const blob=await r.blob();const f=new File([blob],path.split(/[\\/]/).pop(),{type:blob.type});ingestFiles([f]);return;}
+    }catch{}
+  }
+  toast('Engine offline — run Launch_Masorah.bat, or use Open Image/Folder');
+}
+
+/* export the currently displayed scan WITH filters baked in */
+function exportProcessedImage(){
+  const img=document.getElementById('realImg');
+  const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+  const ctx=cv.getContext('2d');
+  ctx.filter=getComputedStyle(fxTarget()).filter||'none';
+  ctx.drawImage(img,0,0);
+  const name=(pages[curPage]?pages[curPage].name.replace(/\.[^.]+$/,''):'folio'+currentFolio+currentSide)+'_processed.png';
+  cv.toBlob(async b=>{
+    if(dirHandles.img){
+      try{await writeToHandle(dirHandles.img,name,b);toast('Processed scan written → '+dirHandles.img.name+'/'+name);return;}catch(e){toast('Direct write failed — downloading instead');}
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();
+    toast(dirHandles.img?('Downloaded '+name):('Downloaded '+name+' — choose an Img folder above to write directly next time'));
+  });
+}
+
+/* pan + wheel-zoom wiring */
+(function wireViewer(){
+  /* Only drives the synthetic demo folio's CSS-transform pan/zoom.
+     A real loaded scan pans/zooms via OpenSeadragon's own input handling. */
+  const stage=document.getElementById('viewerStage');
+  let dragging=false,sx=0,sy=0,ox=0,oy=0;
+  stage.addEventListener('pointerdown',e=>{if(isRealActive()||e.target.classList.contains('word-ov'))return;dragging=true;sx=e.clientX;sy=e.clientY;ox=vState.tx;oy=vState.ty;document.getElementById('viewerPan').classList.add('grabbing');stage.setPointerCapture(e.pointerId);});
+  stage.addEventListener('pointermove',e=>{if(!dragging||isRealActive())return;vState.tx=ox+(e.clientX-sx);vState.ty=oy+(e.clientY-sy);applyTransform();});
+  stage.addEventListener('pointerup',e=>{dragging=false;document.getElementById('viewerPan').classList.remove('grabbing');});
+  stage.addEventListener('wheel',e=>{if(isRealActive())return;e.preventDefault();const d=e.deltaY<0?1.12:1/1.12;vState.scale=Math.min(8,Math.max(0.1,vState.scale*d));applyTransform();},{passive:false});
+})();
+
+
+/* ── API probe ── */
+async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+/* ── Init ── */
+function loadPaths(){
+  const ids={img:'pathImg',xml:'pathXml',csv:'pathCsv'};
+  ['img','xml','csv'].forEach(t=>{
+    const v=localStorage.getItem('masorah.path.'+t);if(v)document.getElementById(ids[t]).value=v;
+    DirStore.get('archive-'+t).then(async h=>{
+      if(!h)return;
+      try{if((await h.queryPermission({mode:'readwrite'}))==='granted'){dirHandles[t]=h;document.getElementById(ids[t]).value=h.name;}}catch(e){}
+    });
+  });
+}
+renderMSList();renderContexts();updateFolioLabel();loadPaths();probeAPI();setInterval(probeAPI,8000);applyTransform();
+document.querySelectorAll('.anno-zone').forEach(z=>z.addEventListener('click',()=>toast('Zone: '+z.getAttribute('title')+'  — open Masorah.ai for analysis')));
+</script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah Corpus — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Frank+Ruhl+Libre:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'EB Garamond',serif;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at 55% 40%,#FBF5E0 0%,#F5EBCC 45%,#EBE0B8 100%);}
+
+/* PARCHMENT TEXTURE GRID */
+body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 29px,rgba(184,134,11,.04) 29px,rgba(184,134,11,.04) 30px),repeating-linear-gradient(90deg,transparent,transparent 29px,rgba(184,134,11,.04) 29px,rgba(184,134,11,.04) 30px);pointer-events:none;z-index:0;}
+
+/* MULTIPLE GOLDEN MEMS — varied positions, sizes, opacities */
+.bg-mem{position:fixed;font-family:'Frank Ruhl Libre',serif;font-weight:700;color:#B8860B;pointer-events:none;user-select:none;z-index:1;line-height:1;}
+#m1{font-size:520px;opacity:.055;top:50%;left:50%;transform:translate(-50%,-50%);}
+#m2{font-size:180px;opacity:.08;top:4%;left:3%;transform:rotate(-15deg);}
+#m3{font-size:140px;opacity:.06;top:5%;right:4%;transform:rotate(12deg);}
+#m4{font-size:110px;opacity:.07;bottom:5%;left:5%;transform:rotate(8deg);}
+#m5{font-size:130px;opacity:.06;bottom:4%;right:5%;transform:rotate(-10deg);}
+#m6{font-size:90px;opacity:.05;top:40%;left:1%;transform:rotate(-20deg);}
+#m7{font-size:80px;opacity:.05;top:45%;right:1%;transform:rotate(18deg);}
+#m8{font-size:65px;opacity:.06;top:18%;left:30%;transform:rotate(-8deg);}
+#m9{font-size:70px;opacity:.05;bottom:18%;right:28%;transform:rotate(6deg);}
+
+/* CARD */
+.card{position:relative;z-index:10;background:rgba(255,253,248,.97);border:1px solid rgba(184,134,11,.35);border-radius:14px;padding:38px 42px;width:420px;box-shadow:0 18px 56px rgba(100,70,10,.18),0 2px 8px rgba(184,134,11,.12);backdrop-filter:blur(3px);}
+
+/* LOGO */
+.logo{text-align:center;margin-bottom:26px;}
+.logo-mem{font-family:'Frank Ruhl Libre',serif;font-size:60px;font-weight:700;color:#B8860B;line-height:1;display:block;text-shadow:0 2px 14px rgba(184,134,11,.25);}
+.logo h1{font-size:19px;font-weight:700;color:#1a1208;margin-top:8px;}
+.logo p{font-size:11px;color:#6a5a30;margin-top:3px;}
+
+/* TABS */
+.tabs{display:flex;gap:5px;margin-bottom:22px;}
+.tab-btn{flex:1;padding:7px 10px;background:#F5EBCC;border:1px solid rgba(184,134,11,.25);border-radius:6px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;color:#7A5800;transition:.15s;}
+.tab-btn:hover{background:#EDD88A;border-color:#B8860B;}
+.tab-btn.active{background:#B8860B;color:#fff;border-color:#B8860B;box-shadow:0 2px 8px rgba(184,134,11,.3);}
+
+/* FORM */
+.form-sec{display:none;}
+.form-sec.active{display:block;}
+.field{margin-bottom:15px;}
+.field label{display:block;font-size:10px;font-weight:700;color:#7A5800;text-transform:uppercase;margin-bottom:4px;letter-spacing:.06em;}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid rgba(184,134,11,.3);border-radius:10px;font-family:inherit;font-size:13px;background:#FEFCF8;color:#1a1208;transition:.15s;}
+.field input:focus,.field select:focus{border-color:#B8860B;outline:none;box-shadow:0 0 0 3px rgba(184,134,11,.12);background:#fff;}
+.field textarea{resize:vertical;min-height:65px;}
+
+/* BUTTONS */
+.btn-primary{width:100%;padding:12px;background:#B8860B;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;box-shadow:0 3px 10px rgba(184,134,11,.3);letter-spacing:.02em;}
+.btn-primary:hover{background:#D4A017;box-shadow:0 4px 16px rgba(184,134,11,.4);}
+.btn-primary:active{background:#9A6E08;transform:translateY(1px);}
+
+/* TIER INFO */
+.tiers{margin-top:16px;padding-top:13px;border-top:1px solid rgba(184,134,11,.15);}
+.tier-row{display:flex;align-items:center;gap:10px;margin-bottom:5px;color:#5A4A28;font-size:11.5px;}
+.lv{font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;flex-shrink:0;}
+.lv1{background:#D4F0D8;color:#1A5C24;} .lv2{background:#D0E8F8;color:#1A4070;}
+.lv3{background:#EAD8F8;color:#4A1870;} .lv4{background:#FDE8D0;color:#7A2800;}
+
+/* MSGS */
+.msg{padding:9px 12px;border-radius:6px;margin-bottom:12px;display:none;font-size:12px;line-height:1.5;}
+.msg.err{background:rgba(183,28,28,.07);border:1px solid #EF9A9A;color:#B71C1C;}
+.msg.ok{background:rgba(46,125,50,.07);border:1px solid #A5D6A7;color:#2E7D32;}
+
+/* FOOTER */
+.footer{margin-top:14px;text-align:center;font-size:10.5px;color:#9A8A60;display:flex;gap:10px;justify-content:center;align-items:center;}
+.footer a{color:#B8860B;cursor:pointer;text-decoration:none;font-weight:600;}
+.footer a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<!-- MULTIPLE HEBREW MEM WATERMARKS -->
+<div class="bg-mem" id="m1">מ</div>
+<div class="bg-mem" id="m2">מ</div>
+<div class="bg-mem" id="m3">מ</div>
+<div class="bg-mem" id="m4">מ</div>
+<div class="bg-mem" id="m5">מ</div>
+<div class="bg-mem" id="m6">מ</div>
+<div class="bg-mem" id="m7">מ</div>
+<div class="bg-mem" id="m8">מ</div>
+<div class="bg-mem" id="m9">מ</div>
+
+<div class="card">
+  <div class="logo">
+    <span class="logo-mem">מ</span>
+    <h1>Masorah Corpus Workbench</h1>
+    <p>Sassoon 1053 · eCBGM v42 · 05c Baseline 1525</p>
+  </div>
+
+  <div class="tabs" id="loginTabs">
+    <button class="tab-btn active" onclick="showTab('login',this)">Sign In</button>
+    <button class="tab-btn" onclick="showTab('request',this)">Request Access</button>
+  </div>
+
+  <!-- SIGN IN -->
+  <div class="form-sec active" id="tab-login">
+    <div class="msg err" id="loginErr"></div>
+    <div class="msg ok"  id="loginOk"></div>
+    <div class="field"><label>Username</label><input type="text" id="username" autocomplete="username" spellcheck="false"></div>
+    <div class="field"><label>Password</label><input type="password" id="password" autocomplete="current-password"></div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In to Workbench</button>
+    <div class="tiers">
+      <div class="tier-row"><span class="lv lv1">L1</span>Reader · Archive · Architecture</div>
+      <div class="tier-row"><span class="lv lv2">L2</span>Provenance · Forensics</div>
+      <div class="tier-row"><span class="lv lv3">L3</span>Transcriber · Paleography · Chat · Graph</div>
+      <div class="tier-row"><span class="lv lv4">L4</span>Pipeline · Analyzer · LaTeX Publish</div>
+    </div>
+  </div>
+
+  <!-- REQUEST ACCESS -->
+  <div class="form-sec" id="tab-request">
+    <div class="msg err" id="reqErr"></div>
+    <div class="msg ok"  id="reqOk"></div>
+    <div class="field"><label>Full Name</label><input type="text" id="regName" placeholder="Dr. Jane Smith"></div>
+    <div class="field"><label>Email</label><input type="email" id="regEmail" placeholder="researcher@university.edu"></div>
+    <div class="field"><label>Institution</label><input type="text" id="regInst" placeholder="University / Research Institute"></div>
+    <div class="field"><label>Requested Level</label>
+      <select id="regLevel">
+        <option value="1">L1 – Reader (Archive, Architecture)</option>
+        <option value="2">L2 – Researcher (Provenance, Forensics)</option>
+        <option value="3">L3 – Advanced (Transcriber, Paleography, Chat, Graph)</option>
+        <option value="4">L4 – Full Access (Pipeline, Analyzer, Publish)</option>
+      </select>
+    </div>
+    <div class="field"><label>Research Purpose</label><textarea id="regPurpose" placeholder="Describe your research focus and reason for access…"></textarea></div>
+    <button class="btn-primary" onclick="submitRequest()">Submit Access Request</button>
+    <p style="font-size:10px;color:#9A9A9E;margin-top:8px;text-align:center">Requests reviewed within 2–3 business days.</p>
+  </div>
+
+  <div class="footer">
+    <a onclick="showHistory()">Login history</a>
+    <span>·</span>
+    <a href="index.html">Skip to Home →</a>
+    <span>·</span>
+    <a onclick="triggerAdmin()" style="color:#D0C090;font-size:9.5px">Admin</a>
+  </div>
+</div>
+
+<script>
+const ADMIN={username:'markcorleyjune',password:'masorah1525',level:4,name:'Mark Corley'};
+const UK='masorah_users', RK='masorah_requests';
+
+function getUsers(){try{return JSON.parse(localStorage.getItem(UK)||'[]');}catch{return [];}}
+function now(){return new Date().toISOString();}
+
+function showTab(id,btn){
+  document.querySelectorAll('.form-sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+function showMsg(id,cls,txt){
+  const el=document.getElementById(id);if(!el)return;
+  el.className='msg '+cls;el.textContent=txt;el.style.display='block';
+  setTimeout(()=>el.style.display='none',7000);
+}
+
+async function doLogin(){
+  const u=document.getElementById('username').value.trim();
+  const p=document.getElementById('password').value;
+  const btn=document.getElementById('loginBtn');
+  if(!u||!p){showMsg('loginErr','err','Please enter username and password.');return;}
+  btn.disabled=true;btn.textContent='Signing in…';
+
+  // Try the real API FIRST — this is the only path that returns a genuine
+  // JWT, which every authenticated agent endpoint (chat/RAG, HTR, pipeline,
+  // CBGM, forensics) requires. Previously this branch ran last and its
+  // returned access_token was discarded entirely, so agent calls always
+  // 401'd even when the engine was running and credentials were correct.
+  try{
+    const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),1200);
+    const r=await fetch('http://localhost:8000/api/v1/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p}),signal:ctrl.signal});
+    clearTimeout(t);
+    if(r.ok){
+      const d=await r.json();
+      setSession(d.username,d.level,d.full_name||d.username,d.access_token);
+      window.location.href='index.html';return;
+    }
+    if(r.status===401){
+      btn.disabled=false;btn.textContent='Sign In to Workbench';
+      showMsg('loginErr','err','Invalid username or password.');return;
+    }
+  }catch(e){/* engine offline/unreachable — fall through to offline auth below */}
+
+  // Engine offline — fall back to hardcoded admin / locally-registered users.
+  // No JWT is issued on this path, so authenticated agent features stay in
+  // demo/offline mode until Launch_Masorah.bat is running and login retried.
+  if(u.toLowerCase()===ADMIN.username.toLowerCase()&&p===ADMIN.password){
+    setSession(ADMIN.username,ADMIN.level,ADMIN.name);
+    window.location.href='index.html';return;
+  }
+  const users=getUsers();
+  const found=users.find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.pw===p);
+  if(found){setSession(found.username,found.level,found.name);window.location.href='index.html';return;}
+
+  btn.disabled=false;btn.textContent='Sign In to Workbench';
+  showMsg('loginErr','err','Invalid username or password. (API offline — check Launch_Masorah.bat for full agent access)');
+}
+
+function setSession(username,level,name,token){
+  const data=JSON.stringify({username,level,name});
+  sessionStorage.setItem('masorah_user',data);
+  if(token){sessionStorage.setItem('masorah_token',token);}else{sessionStorage.removeItem('masorah_token');}
+  localStorage.setItem('masorah_session',data);
+  localStorage.setItem('masorah_session_ts',Date.now().toString());
+}
+
+function submitRequest(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim();
+  const purpose=document.getElementById('regPurpose').value.trim();
+  if(!name||!email||!purpose){showMsg('reqErr','err','Name, email, and purpose are required.');return;}
+  const reqs=JSON.parse(localStorage.getItem(RK)||'[]');
+  reqs.push({id:'REQ-'+Date.now(),name,email,inst:document.getElementById('regInst').value,level:document.getElementById('regLevel').value,purpose,status:'pending',submitted:now()});
+  localStorage.setItem(RK,JSON.stringify(reqs));
+  showMsg('reqOk','ok','Request submitted for '+name+'. You will receive credentials by email within 2–3 business days.');
+  ['regName','regEmail','regInst','regPurpose'].forEach(id=>document.getElementById(id).value='');
+}
+
+function triggerAdmin(){
+  const pw=prompt('Admin password:');
+  if(pw===ADMIN.password){setSession(ADMIN.username,ADMIN.level,ADMIN.name);window.location.href='index.html';}
+  else if(pw!==null) alert('Incorrect admin password.');
+}
+
+function showHistory(){
+  const log=JSON.parse(localStorage.getItem('masorah_login_log')||'[]');
+  if(!log.length){alert('No login history yet.');return;}
+  alert('Recent logins:\n\n'+log.slice(0,15).map(e=>e.t.slice(0,19).replace('T',' ')+'  '+e.user).join('\n'));
+}
+
+// Pre-fill admin credentials
+document.getElementById('username').value='markcorleyjune';
+document.getElementById('password').value='masorah1525';
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('username').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('password').focus();});
+</script>
+</body>
+</html>
