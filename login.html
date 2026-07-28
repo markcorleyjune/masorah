@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Masorah Corpus — Sign In</title>
+<title>Masorah — Sign In</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Frank+Ruhl+Libre:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -86,7 +86,7 @@ body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-
 <div class="card">
   <div class="logo">
     <span class="logo-mem">מ</span>
-    <h1>Masorah Corpus Workbench</h1>
+    <h1>Masorah Workbench</h1>
     <p>Sassoon 1053 · eCBGM v42 · 05c Baseline 1525</p>
   </div>
 
@@ -133,7 +133,7 @@ body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-
   <div class="footer">
     <a onclick="showHistory()">Login history</a>
     <span>·</span>
-    <a href="index.html">Skip to Home →</a>
+    <a href="workbench.html">Skip to Workbench →</a>
     <span>·</span>
     <a onclick="triggerAdmin()" style="color:#D0C090;font-size:9.5px">Admin</a>
   </div>
@@ -178,7 +178,7 @@ async function doLogin(){
     if(r.ok){
       const d=await r.json();
       setSession(d.username,d.level,d.full_name||d.username,d.access_token);
-      window.location.href='index.html';return;
+      window.location.href='workbench.html';return;
     }
     if(r.status===401){
       btn.disabled=false;btn.textContent='Sign In to Workbench';
@@ -191,11 +191,11 @@ async function doLogin(){
   // demo/offline mode until Launch_Masorah.bat is running and login retried.
   if(u.toLowerCase()===ADMIN.username.toLowerCase()&&p===ADMIN.password){
     setSession(ADMIN.username,ADMIN.level,ADMIN.name);
-    window.location.href='index.html';return;
+    window.location.href='workbench.html';return;
   }
   const users=getUsers();
   const found=users.find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.pw===p);
-  if(found){setSession(found.username,found.level,found.name);window.location.href='index.html';return;}
+  if(found){setSession(found.username,found.level,found.name);window.location.href='workbench.html';return;}
 
   btn.disabled=false;btn.textContent='Sign In to Workbench';
   showMsg('loginErr','err','Invalid username or password. (API offline — check Launch_Masorah.bat for full agent access)');
@@ -223,7 +223,7 @@ function submitRequest(){
 
 function triggerAdmin(){
   const pw=prompt('Admin password:');
-  if(pw===ADMIN.password){setSession(ADMIN.username,ADMIN.level,ADMIN.name);window.location.href='index.html';}
+  if(pw===ADMIN.password){setSession(ADMIN.username,ADMIN.level,ADMIN.name);window.location.href='workbench.html';}
   else if(pw!==null) alert('Incorrect admin password.');
 }
 

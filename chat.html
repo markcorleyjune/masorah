@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Masorah Corpus — Research Chat (Agentic RAG)</title>
+<title>Masorah — Research Chat (Agentic RAG)</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22)}
@@ -76,12 +76,12 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
 <body>
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah Corpus</h1><p>Research Chat · Agentic RAG</p></div></div>
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Research Chat · Agentic RAG</p></div></div>
     <nav class="nav">
-      <a href="transcriber.html">✍ Transcriber</a>
-      <a href="annotate.html">▤ Annotate</a>
       <a href="architecture.html">⧉ Arch</a>
+      <a href="transcriber.html">✍ Transcriber</a>
       <a href="pipeline.html">⫯ Pipeline</a>
+      <a href="annotate.html">▤ Annotate</a>
       <a href="provenance.html">⟳ Provenance</a>
       <a href="paleography.html">◉ Paleography</a>
       <a href="analyzer.html">∿ Analyzer</a>
@@ -177,7 +177,7 @@ function selectSession(i){curS=i;renderSessions();renderMsgs();}
 function renderMsgs(){
   const box=document.getElementById('messages');const m=sessions[curS].msgs;
   if(!m.length){box.innerHTML=`<div class="msg"><div class="av bot">מ</div><div class="bubble"><div class="who">Masorah Agent · ${curModel.name}</div>
-    Shalom. I'm your textual-criticism research assistant for the Masorah Corpus. I can compare witnesses, analyse <span class="heb">מסורה</span> notes, score CBGM coherence against the <b>05c (1525)</b> baseline, and reason over the aligned corpus. Pick a model above and ask anything.</div></div>`;return;}
+    Shalom. I'm your textual-criticism research assistant for the Masorah. I can compare witnesses, analyse <span class="heb">מסורה</span> notes, score CBGM coherence against the <b>05c (1525)</b> baseline, and reason over the aligned corpus. Pick a model above and ask anything.</div></div>`;return;}
   box.innerHTML=m.map(x=>`<div class="msg ${x.role}"><div class="av ${x.role==='me'?'me':'bot'}">${x.role==='me'?'M':'מ'}</div>
     <div class="bubble"><div class="who">${x.role==='me'?'You':('Agent · '+(x.model||curModel.name))}</div>${x.html}</div></div>`).join('');
   box.scrollTop=box.scrollHeight;

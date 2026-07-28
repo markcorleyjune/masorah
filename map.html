@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Masorah Corpus — Map · Manuscript Geography</title>
+<title>Masorah — Map · Manuscript Geography</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
 <!-- Leaflet: real open-source tiled-map renderer (OpenStreetMap tiles) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -69,10 +69,10 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
   <div class="banner-row">
     <div class="brand">
       <div class="brand-glyph">מָסוֹרָה</div>
-      <div class="brand-text"><h1>Masorah Corpus</h1></div>
+      <div class="brand-text"><h1>Masorah</h1></div>
     </div>
     <nav class="nav">
-      <a href="masorah.html">⌂ Project</a>
+      <a href="index.html">⌂ Project</a>
       <a href="scriptorium.html">📚 Library</a>
       <a href="map.html" class="active">🗺 Map</a>
     </nav>
@@ -91,10 +91,10 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
   <div class="tb-sep"></div>
   <div class="year-range">
     <span>Year</span>
-    <span id="yrFromLbl">-200</span>
-    <input type="range" id="yrFrom" min="-200" max="1100" value="-200" step="10" oninput="onYearChange()">
-    <input type="range" id="yrTo" min="-200" max="1100" value="1100" step="10" oninput="onYearChange()">
-    <span id="yrToLbl">1100</span>
+    <span id="yrFromLbl">-2400</span>
+    <input type="range" id="yrFrom" min="-2400" max="2010" value="-2400" step="10" oninput="onYearChange()">
+    <input type="range" id="yrTo" min="-2400" max="2010" value="2010" step="10" oninput="onYearChange()">
+    <span id="yrToLbl">2010</span>
   </div>
   <div class="tb-sep"></div>
   <div id="tradChips" style="display:flex;gap:5px;flex-wrap:wrap"></div>
@@ -119,37 +119,117 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
    are approximate — public-domain findspots for well-known
    witnesses, plotted with Leaflet + OpenStreetMap tiles.
    ════════════════════════════════════════════════════════════ */
-const TRAD_COLORS={'Tiberian':'#B8860B','Proto-Masoretic (Qumran)':'#9a6cc4','Proto-Masoretic':'#e08a1e','Mixed / Oriental':'#c0394b'};
+const TRAD_COLORS={'Proto-Semitic Inscriptions':'#8a6a20','Second Temple / Qumran':'#c0394b','Masoretic Codices':'#B8860B','Sephardic Targum':'#4a148c','Printed Editions':'#3f8ed0'};
 const MSS=[
- {id:'sassoon1053',sigil:'Sassoon 1053',name:'Tanakh (MS Sassoon 1053)',date:900,dateLbl:'c. 880–960 CE',tradition:'Tiberian',place:'Tiberias, Levant',lat:32.79,lng:35.53,
-  desc:'Primary research object of this project — Tiberian codex with a distinctive S1 scribal profile.'},
- {id:'aleppo',sigil:'Aleppo Codex',name:'Aleppo Codex (Keter Aram Tsova)',date:920,dateLbl:'c. 920 CE',tradition:'Tiberian',place:'Tiberias, Levant',lat:32.792,lng:35.535,
-  desc:'Vocalized by Aharon ben Asher; later moved to Aleppo, Syria, where it resided for centuries before relocating to Jerusalem.'},
- {id:'leningrad',sigil:'Leningrad Codex',name:'Codex Leningradensis',date:1008,dateLbl:'1008/9 CE',tradition:'Tiberian',place:'Cairo (Fustat), Egypt',lat:30.006,lng:31.23,
-  desc:'Oldest complete dated Masoretic Bible codex; base text of BHS/BHQ.'},
- {id:'orquart',sigil:'BL Or 4445',name:'London Pentateuch (BL Or 4445)',date:925,dateLbl:'c. 920–950 CE',tradition:'Tiberian',place:'Eretz Yisrael, Levant',lat:31.9,lng:35.2,
-  desc:'Substantially complete Tiberian Pentateuch, an early control witness.'},
- {id:'genizah',sigil:'Cairo Genizah',name:'Cairo Genizah Bible Fragments',date:1000,dateLbl:'9th–14th c. (composite)',tradition:'Mixed / Oriental',place:'Fustat (Old Cairo), Egypt',lat:30.005,lng:31.234,
-  desc:'Dispersed fragment corpus recovered from the Ben Ezra Synagogue genizah.'},
- {id:'1qisaa',sigil:'1QIsaa',name:'Great Isaiah Scroll (Dead Sea Scrolls)',date:-150,dateLbl:'c. 350–100 BCE',tradition:'Proto-Masoretic (Qumran)',place:'Qumran, Judean Desert',lat:31.7415,lng:35.4587,
-  desc:'Earliest substantially complete witness to Isaiah, over a millennium older than the medieval codices.'},
- {id:'engedi',sigil:'En-Gedi Scroll',name:'En-Gedi Leviticus Scroll',date:300,dateLbl:'c. 3rd–4th c. CE',tradition:'Proto-Masoretic',place:'Ein Gedi, Judean Desert',lat:31.4616,lng:35.3866,
-  desc:'Carbonized synagogue scroll read via CT scanning; text matches the medieval Masoretic tradition closely.'}
+{id:'01a_Umm_el_Marra',sigil:'01a',name:"Umm el-Marra Cuneiform Tablet",date:-2400,dateLbl:"c. 2400 BCE",tradition:"Proto-Semitic Inscriptions",place:"Syria",lat:35.783,lng:37.517,color:'#8a6a20',
+  desc:"Early cuneiform tablet from the Umm el-Marra excavation, among the oldest evidence bearing on Northwest Semitic writing traditions."},
+{id:'01b_Wadi_el_Hol',sigil:'01b',name:"Wadi el-Hol Inscriptions",date:-1900,dateLbl:"c. 1900 BCE",tradition:"Proto-Semitic Inscriptions",place:"Egypt",lat:25.73,lng:32.55,color:'#8a6a20',
+  desc:"Rock inscriptions in the Theban desert widely regarded as among the earliest known alphabetic writing."},
+{id:'01c_Serabit_el_Khadim',sigil:'01c',name:"Serabit el-Khadim Inscriptions",date:-1500,dateLbl:"c. 1500 BCE",tradition:"Proto-Semitic Inscriptions",place:"Sinai",lat:29.033,lng:33.45,color:'#8a6a20',
+  desc:"Proto-Sinaitic inscriptions from Egyptian turquoise-mining works, key evidence for the early alphabet's development."},
+{id:'01d_Proto_Canaanite',sigil:'01d',name:"Proto-Canaanite Inscriptions",date:-1200,dateLbl:"c. 1200 BCE",tradition:"Proto-Semitic Inscriptions",place:"Levant",lat:31.566,lng:34.851,color:'#8a6a20',
+  desc:"Corpus of Late Bronze/Iron I Proto-Canaanite inscriptions from Levantine sites, bridging Proto-Sinaitic script and the Phoenician alphabet."},
+{id:'01e_Mesha_Stele',sigil:'01e',name:"Mesha Stele",date:-840,dateLbl:"c. 840 BCE",tradition:"Proto-Semitic Inscriptions",place:"Moab (Jordan)",lat:31.5,lng:35.796,color:'#8a6a20',
+  desc:"Moabite royal inscription (the 'Moabite Stone') found at Dhiban, one of the longest and most important early Northwest Semitic inscriptions."},
+{id:'01f_Ketef_Hinnom',sigil:'01f',name:"Ketef Hinnom Silver Scrolls",date:-650,dateLbl:"c. 650 BCE",tradition:"Proto-Semitic Inscriptions",place:"Jerusalem",lat:31.771,lng:35.222,color:'#8a6a20',
+  desc:"Two silver amulet scrolls bearing the earliest known citation of a biblical text (the Priestly Blessing, Numbers 6:24-26)."},
+{id:'02a_DSS_General',sigil:'02a',name:"Dead Sea Scrolls (General Biblical Corpus)",date:-150,dateLbl:"c. 250 BCE - 70 CE",tradition:"Second Temple / Qumran",place:"Judean Desert",lat:31.7415,lng:35.4587,color:'#c0394b',
+  desc:"The Qumran biblical scroll corpus \u2014 the earliest large-scale witness to the Hebrew Bible text, predating the medieval Masoretic codices by a millennium."},
+{id:'02b_Great_Isaiah_Scroll',sigil:'02b',name:"Great Isaiah Scroll (1QIsaa)",date:-150,dateLbl:"c. 350-100 BCE",tradition:"Second Temple / Qumran",place:"Judean Desert",lat:31.7415,lng:35.4587,color:'#c0394b',
+  desc:"The best-preserved of the Qumran scrolls, containing nearly the entire Book of Isaiah."},
+{id:'02c_Nash_Papyrus',sigil:'02c',name:"Nash Papyrus",date:-150,dateLbl:"c. 150-100 BCE",tradition:"Second Temple / Qumran",place:"Egypt (Fayyum)",lat:29.31,lng:30.84,color:'#c0394b',
+  desc:"Fragment preserving the Decalogue and Shema, the oldest known Hebrew biblical manuscript prior to the Dead Sea Scrolls discoveries."},
+{id:'02d_Job_Targum',sigil:'02d',name:"Targum of Job (11QtgJob)",date:-100,dateLbl:"c. 100 BCE - 50 CE",tradition:"Second Temple / Qumran",place:"Judean Desert",lat:31.7415,lng:35.4587,color:'#c0394b',
+  desc:"Qumran Cave 11 Aramaic Targum of Job, among the earliest attested biblical Targumim."},
+{id:'02e_En_Gedi_Scroll',sigil:'02e',name:"En-Gedi Leviticus Scroll",date:300,dateLbl:"c. 3rd-4th c. CE",tradition:"Second Temple / Qumran",place:"Judean Desert",lat:31.4616,lng:35.3866,color:'#c0394b',
+  desc:"Carbonized synagogue scroll recovered from Ein Gedi and read via micro-CT scanning; its text matches the medieval Masoretic tradition almost exactly."},
+{id:'02f_Severus_Rubrics',sigil:'02f',name:"Severus Rubrics (Temple Scroll tradition)",date:200,dateLbl:"c. 2nd-3rd c. CE (tradition)",tradition:"Second Temple / Qumran",place:"Jerusalem",lat:31.7767,lng:35.2345,color:'#c0394b',
+  desc:"Rabbinic tradition of scribal notes said to derive from a Torah scroll associated with the Second Temple."},
+{id:'02g_Samaritan_Pentateuch',sigil:'02g',name:"Samaritan Pentateuch",date:1000,dateLbl:"Ancient tradition; extant MSS medieval",tradition:"Second Temple / Qumran",place:"Samaria / Nablus",lat:32.222,lng:35.259,color:'#c0394b',
+  desc:"The Samaritan community's own Torah text tradition, preserved and copied at Mount Gerizim/Nablus, textually independent of the Masoretic line."},
+{id:'02h_Cairo_Genizah',sigil:'02h',name:"Cairo Genizah Bible Fragments",date:1000,dateLbl:"9th-14th c. (composite)",tradition:"Second Temple / Qumran",place:"Egypt",lat:30.006,lng:31.23,color:'#c0394b',
+  desc:"Vast fragment corpus recovered from the Ben Ezra Synagogue genizah in Fustat, including Bible texts, Masoretic treatises, and Babylonian-tradition pointing."},
+{id:'02i_Syriac_Peshitta',sigil:'02i',name:"Syriac Peshitta",date:450,dateLbl:"c. 5th c. CE",tradition:"Second Temple / Qumran",place:"Mesopotamia/Syria",lat:37.159,lng:38.793,color:'#c0394b',
+  desc:"The standard Bible of Syriac Christianity, translated from Hebrew and an important early witness to a pre-Masoretic text form."},
+{id:'03a_Aleppo_Codex',sigil:'03a',name:"Aleppo Codex (Keter Aram Tsova)",date:920,dateLbl:"c. 920 CE",tradition:"Masoretic Codices",place:"Tiberias / Aleppo",lat:36.2021,lng:37.1343,color:'#B8860B',
+  desc:"Vocalized and annotated by Aharon ben Asher in Tiberias, later kept for centuries in Aleppo, Syria, before relocating to Jerusalem; the traditional 'model codex' of the Masoretic Text."},
+{id:'03b_Leningrad_Codex',sigil:'03b',name:"Leningrad Codex (RNL Evr. I B 19a)",date:1008,dateLbl:"1008/9 CE",tradition:"Masoretic Codices",place:"Cairo/Egypt",lat:30.006,lng:31.23,color:'#B8860B',
+  desc:"Copied and vocalized in Fustat (Old Cairo) by Samuel ben Jacob; the oldest complete dated Masoretic Bible codex, and the base text of BHS/BHQ."},
+{id:'03c_Sassoon_1053',sigil:'03c',name:"Tanakh (MS Sassoon 1053)",date:900,dateLbl:"c. 880-960 CE",tradition:"Masoretic Codices",place:"Levant",lat:32.79,lng:35.53,color:'#B8860B',
+  desc:"This project's primary research object \u2014 an early, near-complete Tiberian codex with a distinctive scribal profile, acquired by ANU Museum in 2023."},
+{id:'03d_MS_Or_4445',sigil:'03d',name:"London Pentateuch (BL Or 4445)",date:925,dateLbl:"c. 920-950 CE",tradition:"Masoretic Codices",place:"Levant",lat:31.9,lng:35.2,color:'#B8860B',
+  desc:"Substantially complete Tiberian Pentateuch codex, an early control witness now held at the British Library."},
+{id:'03e_MS_Cairensis',sigil:'03e',name:"MS Cairensis (Cairo Codex of the Prophets)",date:895,dateLbl:"895 CE",tradition:"Masoretic Codices",place:"Tiberias",lat:32.79,lng:35.53,color:'#B8860B',
+  desc:"Attributed to Moshe ben Asher; one of the earliest firmly dated Masoretic codices, covering the Former and Latter Prophets."},
+{id:'03f_Reuchlin_Prophets',sigil:'03f',name:"Reuchlin Codex of the Prophets",date:1105,dateLbl:"1105 CE",tradition:"Masoretic Codices",place:"Karlsruhe (copied Levant)",lat:49.0069,lng:8.4037,color:'#B8860B',
+  desc:"Named for its 16th-century owner Johannes Reuchlin; preserves a Palestinian-influenced pointing tradition distinct from the Ben Asher line."},
+{id:'03g_Valmadonna_I',sigil:'03g',name:"Valmadonna I Pentateuch",date:1189,dateLbl:"1189 CE",tradition:"Masoretic Codices",place:"Italy/Levant",lat:41.9,lng:12.5,color:'#B8860B',
+  desc:"One of the oldest dated codices of the Pentateuch, formerly in the Valmadonna Trust Library collection."},
+{id:'03h_Codex_Madrid_M1',sigil:'03h',name:"Codex Madrid M1 (Complutense)",date:1280,dateLbl:"c. 1280 CE",tradition:"Masoretic Codices",place:"Spain",lat:40.4168,lng:-3.7038,color:'#B8860B',
+  desc:"Sephardic-tradition Masoretic codex held at the Complutense University of Madrid, later consulted for the Complutensian Polyglot."},
+{id:'03i_Erfurt_Codex_1',sigil:'03i',name:"Erfurt Codex 1",date:1150,dateLbl:"c. 12th-13th c. CE",tradition:"Masoretic Codices",place:"Ashkenaz",lat:50.9848,lng:11.0299,color:'#B8860B',
+  desc:"Early Ashkenazi-tradition Masoretic manuscript, part of the important Erfurt collection of medieval Hebrew codices."},
+{id:'03j_MS_Babylonicus',sigil:'03j',name:"Codex Babylonicus Petropolitanus (MS Babylonicus)",date:916,dateLbl:"916 CE",tradition:"Masoretic Codices",place:"Babylonia",lat:32.5364,lng:44.4208,color:'#B8860B',
+  desc:"Codex of the Latter Prophets pointed with the Babylonian supralinear vocalization system, a key witness to the Babylonian Masoretic tradition."},
+{id:'03k_Yemenite_Taj',sigil:'03k',name:"Yemenite Taj",date:1450,dateLbl:"c. 15th-16th c. CE (tradition older)",tradition:"Masoretic Codices",place:"Yemen",lat:15.3694,lng:44.191,color:'#B8860B',
+  desc:"Manuscript representative of the Yemenite Jewish scribal tradition ('Taj', crown), preserving distinctive vocalization and Masoretic conventions."},
+{id:'04a_Huntington_148',sigil:'04a',name:"Huntington 148 Targum",date:1250,dateLbl:"c. 13th c. CE",tradition:"Sephardic Targum",place:"Sepharad",lat:39.8628,lng:-4.0273,color:'#4a148c',
+  desc:"Sephardic-tradition Targum manuscript held in the Huntington collection, Bodleian Library."},
+{id:'04b_MS_Or_2363_2365',sigil:'04b',name:"MS Or 2363-2365 Targum",date:1300,dateLbl:"c. 14th c. CE",tradition:"Sephardic Targum",place:"Sepharad",lat:39.8628,lng:-4.0273,color:'#4a148c',
+  desc:"Multi-volume Sephardic Targum manuscript in the British Library's Oriental collection."},
+{id:'04c_MS_Or_2210',sigil:'04c',name:"MS Or 2210 Targum",date:1300,dateLbl:"c. 14th c. CE",tradition:"Sephardic Targum",place:"Sepharad",lat:39.8628,lng:-4.0273,color:'#4a148c',
+  desc:"Sephardic-tradition Targum codex, British Library Oriental collection."},
+{id:'04d_MS_Madrid_116',sigil:'04d',name:"MS Madrid 116 Targum",date:1350,dateLbl:"c. 14th c. CE",tradition:"Sephardic Targum",place:"Spain",lat:40.4168,lng:-3.7038,color:'#4a148c',
+  desc:"Targum manuscript in a Spanish collection, representative of the later Sephardic Targum tradition."},
+{id:'04e_Berliners_Onkelos',sigil:'04e',name:"Berliner's Onkelos Edition",date:1884,dateLbl:"1884 CE (ed. Berliner)",tradition:"Sephardic Targum",place:"Germany",lat:52.52,lng:13.405,color:'#4a148c',
+  desc:"Abraham Berliner's critical edition of Targum Onkelos (Berlin, 1884), a landmark in modern Targum scholarship."},
+{id:'05a_Complutensian',sigil:'05a',name:"Complutensian Polyglot",date:1517,dateLbl:"1514-1517 CE",tradition:"Printed Editions",place:"Alcala, Spain",lat:40.4818,lng:-3.3635,color:'#3f8ed0',
+  desc:"The first printed polyglot Bible, produced under Cardinal Cisneros at the University of Alcal\u00e1 de Henares."},
+{id:'05b_First_Rabbinic_1517',sigil:'05b',name:"First Rabbinic Bible (Bomberg 1517)",date:1517,dateLbl:"1517 CE",tradition:"Printed Editions",place:"Venice",lat:45.4408,lng:12.3155,color:'#3f8ed0',
+  desc:"Daniel Bomberg's first printed Rabbinic Bible (Mikraot Gedolot), edited by Felix Pratensis."},
+{id:'05c_Second_Rabbinic_1525',sigil:'05c',name:"Second Rabbinic Bible (Ben Hayyim 1525)",date:1525,dateLbl:"1524/25 CE",tradition:"Printed Editions",place:"Venice",lat:45.4408,lng:12.3155,color:'#3f8ed0',
+  desc:"Jacob ben Hayyim's edition for Bomberg \u2014 this project's primary baseline text, the standard Masoretic Bible for centuries."},
+{id:'05c_Second_Rabbinic_1548',sigil:'05c2',name:"Second Rabbinic Bible (Ben Hayyim 1548)",date:1548,dateLbl:"1548 CE",tradition:"Printed Editions",place:"Venice",lat:45.4408,lng:12.3155,color:'#3f8ed0',
+  desc:"Later Bomberg-press reprint of the Ben Hayyim Second Rabbinic Bible."},
+{id:'05d_Third_Rabbinic_1545',sigil:'05d',name:"Third Rabbinic Bible (1545/46)",date:1545,dateLbl:"1545-46 CE",tradition:"Printed Editions",place:"Venice",lat:45.4408,lng:12.3155,color:'#3f8ed0',
+  desc:"Third major printed Rabbinic Bible edition to appear from the Venice presses."},
+{id:'05e_Western_Targums_1591',sigil:'05e',name:"Western Targums (Antwerp Polyglot) 1591",date:1591,dateLbl:"1591 CE",tradition:"Printed Editions",place:"Antwerp",lat:51.2194,lng:4.4025,color:'#3f8ed0',
+  desc:"Targum texts as printed in the Antwerp Polyglot (Biblia Regia), produced under Christophe Plantin."},
+{id:'05f_Letteris_1852',sigil:'05f',name:"Letteris Edition",date:1852,dateLbl:"1852 CE",tradition:"Printed Editions",place:"Vienna",lat:48.2082,lng:16.3738,color:'#3f8ed0',
+  desc:"Meir Letteris's widely-circulated 19th-century printed Hebrew Bible edition."},
+{id:'05g_Lagarde_Jonathan_1872',sigil:'05g',name:"Lagarde Edition of Targum Jonathan",date:1872,dateLbl:"1872 CE",tradition:"Printed Editions",place:"Germany",lat:51.5413,lng:9.9158,color:'#3f8ed0',
+  desc:"Paul de Lagarde's critical edition of Targum Jonathan, a foundational modern scholarly edition."},
+{id:'05h_Sperber_Targum_1959',sigil:'05h',name:"Sperber Targum Edition",date:1959,dateLbl:"1959 CE",tradition:"Printed Editions",place:"Leiden",lat:52.1601,lng:4.497,color:'#3f8ed0',
+  desc:"Alexander Sperber's critical edition of the Aramaic Targumim, still a standard scholarly reference."},
+{id:'05i_Ginsburg_1894',sigil:'05i',name:"Ginsburg Edition",date:1894,dateLbl:"1894 CE",tradition:"Printed Editions",place:"London",lat:51.5074,lng:-0.1278,color:'#3f8ed0',
+  desc:"Christian D. Ginsburg's massoretico-critical edition of the Hebrew Bible."},
+{id:'05j_BHS_1977',sigil:'05j',name:"Biblia Hebraica Stuttgartensia (BHS)",date:1977,dateLbl:"1977 CE",tradition:"Printed Editions",place:"Stuttgart",lat:48.7758,lng:9.1829,color:'#3f8ed0',
+  desc:"The standard modern critical edition, based directly on the Leningrad Codex."},
+{id:'05k_BHQ_Quinta',sigil:'05k',name:"Biblia Hebraica Quinta (BHQ)",date:2004,dateLbl:"2004 CE - ongoing",tradition:"Printed Editions",place:"Stuttgart",lat:48.7758,lng:9.1829,color:'#3f8ed0',
+  desc:"The current in-progress critical edition superseding BHS, with a fuller textual apparatus."},
 ];
-const state={search:'',yrFrom:-200,yrTo:1100,trad:new Set()};
+const state={search:'',yrFrom:-2400,yrTo:2010,trad:new Set()};
 let map,markers=[];
 
 function initMap(){
-  map=L.map('leafletMap',{scrollWheelZoom:true}).setView([33.5,33],4.4);
+  map=L.map('leafletMap',{scrollWheelZoom:true}).setView([33.5,33],3.4);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom:18
   }).addTo(map);
+  const seen={};
   MSS.forEach(m=>{
-    const color=TRAD_COLORS[m.tradition]||'#8a6a20';
+    // Jitter markers that share an exact coordinate (e.g. several Venice or
+    // Stuttgart editions) in a small ring so every pin stays clickable.
+    const key=m.lat.toFixed(3)+','+m.lng.toFixed(3);
+    seen[key]=(seen[key]||0)+1;
+    const n=seen[key]-1;
+    const jLat=m.lat+(n?Math.sin(n*2.4)*0.18:0);
+    const jLng=m.lng+(n?Math.cos(n*2.4)*0.18:0);
+    const color=m.color||TRAD_COLORS[m.tradition]||'#8a6a20';
     const icon=L.divIcon({className:'',html:`<div class="pin-dot" style="background:${color}"></div>`,iconSize:[16,16],iconAnchor:[8,14]});
-    const mk=L.marker([m.lat,m.lng],{icon}).addTo(map);
-    mk.bindPopup(`<div class="pop-sigil">${m.sigil}</div><div class="pop-title">${m.name}</div><div class="pop-meta">📅 ${m.dateLbl} · 📍 ${m.place}</div><div style="font-size:11.5px;color:#3a2a10;margin-bottom:6px">${m.desc}</div><a class="pop-link" href="scriptorium.html">Open in Scriptorium →</a>`);
+    const mk=L.marker([jLat,jLng],{icon}).addTo(map);
+    mk.bindPopup(`<div class="pop-sigil">${m.sigil}</div><div class="pop-title">${m.name}</div><div class="pop-meta">📅 ${m.dateLbl} · 📍 ${m.place}</div><div style="font-size:11.5px;color:#3a2a10;margin-bottom:6px">${m.desc}</div><a class="pop-link" href="scriptorium.html">Open in Library →</a>`);
     mk._rec=m;
     markers.push(mk);
   });
@@ -178,10 +258,10 @@ function onYearChange(){
 }
 function resetAll(){
   document.getElementById('searchBox').value='';
-  document.getElementById('yrFrom').value=-200;document.getElementById('yrTo').value=1100;
+  document.getElementById('yrFrom').value=-2400;document.getElementById('yrTo').value=2010;
   document.querySelectorAll('.tb-chip.sel').forEach(c=>c.classList.remove('sel'));
-  state.search='';state.yrFrom=-200;state.yrTo=1100;state.trad.clear();
-  document.getElementById('yrFromLbl').textContent='-200';document.getElementById('yrToLbl').textContent='1100';
+  state.search='';state.yrFrom=-2400;state.yrTo=2010;state.trad.clear();
+  document.getElementById('yrFromLbl').textContent='-2400';document.getElementById('yrToLbl').textContent='2010';
   applyFilters();
 }
 function applyFilters(){

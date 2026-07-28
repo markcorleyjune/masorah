@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Masorah Corpus — Reader · Interlinear Study</title>
+<title>Masorah — Reader · Interlinear Study</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22)}
@@ -201,12 +201,12 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 <!-- BANNER -->
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah Corpus</h1><p>Reader · Interlinear Study</p></div></div>
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah</h1><p>Reader · Interlinear Study</p></div></div>
     <nav class="nav">
-      <a href="transcriber.html">✍ Transcriber</a>
-      <a href="annotate.html">▤ Annotate</a>
       <a href="architecture.html">⧉ Arch</a>
+      <a href="transcriber.html">✍ Transcriber</a>
       <a href="pipeline.html">⫯ Pipeline</a>
+      <a href="annotate.html">▤ Annotate</a>
       <a href="provenance.html">⟳ Provenance</a>
       <a href="paleography.html">◉ Paleography</a>
       <a href="analyzer.html">∿ Analyzer</a>
@@ -290,7 +290,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 <!-- FAQ PANEL (right, visible by default) -->
 <div id="faqPanel">
   <button class="faq-x" onclick="toggleFaq()">×</button>
-  <div class="faq-hd">Masorah Corpus</div>
+  <div class="faq-hd">Masorah</div>
   <div class="faq-sub">Forensic Manuscript Analysis Platform</div>
   <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>How do I navigate to a passage?</strong><div class="faq-ans">Click the passage picker (e.g. "Gen 1") in the reader toolbar. Select a book, then a chapter, then optionally type a verse number.</div></div>
   <div class="faq-item" onclick="this.classList.toggle('open')"><span class="faq-tri">›</span><strong>How do I select texts?</strong><div class="faq-ans">Click "ESV · THOT" in the toolbar to open the full text selector. Choose manuscripts, translations, and witnesses from all T01–T05 tiers.</div></div>
@@ -949,7 +949,7 @@ async function pickExportFolder(){
 }
 async function exportPassage(){
   const rows=currentVerses.map(v=>({ref:state.book+' '+state.chapter+':'+v.n,heb:v.heb||'',en:v.text.replace(/<[^>]+>/g,'')}));
-  const payload={manuscript:'Masorah Corpus Reader',passage:state.book+' '+state.chapter,exported:new Date().toISOString(),translations:document.getElementById('transLabel').textContent,verses:rows,lexicon:LEX};
+  const payload={manuscript:'Masorah Reader',passage:state.book+' '+state.chapter,exported:new Date().toISOString(),translations:document.getElementById('transLabel').textContent,verses:rows,lexicon:LEX};
   const json=JSON.stringify(payload,null,2);
   const fname=(state.book+'_'+state.chapter).replace(/\s+/g,'_')+'_reader_export.json';
   if(exportDirHandle){
@@ -970,7 +970,23 @@ async function exportPassage(){
 function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),2800);}
 
 /* ── API probe ── */
-async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch(API_BASE+'/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+async function probeAPI(){
+  const pill=document.getElementById('apiPill');if(!pill)return;
+  try{
+    const r=await fetch(API_BASE+'/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});
+    if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';pill.style.cursor='default';pill.onclick=null;return;}
+  }catch(e){}
+  pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';
+  pill.style.cursor='pointer';
+  pill.title='Click for how to bring the corpus API online';
+  // A webpage — this one included, whether opened locally or at masorah.io —
+  // cannot launch a program on your computer; browsers block that for
+  // security. main_api.py has to actually be running on THIS machine for
+  // live corpus/reader/chat data to appear, whether you're viewing the
+  // local files or the public site (CORS is open, so localhost:8000 answers
+  // either way once it's running).
+  pill.onclick=()=>toast("Run Launch_Masorah.bat on this computer, then reload — a webpage can't start it for you (browser security). Works even while viewing masorah.io, as long as the API is running locally.");
+}
 
 /* ── INIT ── */
 buildTSP();

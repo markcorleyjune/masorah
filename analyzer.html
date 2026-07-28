@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Masorah Corpus — Analyzer</title>
+<title>Masorah — Analyzer</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
@@ -86,12 +86,12 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 <body>
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah Corpus</h1><p>Analyzer · Statistical Analysis</p></div></div>
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah</h1><p>Analyzer · Statistical Analysis</p></div></div>
     <nav class="nav">
-      <a href="transcriber.html">✍ Transcriber</a>
-      <a href="annotate.html">▤ Annotate</a>
       <a href="architecture.html">⧉ Arch</a>
+      <a href="transcriber.html">✍ Transcriber</a>
       <a href="pipeline.html">⫯ Pipeline</a>
+      <a href="annotate.html">▤ Annotate</a>
       <a href="provenance.html">⟳ Provenance</a>
       <a href="paleography.html">◉ Paleography</a>
       <a class="active" href="analyzer.html">∿ Analyzer</a>
@@ -223,7 +223,7 @@ function exportPDF(){toast('Exporting analysis as PDF…')}
 function exportCSV(){const rows=[['id','name','tier','selected'],WITNESSES.map(w=>[w.id,w.name,w.tier,w.checked]).join('\n')].join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv'}));a.download='analysis.csv';a.click();}
 
 /* AI */
-const AI_RESPONSES={'cbgm':`<strong>CBGM Coherence Statistics</strong><br><br>The Coherence-Based Genealogical Method (Mink 2000; Wasserman & Gurry 2017) computes pairwise coherence scores as ratio of agreements to variation units. In Masorah Corpus: 60,000 pairs, 8 features, θ=0.246 after 4 EM iterations. ECM coherence −0.483 indicates majority divergence from 05c baseline.<br><div class="ai-src">Sources: Mink 2000 · Wasserman & Gurry 2017 JSTOR · Trovato 2014 Brill</div>`,'masoretic':`<strong>Masoretic Code Verification</strong><br><br>The Masoretic Code provides internal sum-checks: Torah word count = 79,976 (Ginsburg 1897); verse count = 5,845; letter count = 304,805. These totals are encoded in the Masorah Finalis. Discrepancies indicate scribal error or variant readings. Automated sum-checking is implemented in pipeline v42.1.<br><div class="ai-src">Sources: Ginsburg 1897 · Würthwein 1995 · BHS apparatus</div>`};
+const AI_RESPONSES={'cbgm':`<strong>CBGM Coherence Statistics</strong><br><br>The Coherence-Based Genealogical Method (Mink 2000; Wasserman & Gurry 2017) computes pairwise coherence scores as ratio of agreements to variation units. In Masorah: 60,000 pairs, 8 features, θ=0.246 after 4 EM iterations. ECM coherence −0.483 indicates majority divergence from 05c baseline.<br><div class="ai-src">Sources: Mink 2000 · Wasserman & Gurry 2017 JSTOR · Trovato 2014 Brill</div>`,'masoretic':`<strong>Masoretic Code Verification</strong><br><br>The Masoretic Code provides internal sum-checks: Torah word count = 79,976 (Ginsburg 1897); verse count = 5,845; letter count = 304,805. These totals are encoded in the Masorah Finalis. Discrepancies indicate scribal error or variant readings. Automated sum-checking is implemented in pipeline v42.1.<br><div class="ai-src">Sources: Ginsburg 1897 · Würthwein 1995 · BHS apparatus</div>`};
 function sendAI(){const q=document.getElementById('aiInput').value.trim();if(!q)return;const msgs=document.getElementById('aiMessages');msgs.innerHTML+=`<div class="ai-msg user">${q}</div>`;msgs.innerHTML+=`<div class="ai-msg ai"><em>Searching…</em></div>`;msgs.scrollTop=msgs.scrollHeight;document.getElementById('aiInput').value='';const k=Object.keys(AI_RESPONSES).find(k=>q.toLowerCase().includes(k));setTimeout(()=>{const all=msgs.querySelectorAll('.ai-msg.ai');all[all.length-1].innerHTML=k?AI_RESPONSES[k]:`<strong>Search: ${q}</strong><br><br>No cached result. Connect MCP to Google Scholar for live results.<br><div class="ai-src">Sources: Google Scholar · Brill · JBL · CBQ</div>`;msgs.scrollTop=msgs.scrollHeight},1200);}
 function aiQuery(q){document.getElementById('aiInput').value=q;sendAI()}
 function exportAI(){const t=document.getElementById('aiMessages').innerText;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='analyzer_ai.txt';a.click();}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Masorah Corpus — Pipeline</title>
+<title>Masorah — Pipeline</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22);--code-bg:#1a1208;--code-fg:#f4e8b8;--code-key:#e8a020;--code-str:#c0d890;--code-cmt:#7a6a40;--code-num:#f7c860}
@@ -111,20 +111,20 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);mi
   <div class="banner-row">
     <div class="brand" onclick="location.href='index.html'" style="cursor:pointer">
       <div class="brand-glyph">מָסוֹרָה</div>
-      <div class="brand-text"><h1>Masorah Corpus</h1><p>Pipeline · pipeline.py v42.1</p></div>
+      <div class="brand-text"><h1>Masorah</h1><p>Pipeline · pipeline.py v42.1</p></div>
     </div>
     <nav class="nav">
-      <a href="transcriber.html"><span>✍</span> Transcriber</a>
-      <a href="annotate.html"><span>▤</span> Annotate</a>
-      <a href="architecture.html"><span>⧉</span> Arch</a>
-      <a class="active" href="pipeline.html"><span>⫯</span> Pipeline</a>
-      <a href="provenance.html"><span>⟳</span> Provenance</a>
-      <a href="paleography.html"><span>◉</span> Paleography</a>
-      <a href="analyzer.html"><span>∿</span> Analyzer</a>
-      <a href="chat.html"><span>◍</span> Chat</a>
-      <a href="graph.html"><span>⌬</span> Graph</a>
-      <a href="reader.html"><span>▦</span> Reader</a>
-      <a href="publish.html"><span>⥤</span> Publish</a>
+      <a href="architecture.html">⧉ Arch</a>
+      <a href="transcriber.html">✍ Transcriber</a>
+      <a class="active" href="pipeline.html">⫯ Pipeline</a>
+      <a href="annotate.html">▤ Annotate</a>
+      <a href="provenance.html">⟳ Provenance</a>
+      <a href="paleography.html">◉ Paleography</a>
+      <a href="analyzer.html">∿ Analyzer</a>
+      <a href="chat.html">◍ Chat</a>
+      <a href="graph.html">⌬ Graph</a>
+      <a href="reader.html">▦ Reader</a>
+      <a href="publish.html">⥤ Publish</a>
     </nav>
     <div class="status-cluster">
       <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
@@ -233,7 +233,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);mi
 /* ── pipeline.py source (renamed from pip.py) ─────────────────────────────── */
 const FILES = {
 'pipeline.py': `# ═══════════════════════════════════════════════════════════════
-#  Masorah Corpus · pipeline.py · v42.1
+#  Masorah · pipeline.py · v42.1
 #  Expectation-Maximization Engine for eCBGM
 #  Renamed from pip.py — canonical module name is now pipeline.py
 # ═══════════════════════════════════════════════════════════════
@@ -349,7 +349,7 @@ if __name__ == "__main__":
 `,
 
 'aud.py': `# ═══════════════════════════════════════════════════════════════
-#  Masorah Corpus · aud.py · v8.1
+#  Masorah · aud.py · v8.1
 #  Audit script: validates corpus integrity before pipeline.py runs
 # ═══════════════════════════════════════════════════════════════
 

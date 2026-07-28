@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Masorah Corpus — Transcriber (HTR / OCR Workbench)</title>
+<title>Masorah — Transcriber (HTR / OCR Workbench)</title>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@300;400;700&display=swap" rel="stylesheet">
 <!-- Real in-browser OCR (Tesseract.js) + TIFF decoder (UTIF). Loaded over the internet on first use. -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
@@ -191,12 +191,12 @@ input[type=file]{display:none}
 
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah Corpus</h1><p>Transcriber · HTR / OCR Workbench</p></div></div>
+    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Transcriber · HTR / OCR Workbench</p></div></div>
     <nav class="nav">
-      <a class="active" href="transcriber.html">✍ Transcriber</a>
-      <a href="annotate.html">▤ Annotate</a>
       <a href="architecture.html">⧉ Arch</a>
+      <a class="active" href="transcriber.html">✍ Transcriber</a>
       <a href="pipeline.html">⫯ Pipeline</a>
+      <a href="annotate.html">▤ Annotate</a>
       <a href="provenance.html">⟳ Provenance</a>
       <a href="paleography.html">◉ Paleography</a>
       <a href="analyzer.html">∿ Analyzer</a>
@@ -948,7 +948,7 @@ function pageXML(stem){
   const lineXML=state.lines.map((l,i)=>{const b=state.boxes.find(x=>x.id===l.box)||{x:0,y:0,w:0,h:0};return `      <TextLine id="line_${i+1}"><Coords points="${coords(b)}"/><TextEquiv><Unicode>${esc(l.text)}</Unicode></TextEquiv></TextLine>`;}).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>
 <PcGts xmlns="http://schema.primaresearch.org/PAGE/gts/pagecontent/2013-07-15">
-  <Metadata><Creator>Masorah Corpus Transcriber</Creator><Created>${new Date().toISOString()}</Created><Comments>model=${state.selModel.name}</Comments></Metadata>
+  <Metadata><Creator>Masorah Transcriber</Creator><Created>${new Date().toISOString()}</Created><Comments>model=${state.selModel.name}</Comments></Metadata>
   <Page imageFilename="${esc(stem)}.jpg" imageWidth="${state.natW}" imageHeight="${state.natH}">
     <TextRegion id="region_1" type="paragraph"><Coords points="0,0 ${state.natW},0 ${state.natW},${state.natH} 0,${state.natH}"/>
 ${lineXML}
@@ -961,7 +961,7 @@ function alto(stem){const ls=state.lines.map((l,i)=>{const b=state.boxes.find(x=
       <TextBlock ID="block_1">
 ${ls}
       </TextBlock></PrintSpace></Page></Layout></alto>`;}
-function hocr(stem){const ls=state.lines.map((l,i)=>{const b=state.boxes.find(x=>x.id===l.box)||{x:0,y:0,w:0,h:0};return `   <span class='ocr_line' id='line_${i+1}' title='bbox ${Math.round(b.x)} ${Math.round(b.y)} ${Math.round(b.x+b.w)} ${Math.round(b.y+b.h)}'>${esc(l.text)}</span>`;}).join('\n');return `<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='ocr-system' content='Masorah Corpus'></head><body><div class='ocr_page' title='image "${esc(stem)}.jpg"; bbox 0 0 ${state.natW} ${state.natH}'>\n${ls}\n</div></body></html>`;}
+function hocr(stem){const ls=state.lines.map((l,i)=>{const b=state.boxes.find(x=>x.id===l.box)||{x:0,y:0,w:0,h:0};return `   <span class='ocr_line' id='line_${i+1}' title='bbox ${Math.round(b.x)} ${Math.round(b.y)} ${Math.round(b.x+b.w)} ${Math.round(b.y+b.h)}'>${esc(l.text)}</span>`;}).join('\n');return `<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='ocr-system' content='Masorah'></head><body><div class='ocr_page' title='image "${esc(stem)}.jpg"; bbox 0 0 ${state.natW} ${state.natH}'>\n${ls}\n</div></body></html>`;}
 /* TEI P5, with real <facsimile>/<surface>/<zone> linking each transcribed
    line and zone to its actual image-pixel region (state.boxes), so the
    transcription is anchored to the page image the way P5 sourceDoc/facsimile
@@ -985,7 +985,7 @@ function tei(stem){
   <teiHeader>
     <fileDesc>
       <titleStmt><title>Sassoon 1053 — folio ${$('pageInp').value}</title></titleStmt>
-      <publicationStmt><p>Masorah Corpus Transcriber</p></publicationStmt>
+      <publicationStmt><p>Masorah Transcriber</p></publicationStmt>
       <sourceDesc><p>${esc(stem)} · model=${state.selModel.name}</p></sourceDesc>
     </fileDesc>
     <sourceDoc>
@@ -1025,7 +1025,7 @@ function w3cAnnotations(stem){
     body.push({type:'TextualBody',purpose:'tagging',value:isLine?'line':(b.zone||'region')});
     return {'@context':'http://www.w3.org/ns/anno.jsonld',id:'#'+b.id,type:'Annotation',motivation:isLine?'transcribing':'tagging',body,target};
   });
-  return JSON.stringify({'@context':'http://www.w3.org/ns/anno.jsonld',id:base+'-annos',type:'AnnotationCollection',label:'Masorah Corpus — '+stem,total:items.length,items},null,2);
+  return JSON.stringify({'@context':'http://www.w3.org/ns/anno.jsonld',id:base+'-annos',type:'AnnotationCollection',label:'Masorah — '+stem,total:items.length,items},null,2);
 }
 function importW3CFile(file){
   const reader=new FileReader();

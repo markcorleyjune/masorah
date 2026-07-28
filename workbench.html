@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah — Workbench</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22);--base:16px}
+*{margin:0;padding:0;box-sizing:border-box}
+html{font-size:var(--base);scroll-behavior:smooth}
+body{
+  font-family:'EB Garamond',Georgia,serif;
+  background:
+    radial-gradient(ellipse at top, var(--gold-pale) 0%, transparent 50%),
+    linear-gradient(180deg,var(--cream) 0%, #f4eedd 100%);
+  background-attachment:fixed;
+  color:var(--ink);min-height:100vh;
+}
+
+/* ── HEADER BANNER ─────────────────────────────────── */
+.banner{
+  background:linear-gradient(180deg,var(--paper) 0%, var(--gold-bg) 100%);
+  border-bottom:3px double var(--gold);
+  padding:0 28px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:var(--shadow);
+}
+.banner-row{
+  display:flex;align-items:center;gap:18px;
+  height:78px;max-width:1700px;margin:0 auto;
+}
+.brand{display:flex;align-items:center;gap:14px;padding-right:18px;border-right:1px solid var(--bdr)}
+.brand-glyph{
+  font-family:'Frank Ruhl Libre',serif;font-size:42px;color:var(--gold);
+  line-height:1;text-shadow:1px 1px 0 #fff, 2px 2px 4px rgba(120,90,20,.2);
+}
+.brand-text h1{
+  font-family:'Cinzel',serif;font-size:22px;font-weight:700;
+  color:var(--ink);letter-spacing:.06em;line-height:1.1;
+}
+.brand-text p{font-size:11px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}
+.nav::-webkit-scrollbar{height:0}
+.nav a{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:8px 13px;font-size:14px;color:var(--ink2);
+  text-decoration:none;border-radius:var(--r);
+  font-family:'EB Garamond',serif;font-weight:500;
+  white-space:nowrap;transition:all .14s;
+  border:1px solid transparent;
+}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk);box-shadow:var(--shadow-sm)}
+.nav-ico{font-size:13px;opacity:.9}
+
+.status-cluster{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 11px;border-radius:20px;font-size:11px;
+  font-family:'JetBrains Mono',monospace;font-weight:500;
+  border:1px solid var(--bdr);background:var(--paper);
+}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}
+.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.font-ctrl{display:flex;align-items:center;border:1px solid var(--bdr);border-radius:20px;background:var(--paper);overflow:hidden}
+.font-ctrl button{
+  border:none;background:transparent;padding:5px 11px;cursor:pointer;
+  font-family:'Cinzel',serif;font-weight:600;color:var(--gold-dk);
+  transition:background .14s;
+}
+.font-ctrl button:hover{background:var(--gold-pale)}
+.font-ctrl .sz{font-size:11px;padding:5px 9px;color:var(--ink3);border-left:1px solid var(--bdr);border-right:1px solid var(--bdr);min-width:46px;text-align:center}
+
+.user{display:flex;align-items:center;gap:8px;padding:5px 11px 5px 5px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:13px}
+.user-n{font-size:12px;color:var(--ink2)}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:9px;font-family:'JetBrains Mono',monospace}
+.logout{background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:4px 8px;border-radius:var(--r);font-family:'EB Garamond',serif}
+.logout:hover{color:var(--err)}
+
+/* ── HERO ─────────────────────────────────── */
+.hero{
+  max-width:1700px;margin:24px auto 0;padding:0 28px;
+}
+.hero-card{
+  background:linear-gradient(135deg,#fdf8e8 0%, #fbf3d4 100%);
+  border:1px solid var(--bdr2);
+  border-radius:var(--r3);
+  padding:26px 32px;
+  position:relative;overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.hero-card::before{
+  content:'';position:absolute;top:-50%;right:-10%;width:400px;height:400px;
+  background:radial-gradient(circle,rgba(184,134,11,.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-grid{display:grid;grid-template-columns:1fr 360px;gap:32px;align-items:start;position:relative}
+.hero-title{font-family:'Cinzel',serif;font-size:26px;color:var(--gold-dk);font-weight:600;line-height:1.2;margin-bottom:8px}
+.hero-title .em{color:var(--ink);font-style:italic}
+.hero-sub{font-size:15px;line-height:1.65;color:var(--ink2);max-width:880px}
+.hero-sub strong{color:var(--ink);font-weight:600}
+.hero-meta{display:flex;gap:10px}
+.hero-meta-card{
+  flex:1;background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);
+  padding:11px 14px;text-align:center;
+}
+.hero-meta-card .v{font-family:'Cinzel',serif;font-size:20px;color:var(--gold);font-weight:700;line-height:1}
+.hero-meta-card .k{font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+.hero-meta-card .x{font-size:10px;color:var(--ink4);margin-top:2px}
+
+/* ── PIPELINE BAR ─────────────────────────────────── */
+.pipe-bar{
+  max-width:1700px;margin:18px auto 0;padding:0 28px;
+}
+.pipe-card{
+  background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);
+  padding:14px 20px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow-sm);
+}
+.pipe-tag{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold-dk);font-weight:600}
+.pipe-track{flex:1;height:8px;background:var(--gold-bg);border-radius:4px;overflow:hidden;border:1px solid var(--bdr)}
+.pipe-fill{height:100%;background:linear-gradient(90deg,var(--gold) 0%,var(--amber) 100%);width:0%;transition:width .6s ease;border-radius:4px}
+.pipe-stat{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3)}
+.pipe-link{font-family:'Cinzel',serif;font-size:12px;color:var(--gold);text-decoration:none;border-bottom:1px solid transparent}
+.pipe-link:hover{border-bottom-color:var(--gold)}
+
+/* ── STAT TILES ─────────────────────────────────── */
+.stats{max-width:1700px;margin:18px auto 0;padding:0 28px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.stat{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);padding:18px 20px;position:relative;overflow:hidden;transition:.18s}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--gold)}
+.stat .num{font-family:'Cinzel',serif;font-size:34px;font-weight:700;color:var(--ink);line-height:1;letter-spacing:-.02em}
+.stat .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;margin-top:8px}
+.stat .sub{font-size:11px;color:var(--ink4);margin-top:4px;font-style:italic}
+.stat::after{content:'';position:absolute;top:0;right:0;width:50px;height:50px;background:radial-gradient(circle at top right,var(--gold-glow),transparent);opacity:.5}
+
+/* ── COHERENCE PRIORITIES ─────────────────────────────────── */
+.section{max-width:1700px;margin:24px auto 0;padding:0 28px}
+.section h2{font-family:'Cinzel',serif;font-size:15px;color:var(--ink2);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;gap:8px}
+.section h2 .ico{color:var(--gold)}
+
+.coh-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.coh{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);padding:18px 20px;transition:.18s}
+.coh:hover{border-color:var(--gold);box-shadow:var(--shadow-sm)}
+.coh-pri{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.14em;font-weight:700}
+.coh h3{font-family:'Cinzel',serif;font-size:16px;color:var(--ink);margin:6px 0 10px;font-weight:600}
+.coh p{font-size:13px;line-height:1.55;color:var(--ink2)}
+.coh em{color:var(--gold-dk);font-style:italic}
+
+/* ── MODULES ─────────────────────────────────── */
+.mod-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.mod{
+  position:relative;background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);
+  padding:18px 14px;text-align:center;text-decoration:none;color:var(--ink);transition:.2s;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.mod:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:var(--shadow);background:var(--gold-pale)}
+.mod .ico{font-size:26px;color:var(--gold);margin-bottom:4px}
+.mod .nm{font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--ink)}
+.mod .ds{font-size:10px;color:var(--ink3);min-height:24px;line-height:1.3}
+.mod .dot{position:absolute;top:8px;left:8px;width:7px;height:7px;border-radius:50%}
+.mod .dot.ok{background:#2e7d32;box-shadow:0 0 0 2px #e8f5e9}
+.mod .dot.warn{background:#e65100;box-shadow:0 0 0 2px #fff3e0}
+.mod .lvl{position:absolute;top:8px;right:8px;font-size:9px;background:var(--gold-pale);color:var(--gold-dk);padding:2px 6px;border-radius:9px;font-family:'JetBrains Mono',monospace;border:1px solid var(--bdr)}
+
+/* ── FOOTER ─────────────────────────────────── */
+footer{max-width:1700px;margin:32px auto;padding:24px 28px;border-top:1px solid var(--bdr);text-align:center}
+footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+footer .heb{font-family:'Frank Ruhl Libre',serif;font-size:18px;color:var(--gold);margin-bottom:6px}
+
+/* ── RESPONSIVE / FONT SCALE ─────────────────────────────────── */
+@media (max-width:1300px){
+  .stats,.mod-grid{grid-template-columns:repeat(3,1fr)}
+  .coh-grid{grid-template-columns:1fr}
+  .hero-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ BANNER ═══════════════════════════════ -->
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand">
+      <div class="brand-glyph">מָסוֹרָה</div>
+      <div class="brand-text">
+        <h1>Masorah</h1>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="architecture.html"><span class="nav-ico">⧉</span> Arch</a>
+      <a href="transcriber.html"><span class="nav-ico">✍</span> Transcriber</a>
+      <a href="pipeline.html"><span class="nav-ico">⫯</span> Pipeline</a>
+      <a href="annotate.html"><span class="nav-ico">▤</span> Annotate</a>
+      <a href="provenance.html"><span class="nav-ico">⟳</span> Provenance</a>
+      <a href="paleography.html"><span class="nav-ico">◉</span> Paleography</a>
+      <a href="analyzer.html"><span class="nav-ico">∿</span> Analyzer</a>
+      <a href="chat.html"><span class="nav-ico">◍</span> Chat</a>
+      <a href="graph.html"><span class="nav-ico">⌬</span> Graph</a>
+      <a href="reader.html"><span class="nav-ico">▦</span> Reader</a>
+      <a href="publish.html"><span class="nav-ico">⥤</span> Publish</a>
+    </nav>
+
+    <div class="status-cluster">
+      <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
+      <div class="font-ctrl" title="Adjust UI scale">
+        <button onclick="scale(-1)" aria-label="Decrease">A−</button>
+        <span class="sz" id="szLbl">100%</span>
+        <button onclick="scale(+1)" aria-label="Increase">A+</button>
+      </div>
+      <div class="user">
+        <div class="user-av">M</div>
+        <span class="user-n">Mark Corley</span>
+        <span class="user-lvl">L4</span>
+      </div>
+      <button class="logout" onclick="location.href='login.html'">Logout</button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ HERO ═══════════════════════════════ -->
+<section class="hero">
+  <div class="hero-card">
+    <div class="hero-grid">
+      <div>
+        <h1 class="hero-title">A Comparative Analysis of Tanakh Textual Variants <span class="em">— PhD Research Platform</span></h1>
+        <p class="hero-sub">
+          Diachronic Transmission of the Masoretic Text and DSS Traditions (2nd Millennium BCE – 1525 CE) through Digital, Material, and Statistical Approaches, within a Triangulated Provenance Framework and with Reference to a "Masoretic Code." Primary baseline: <strong>Second Rabbinic Bible / Mikraot Gedolot (Ben Ḥayyim 1525 &amp; 1548)</strong>. Mark A. Corley Jr. · FAU Erlangen-Nürnberg, external supervision TAU · Target 2029.
+        </p>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-meta-card"><div class="v">2029</div><div class="k">FAU</div><div class="x">Dr. Edzard</div></div>
+        <div class="hero-meta-card"><div class="v">05c</div><div class="k">Baseline</div><div class="x">1525/1548</div></div>
+        <div class="hero-meta-card"><div class="v">v42.1</div><div class="k">eCBGM</div><div class="x">Engine</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PIPELINE ═══════════════════════════════ -->
+<section class="pipe-bar">
+  <div class="pipe-card">
+    <span class="pipe-tag">⚙ pipeline.py v42.1</span>
+    <div class="pipe-track"><div class="pipe-fill" id="pipeFill"></div></div>
+    <span class="pipe-stat" id="pipeStat">EM iter 4/4 · 60,000 pairs · θ=0.246 · Trigram rising ✓</span>
+    <a class="pipe-link" href="pipeline.html">View Pipeline →</a>
+  </div>
+</section>
+
+<!-- ═══ STATS ═══════════════════════════════ -->
+<section class="stats">
+  <div class="stat"><div class="num">55</div><div class="lbl">Manuscript Nodes</div><div class="sub">7 tiers · T01–T07</div></div>
+  <div class="stat"><div class="num">23,213</div><div class="lbl">Aligned Verses</div><div class="sub">Extant: 22,978 · Lacuna: 235</div></div>
+  <div class="stat"><div class="num">−0.483</div><div class="lbl">ECM Coherence</div><div class="sub">Full corpus vs 05c baseline</div></div>
+  <div class="stat"><div class="num">0.246</div><div class="lbl">θ Spread v42.1</div><div class="sub">Iter 4 best · 8 features</div></div>
+  <div class="stat"><div class="num">v42.1</div><div class="lbl">EM Engine</div><div class="sub">pipeline.py → pipeline.html</div></div>
+</section>
+
+<!-- ═══ COHERENCE LOGIC ═══════════════════════════════ -->
+<section class="section">
+  <h2><span class="ico">⚖</span> Coherence Logic — Masoretic Code</h2>
+  <div class="coh-grid">
+    <div class="coh">
+      <div class="coh-pri">Priority 1 — Highest</div>
+      <h3>Baseline Convergence &amp; Transmissional Coherence</h3>
+      <p>Readings with greatest stable agreement across traceable transmission streams represent the most probable ancestral state. The <em>05c baseline (Ben Ḥayyim 1525)</em> is the primary coherence anchor. Higher coherence = more likely authentic continuity. Stable, traceable manuscript agreement takes priority over earlier or reconstructed witnesses.</p>
+    </div>
+    <div class="coh">
+      <div class="coh-pri">Priority 2 — Tie-Break</div>
+      <h3>Scribal Probability</h3>
+      <p>Prefer readings that best explain the emergence of competing variants through known scribal processes: harmonization, assimilation, omission, smoothing, expansion. The reading that most economically explains its rivals is preferred.</p>
+    </div>
+    <div class="coh">
+      <div class="coh-pri">Priority 3 — Final Tie-Break</div>
+      <h3>Lectio Difficilior</h3>
+      <p>The more difficult reading is preferred <em>only</em> when coherence and transcriptional probability remain functionally equal. Applied as final arbiter only. Scribes simplify; they rarely complicate.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ MODULES ═══════════════════════════════ -->
+<section class="section" style="margin-bottom:32px">
+  <h2><span class="ico">▦</span> Research Modules</h2>
+  <div class="mod-grid">
+    <a class="mod" href="transcriber.html"><span class="dot warn"></span><span class="lvl">L3</span><div class="ico">✍</div><div class="nm">Transcriber</div><div class="ds">HTR zone editor · Transkribus</div></a>
+    <a class="mod" href="annotate.html"><span class="dot ok"></span><span class="lvl">L1</span><div class="ico">▤</div><div class="nm">Annotate</div><div class="ds">Masorah MS registry · images</div></a>
+    <a class="mod" href="architecture.html"><span class="dot ok"></span><span class="lvl">L1</span><div class="ico">⧉</div><div class="nm">Architecture</div><div class="ds">Corpus topology · 55+ nodes</div></a>
+    <a class="mod" href="scriptorium.html"><span class="dot ok"></span><span class="lvl">L1</span><div class="ico">📚</div><div class="nm">Library</div><div class="ds">Faceted manuscript library</div></a>
+    <a class="mod" href="map.html"><span class="dot ok"></span><span class="lvl">L1</span><div class="ico">🗺</div><div class="nm">Map</div><div class="ds">Geographic witness distribution</div></a>
+    <a class="mod" href="pipeline.html"><span class="dot ok"></span><span class="lvl">L4</span><div class="ico">⫯</div><div class="nm">Pipeline</div><div class="ds">pipeline.py v42 · aud.py IDE</div></a>
+    <a class="mod" href="provenance.html"><span class="dot ok"></span><span class="lvl">L2</span><div class="ico">⟳</div><div class="nm">Provenance</div><div class="ds">XRF · C14 · material history</div></a>
+    <a class="mod" href="paleography.html"><span class="dot warn"></span><span class="lvl">L3</span><div class="ico">◉</div><div class="nm">Paleography</div><div class="ds">Ink density · scribal hand ML</div></a>
+    <a class="mod" href="analyzer.html"><span class="dot ok"></span><span class="lvl">L4</span><div class="ico">∿</div><div class="nm">Analyzer</div><div class="ds">±3σ · ECC · bright nodes</div></a>
+    <a class="mod" href="chat.html"><span class="dot warn"></span><span class="lvl">L3</span><div class="ico">◍</div><div class="nm">Chat</div><div class="ds">Agentic RAG · Dicta NLP</div></a>
+    <a class="mod" href="graph.html"><span class="dot ok"></span><span class="lvl">L3</span><div class="ico">⌬</div><div class="nm">Graph</div><div class="ds">CBGM stemma · 05c baseline</div></a>
+    <a class="mod" href="reader.html"><span class="dot ok"></span><span class="lvl">L1</span><div class="ico">▦</div><div class="nm">Reader</div><div class="ds">Interlinear · Masorah notes</div></a>
+    <a class="mod" href="publish.html" style="grid-column:span 1"><span class="dot warn"></span><span class="lvl">L4</span><div class="ico">⥤</div><div class="nm">Publish</div><div class="ds">XeLaTeX · ECM apparatus</div></a>
+  </div>
+</section>
+
+<footer>
+  <div class="heb">תּוֹרָה · נְבִיאִים · כְּתוּבִים</div>
+  <p>Masorah · FAU Erlangen-Nürnberg (external supervision, TAU) · pipeline.py v42.1 · eCBGM Engine · 1525 baseline</p>
+</footer>
+
+<script>
+/* ── API status probe ─────────────────────────────── */
+async function probeAPI(){
+  const pill = document.getElementById('apiPill');
+  if(!pill) return;
+  try{
+    const r = await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});
+    if(r.ok){ pill.className='pill live'; pill.innerHTML='<span class="dot"></span> Active'; return; }
+    throw 0;
+  }catch(e){
+    pill.className='pill warn'; pill.innerHTML='<span class="dot"></span> Offline';
+  }
+}
+probeAPI(); setInterval(probeAPI, 8000);
+
+/* ── Pipeline progress (visual) ─────────────────────────────── */
+let pct = 0;
+function pipeTick(){
+  pct = Math.min(100, pct + Math.random()*8);
+  document.getElementById('pipeFill').style.width = pct + '%';
+  if(pct >= 100){ pct = 100; clearInterval(pipeTimer); }
+}
+let pipeTimer = setInterval(pipeTick, 240);
+
+/* ── Font / UI scale ─────────────────────────────── */
+let szPct = parseInt(localStorage.getItem('masorah.scale')||'100',10);
+function applyScale(){
+  document.documentElement.style.fontSize = (szPct*0.16)+'px'; /* 16px base × pct/100 */
+  document.getElementById('szLbl').textContent = szPct+'%';
+  localStorage.setItem('masorah.scale', szPct);
+}
+function scale(dir){
+  szPct = Math.max(70, Math.min(160, szPct + dir*5));
+  applyScale();
+}
+applyScale();
+</script>
+</body>
+</html>
