@@ -98,16 +98,16 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
 
 @media (max-width:1000px){.wrap{grid-template-columns:1fr}.rail{position:static}}
 
-/* ── Manuscript Explorer (Masoretica-style BCV navigation) ── */
+/* ── Manuscript Search (Masoretica-style BCV navigation) ── */
 .explorer{max-width:1700px;margin:22px auto 0;padding:0 28px}
-.expl-card{background:linear-gradient(180deg,#20170a,#1a1208);border-radius:var(--r3);padding:20px 24px;box-shadow:var(--shadow-lg);color:#f3e8c8}
+.expl-card{background:linear-gradient(180deg,#0c0c0c,#000);border-radius:var(--r3);padding:20px 24px;box-shadow:var(--shadow-lg);color:#f3e8c8;border:1px solid #2a2a2a}
 .expl-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
 .expl-hd h2{font-family:'Cinzel',serif;font-size:16px;color:var(--gold-lt);letter-spacing:.05em}
 .expl-hd p{font-size:11.5px;color:#c9b878;margin-top:2px;max-width:640px}
 .expl-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
 .expl-field{display:flex;flex-direction:column;gap:3px}
 .expl-field label{font-size:9.5px;color:#c9b878;text-transform:uppercase;letter-spacing:.08em}
-.expl-field select,.expl-field input{padding:7px 9px;border-radius:var(--r);border:1px solid #6a5a30;background:#2a2010;color:#f3e8c8;font-family:inherit;font-size:13px;min-width:70px}
+.expl-field select,.expl-field input{padding:7px 9px;border-radius:var(--r);border:1px solid #3a3a3a;background:#161616;color:#f3e8c8;font-family:inherit;font-size:13px;min-width:70px}
 .expl-field select{min-width:150px}
 .expl-go{padding:8px 18px;border-radius:var(--r);border:1px solid var(--gold-dk);background:var(--gold);color:#1a1208;font-weight:700;font-family:'Cinzel',serif;font-size:12px;cursor:pointer;height:34px;align-self:flex-end}
 .expl-go:hover{background:var(--gold-lt)}
@@ -122,7 +122,7 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
 .expl-img-wrap img{width:100%;display:block}
 .expl-img-cap{font-size:10px;color:#a89860;margin-top:6px;font-family:'JetBrains Mono',monospace}
 .expl-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.expl-actions button{font-size:11px;padding:6px 12px;border-radius:var(--r);border:1px solid #6a5a30;background:#2a2010;color:#f3e8c8;cursor:pointer;font-family:inherit}
+.expl-actions button{font-size:11px;padding:6px 12px;border-radius:var(--r);border:1px solid #3a3a3a;background:#161616;color:#f3e8c8;cursor:pointer;font-family:inherit}
 .expl-actions button:hover{border-color:var(--gold-lt);color:var(--gold-lt)}
 @media (max-width:900px){.expl-body{grid-template-columns:1fr}}
 
@@ -163,7 +163,7 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
 <section class="explorer">
   <div class="expl-card">
     <div class="expl-hd">
-      <div><h2>⌕ Manuscript Explorer</h2><p>Jump straight to one Book/Chapter/Verse in one witness — text, apparatus fields, and the real manuscript page, side by side. Modeled after masoretica.org's reference/manuscript navigator, wired to this corpus's own live API.</p></div>
+      <div><h2>⌕ Manuscript Search</h2><p>Jump straight to one Book/Chapter/Verse in one witness — text, apparatus fields, and the real manuscript page, side by side. Modeled after masoretica.org's reference/manuscript navigator, wired to this corpus's own live API.</p></div>
       <div class="expl-actions">
         <button onclick="explCite()">❝ Cite this page</button>
         <button onclick="explPermalink()"># Permalink</button>
@@ -192,7 +192,7 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
 </section>
 
 <section class="pagehead">
-  <h1>Archives — Manuscript Corpus</h1>
+  <h1>Archives — Masorah Corpus</h1>
   <p>Every witness node in the corpus — inscriptions, scrolls, codices, and printed editions — spanning c. 2400 BCE through the 2004 Biblia Hebraica Quinta. Filter by tier, form, or region, then open a witness directly in Apparatus or Reader. Thumbnails are served live from the Digital Archive via the local API.</p>
 </section>
 
@@ -247,9 +247,9 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
     <a href="https://culmus.sourceforge.io/taamim/index.html" target="_blank" rel="noopener">Keter Aram Tsova typeface ↗</a>
   </div>
   <h2 style="font-size:18px;margin-top:6px">How to cite.</h2>
-  <p>If masorah.io has facilitated your research, a citation is appreciated. For a specific witness or BCV page, use "Cite this page" in the Manuscript Explorer above for a permalink-based citation.</p>
+  <p>If masorah.io has facilitated your research, a citation is appreciated. For a specific witness or BCV page, use "Cite this page" in the Manuscript Search above for a permalink-based citation.</p>
   <div class="cite-box">
-    <blockquote id="siteCite">Corley, Mark. "Masorah: Manuscript Explorer &amp; Computational Lab." Accessed <span id="citeDate"></span>. https://masorah.io/.</blockquote>
+    <blockquote id="siteCite">Corley, Mark. "Masorah: Manuscript Search &amp; Computational Lab." Accessed <span id="citeDate"></span>. https://masorah.io/.</blockquote>
     <button class="cite-copy" onclick="copyCite()">Copy</button>
   </div>
   <p style="margin-top:14px;font-size:11px;color:var(--ink4)">Built independently; see also <a href="https://www.masoretica.org/" target="_blank" rel="noopener" style="color:var(--gold-dk)">masoretica.org ↗</a> (Idan Dershowitz) and <a href="https://etnachta.org/" target="_blank" rel="noopener" style="color:var(--gold-dk)">etnachta.org ↗</a> for related manuscript-explorer projects.</p>
@@ -324,6 +324,59 @@ const MSS=[
 {id:'05j_BHS_1977',code:'05j',name:'Biblia Hebraica Stuttgartensia (BHS)',date:1977,era:'1977 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Stuttgart',color:'#3f8ed0'},
 {id:'05k_BHQ_Quinta',code:'05k',name:'Biblia Hebraica Quinta (BHQ)',date:2004,era:'2004 CE - ongoing',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Stuttgart',color:'#3f8ed0'},
 ];
+/* ── Open-source fallback links ──
+   Where this witness has no image on disk yet (see the 2026-07-30 inventory:
+   roughly half the 43 witness folders have zero acquired images), link
+   straight to the open repository/catalogue record instead of a broken
+   thumbnail. Per Mark's instruction, this project only auto-fetches from
+   clearly open sources and links out for everything else — this map is
+   that "everything else" list. Restricted viewers (e.g. Vaticanus, which
+   only opens in the Vatican Library's own viewer) are included too, same
+   as noted in the Sources & Method section below. */
+const SOURCE_LINKS={
+  '01a_Umm_el_Marra':'https://as.jhu.edu/neareastern/research/syria-umm-el-marra/',
+  '01b_Wadi_el_Hol':'https://mnamon.sns.it/index.php?page=Risorse&id=25&lang=en',
+  '01c_Serabit_el_Khadim':'https://www.britishmuseum.org/collection/object/Y_EA41748',
+  '01d_Proto_Canaanite':'https://www.penn.museum/sites/canaan/Writing.html',
+  '01e_Mesha_Stele':'https://collections.louvre.fr/en/ark:/53355/cl010120302',
+  '01f_Ketef_Hinnom':'https://www.imj.org.il/en/collections/198069-0',
+  '02a_DSS_General':'http://dssenglishbible.com/',
+  '02b_Great_Isaiah_Scroll':'https://dss.collections.imj.org.il/isaiah',
+  '02c_Nash_Papyrus':'https://cudl.lib.cam.ac.uk/view/MS-OR-00233/1',
+  '02d_Job_Targum':'https://cal.huc.edu/',
+  '02e_En_Gedi_Scroll':'https://www.nationalgeographic.com/history/article/en-gedi-scroll-bible-micro-ct-scan',
+  '02f_Severus_Rubrics':'https://www.biu.ac.il/js/JSIJ/1-2002/Lange.pdf',
+  '02g_Samaritan_Pentateuch':'https://www.nli.org.il/en/manuscripts/NNL_ALEPH000127598/NLI',
+  '02h_Cairo_Genizah':'https://www.genizah.org/',
+  '02i_Syriac_Peshitta':'https://www.nli.org.il/en/manuscripts/NNL_ALEPH000130985/NLI',
+  '03a_Aleppo_Codex':'http://www.aleppocodex.org/',
+  '03b_Leningrad_Codex':'https://archive.org/details/LeningradCodex',
+  '03c_Sassoon_1053':'https://www.nli.org.il/en/manuscripts/NNL_ALEPH997009426989405171/NLI',
+  '03d_MS_Or_4445':'https://www.bl.uk/manuscripts/FullDisplay.aspx?ref=Or_4445',
+  '03e_MS_Cairensis':'https://www.nli.org.il/en/manuscripts/NNL_ALEPH000139266/NLI',
+  '03f_Reuchlin_Prophets':'https://digital.blb-karlsruhe.de/blbihd/content/titleinfo/153925',
+  '03g_Valmadonna_I':'https://www.sothebys.com/en/auctions/2015/valmadonna-trust-library-n09450.html',
+  '03h_Codex_Madrid_M1':'https://biblioteca.ucm.es/atencion/antiguo-y-valioso',
+  '03i_Erfurt_Codex_1':'https://orient-digital.de/receive/SBBMSBook_manuscript_00001001',
+  '03j_MS_Babylonicus':'https://www.nli.org.il/en/manuscripts/NNL_ALEPH000139264/NLI',
+  '03k_Yemenite_Taj':'https://www.nli.org.il/en/manuscripts/NNL_ALEPH000085189/NLI',
+  '04a_Huntington_148':'https://digital.bodleian.ox.ac.uk/objects/3295b902-8f90-418b-9602-085e6750346c/',
+  '04b_MS_Or_2363_2365':'https://www.bl.uk/manuscripts/FullDisplay.aspx?ref=Or_2363',
+  '04c_MS_Or_2210':'https://www.bl.uk/manuscripts/FullDisplay.aspx?ref=Or_2210',
+  '04d_MS_Madrid_116':'http://bdh.bne.es/bnesearch/detalle/bdh0000045435',
+  '04e_Berliners_Onkelos':'https://www.nli.org.il/en/discover/manuscripts/heb-manuscripts',
+  '05a_Complutensian':'https://www.loc.gov/item/2021666855/',
+  '05b_First_Rabbinic_1517':'https://www.nli.org.il/en/books/NNL_ALEPH001224213/NLI',
+  '05c_Second_Rabbinic_1525':'https://www.nli.org.il/en/books/NNL_ALEPH001224213/NLI',
+  '05d_Third_Rabbinic_1545':'https://www.nli.org.il/en/books/NNL_ALEPH001224217/NLI',
+  '05e_Western_Targums_1591':'https://digi.vatlib.it/',
+  '05f_Letteris_1852':'https://archive.org/details/thehebrewbible00lett',
+  '05g_Lagarde_Jonathan_1872':'https://books.google.com/books?id=PksXAAAAYAAJ',
+  '05h_Sperber_Targum_1959':'https://brill.com/display/title/154',
+  '05i_Ginsburg_1894':'https://archive.org/details/themasoreticothe00gins',
+  '05j_BHS_1977':'https://archive.org/details/the-hebrew-english-interlinear-esv-old-testament-biblia-hebraica-stuttgartensia-',
+  '05k_BHQ_Quinta':'https://www.academic-bible.com/en/home-of-the-biblia-hebraica-quinta/',
+};
 const state={search:'',tier:new Set(),region:new Set(),form:new Set(),sort:'date'};
 
 function uniq(k){return [...new Set(MSS.map(m=>m[k]))];}
@@ -367,7 +420,7 @@ function render(){
     <div class="card" onclick="openDetail('${m.id}')">
       <div class="card-swatch" style="background:${m.color}" id="sw-${m.id}">
         <img src="${imgUrl(m.id)}" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy"
-             onerror="this.style.display='none';document.getElementById('sw-${m.id}').textContent='א'">
+             onerror="this.style.display='none';swatchFallback('${m.id}')">
       </div>
       <div class="card-body">
         <div class="card-sigil">${m.code} · ${m.tier.replace('Tier ','T')}</div>
@@ -377,11 +430,20 @@ function render(){
       </div>
     </div>`).join('')||'<div class="empty-note">No witnesses match these filters.</div>';
 }
+function swatchFallback(id){
+  const el=document.getElementById('sw-'+id);if(!el)return;
+  const url=SOURCE_LINKS[id];
+  el.innerHTML=url
+    ? `<a href="${url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:#fff;font-size:10px;text-decoration:underline;padding:6px;text-align:center">No local scan yet — view at source ↗</a>`
+    : 'א';
+}
 function openDetail(id){
   const m=MSS.find(x=>x.id===id);if(!m)return;
+  const src=SOURCE_LINKS[id];
   document.getElementById('dtTitle').textContent=m.name;
   document.getElementById('dtBody').innerHTML=`
-    <img src="${imgUrl(m.id)}" alt="" style="width:100%;border-radius:8px;margin-bottom:14px;border:1px solid var(--bdr)" onerror="this.style.display='none'">
+    <img src="${imgUrl(m.id)}" alt="" style="width:100%;border-radius:8px;margin-bottom:14px;border:1px solid var(--bdr)" onerror="this.style.display='none';document.getElementById('noImgNote').style.display='block'">
+    <div id="noImgNote" style="display:none;margin-bottom:14px;padding:10px 12px;background:var(--gold-pale);border-radius:var(--r);font-size:12px">No local scan on disk yet for this witness.${src?` <a href="${src}" target="_blank" rel="noopener" style="color:var(--gold-dk);font-weight:600">View at source ↗</a>`:' No open-access source link on file yet.'}</div>
     <div class="dl-row"><span><b>Code</b> ${m.code}</span><span><b>Date</b> ${m.era}</span><span><b>Form</b> ${m.form}</span></div>
     <div class="dl-row"><span><b>Region</b> ${m.region}</span><span><b>Corpus tier</b> ${m.tier}</span></div>
     <p>Live thumbnail and full-resolution scans are served from the Digital Archive by the local API (folder <code>${m.id}</code>). If the image above didn't load, start Launch_Masorah.bat first.</p>
@@ -390,6 +452,7 @@ function openDetail(id){
       <a href="reader.html">▦ Open in Reader</a>
       <a href="provenance.html">⟳ Provenance record</a>
       <a href="map.html">🗺 Show on Map</a>
+      ${src?`<a href="${src}" target="_blank" rel="noopener">🔗 View at source</a>`:''}
     </div>`;
   document.getElementById('detailModal').classList.add('open');
 }
@@ -481,7 +544,11 @@ async function findPage(){
   document.getElementById('exNote').textContent=row.notes?('Notes: '+row.notes):'';
   const folio=row.page_num||'1r';
   const imgUrl2=`${API_BASE}/api/v1/files/image?witness=${encodeURIComponent(witId)}&folio=${encodeURIComponent(folio)}&convert=jpeg`;
-  document.getElementById('exImgWrap').innerHTML=`<img src="${imgUrl2}" alt="" onerror="this.parentElement.innerHTML='<span style=\\'color:#a95;font-size:12px\\'>No page image on disk for this folio</span>'">`;
+  const srcLink=SOURCE_LINKS[witId];
+  const fallbackHtml=srcLink
+    ? `<span style="color:#cba;font-size:12px;text-align:center">No page image on disk for this folio.<br><a href="${srcLink}" target="_blank" rel="noopener" style="color:var(--gold-lt)">View at source ↗</a></span>`
+    : `<span style="color:#a95;font-size:12px">No page image on disk for this folio</span>`;
+  document.getElementById('exImgWrap').innerHTML=`<img src="${imgUrl2}" alt="" onerror="this.parentElement.innerHTML='${fallbackHtml.replace(/'/g,"\\'")}'">`;
   document.getElementById('exImgCap').textContent=`${d.source_file||''} · folio/page ${folio}`;
   updatePermalinkURL(witId,book,chapter,verse);
 }
@@ -499,7 +566,7 @@ function explCite(){
   const m=MSS.find(x=>x.id===witId);
   const book=document.getElementById('exBook').value, ch=document.getElementById('exChapter').value, vs=document.getElementById('exVerse').value;
   const today=new Date().toISOString().slice(0,10);
-  const txt=`Corley, Mark. "Masorah: Manuscript Explorer." ${m?m.name:witId}, ${book} ${ch}:${vs}. Accessed ${today}. ${location.origin}${location.pathname}?book=${encodeURIComponent(book)}&chapter=${ch}&verse=${vs}&manuscript=${m?m.code:witId}`;
+  const txt=`Corley, Mark. "Masorah: Manuscript Search." ${m?m.name:witId}, ${book} ${ch}:${vs}. Accessed ${today}. ${location.origin}${location.pathname}?book=${encodeURIComponent(book)}&chapter=${ch}&verse=${vs}&manuscript=${m?m.code:witId}`;
   navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>alert('Citation copied to clipboard:\n\n'+txt)).catch(()=>alert(txt));
 }
 function copyCite(){

@@ -69,29 +69,57 @@ goto OPEN
 echo  [OK] API server is ready
 
 :OPEN
-REM Open the LIVE masorah.io site directly (not the local index.html file).
-REM The site is static (GitHub Pages, see CNAME) and every page's fetch()
-REM calls point at http://localhost:8000 - CORS on the API already allows
-REM allow_origins=["*"], so masorah.io works against this local API exactly
-REM like the local files did. Local index.html is still on disk as a
-REM fallback for offline use (no internet / DNS issues).
-echo  [*] Opening https://masorah.io ...
-start "" "https://masorah.io"
+REM masorah.io currently fails TLS validation in the browser
+REM (net::ERR_CERT_COMMON_NAME_INVALID) - that is a DNS/certificate
+REM problem on the domain/GitHub Pages side, not something this script
+REM (or any local file) can fix. Common causes, in order of likelihood:
+REM   1. DNS for masorah.io isn't pointed at GitHub Pages' A/AAAA records
+REM      (or ALIAS/ANAME at the apex) - something else is answering on
+REM      port 443 and presenting an unrelated certificate.
+REM   2. A CAA record on masorah.io doesn't allow letsencrypt.org, so
+REM      GitHub can't issue the cert at all.
+REM   3. The custom domain was only just (re)added in the repo's
+REM      Settings -> Pages, and provisioning hasn't finished yet
+REM      (can take up to ~1 hour).
+REM Fix path: in the GitHub repo -> Settings -> Pages, confirm "Custom
+REM domain" is exactly masorah.io, check DNS at the registrar against
+REM https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site ,
+REM then remove and re-add the custom domain to force re-provisioning if
+REM DNS already looks correct.
+REM
+REM Until that's fixed, probe masorah.io first (curl, bundled with
+REM Windows 10 1803+) and fall back to the local copy automatically
+REM instead of sending you to a browser security warning every time.
+echo  [*] Checking https://masorah.io ...
+set "SITE_CODE=000"
+where curl >nul 2>&1
+if not errorlevel 1 (
+    for /f %%c in ('curl -s -o NUL -w "%%{http_code}" --max-time 5 "https://masorah.io" 2^>nul') do set "SITE_CODE=%%c"
+)
+if "%SITE_CODE%"=="200" (
+    echo  [OK] masorah.io is reachable - opening it.
+    start "" "https://masorah.io"
+) else (
+    echo  [WARN] masorah.io not reachable/trusted right now [code: %SITE_CODE%].
+    echo  [WARN] This is the ERR_CERT_COMMON_NAME_INVALID DNS/cert issue above -
+    echo  [WARN] opening the local copy instead, which uses the same API.
+    start "" "%DIR%index.html"
+)
 
 echo.
 echo  ================================================
 echo   RUNNING:
 echo   API:        http://localhost:8000
 echo   API Docs:   http://localhost:8000/docs
-echo   Live site:  https://masorah.io   (opened just now)
-echo   Local copy: %DIR%index.html      (offline fallback)
-echo   Login:      https://masorah.io/login.html
+echo   Live site:  https://masorah.io   (opens once the cert/DNS issue above is fixed)
+echo   Local copy: %DIR%index.html      (in use now if masorah.io failed the check)
+echo   Login:      login.html (same folder as index.html, or masorah.io/login.html once fixed)
 echo   User:       markcorleyjune
 echo   Password:   masorah1525
 echo.
-echo   If the browser did not open, or masorah.io is unreachable,
-echo   double-click index.html in this folder instead - it uses the
-echo   same local API and works fully offline.
+echo   If the browser did not open, double-click index.html in this
+echo   folder manually - it uses the same local API and works fully
+echo   offline, independent of the masorah.io DNS/cert issue.
 echo  ================================================
 echo.
 echo  Press any key to STOP the server...

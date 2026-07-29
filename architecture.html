@@ -140,6 +140,39 @@ input:checked + .slider-tg:before{transform:translateX(18px)}
 
 .footer-bar{background:var(--ink);color:var(--ink4);padding:7px 16px;display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:11px;border-top:1px solid var(--gold-dk)}
 .footer-bar .ok-dot{color:var(--ok)}
+
+/* ── Agent orchestration: run controls, schedule, kill switch, run log ── */
+.btn.danger{background:#fdeaea;color:var(--err);border-color:var(--err)}
+.btn.danger:hover{background:var(--err);color:#fff}
+.btn.danger.armed{background:var(--err);color:#fff}
+.kill-row{display:flex;align-items:center;gap:10px;margin-left:auto;padding:0 4px}
+.kill-row .ks-state{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3)}
+.agent-run-row{display:flex;align-items:center;gap:6px;margin-top:9px;flex-wrap:wrap}
+.agent-run-row .btn{padding:4px 10px;font-size:11px}
+.agent-sched{display:flex;align-items:center;gap:5px;margin-top:7px}
+.agent-sched input{width:56px;padding:4px 6px;border:1px solid var(--bdr);border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px}
+.agent-sched span{font-size:10px;color:var(--ink3)}
+.agent-status-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9.5px;font-family:'JetBrains Mono',monospace;font-weight:600;text-transform:uppercase;margin-top:8px}
+.agent-status-badge.completed{background:#e8f5e9;color:#1b5e20;border:1px solid #2e7d32}
+.agent-status-badge.pending_approval{background:#fff3e0;color:#bf360c;border:1px solid #e65100}
+.agent-status-badge.blocked_kill_switch,.agent-status-badge.blocked_disabled,.agent-status-badge.rejected,.agent-status-badge.killed{background:#fdeaea;color:var(--err);border:1px solid var(--err)}
+.agent-status-badge.error{background:#fdeaea;color:var(--err);border:1px solid var(--err)}
+.agent-status-badge.external{background:var(--gold-pale);color:var(--gold-dk);border:1px solid var(--gold)}
+.agent-status-badge.never{background:#eee;color:#888;border:1px solid #ccc}
+
+.runlog-wrap{flex:1;overflow:auto;padding:14px}
+.runlog-tbl{width:100%;border-collapse:collapse;font-size:12px;background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden}
+.runlog-tbl thead{background:var(--gold-bg)}
+.runlog-tbl th{padding:9px 12px;text-align:left;font-family:'Cinzel',serif;font-size:10.5px;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.06em;font-weight:600;border-bottom:2px solid var(--gold)}
+.runlog-tbl td{padding:8px 12px;border-bottom:1px solid var(--bdr);vertical-align:top}
+.runlog-tbl tr:hover td{background:var(--gold-pale)}
+.runlog-note{font-size:11px;color:var(--ink3);max-width:340px}
+.runlog-acts{display:flex;gap:5px}
+.runlog-acts button{font-size:10.5px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr);background:var(--paper);cursor:pointer;font-family:inherit}
+.runlog-acts button.ok{border-color:var(--ok);color:var(--ok)}
+.runlog-acts button.ok:hover{background:var(--ok);color:#fff}
+.runlog-acts button.no{border-color:var(--err);color:var(--err)}
+.runlog-acts button.no:hover{background:var(--err);color:#fff}
 </style>
 </head>
 <body>
@@ -157,7 +190,7 @@ input:checked + .slider-tg:before{transform:translateX(18px)}
       <a href="annotate.html">▤ Annotate</a>
       <a href="provenance.html">⟳ Provenance</a>
       <a href="paleography.html">◉ Paleography</a>
-      <a href="analyzer.html">∿ Analyzer</a>
+      <a href="analysis.html">∿ Analysis</a>
       <a href="chat.html">◍ Chat</a>
       <a href="graph.html">⌬ Graph</a>
       <a href="reader.html">▦ Reader</a>
@@ -174,7 +207,12 @@ input:checked + .slider-tg:before{transform:translateX(18px)}
 <div class="subnav">
   <button class="active" onclick="showPanel('graph')">⧉ Architecture</button>
   <button onclick="showPanel('agents')">🤖 Masorah AI</button>
+  <button onclick="showPanel('runlog')">📋 Run Log <span id="pendingBadge"></span></button>
   <button onclick="showPanel('nodes')">⊞ Nodes</button>
+  <div class="kill-row">
+    <span class="ks-state" id="ksState">kill switch: OFF</span>
+    <button class="btn danger" id="killBtn" onclick="toggleKillSwitch()">⏻ Kill Switch</button>
+  </div>
 </div>
 
 <div class="wrap">
@@ -195,7 +233,7 @@ input:checked + .slider-tg:before{transform:translateX(18px)}
       <div class="nav-item" onclick="location.href='graph.html'">⌬ Graph Explorer</div>
       <div class="nav-item" onclick="location.href='paleography.html'">◉ Paleography</div>
       <div class="nav-item" onclick="location.href='pipeline.html'">⫯ Pipeline</div>
-      <div class="nav-item" onclick="location.href='analyzer.html'">∿ Analysis</div>
+      <div class="nav-item" onclick="location.href='analysis.html'">∿ Analysis</div>
       <div class="nav-item" onclick="location.href='transcriber.html'">✍ Transcriber</div>
 
       <div class="sec-lbl">Corpus Tiers</div>
@@ -305,89 +343,23 @@ input:checked + .slider-tg:before{transform:translateX(18px)}
 
     <!-- ── PANEL: Masorah AI (agents) ── -->
     <div class="panel" id="panel-agents">
-      <div class="agent-grid">
-        <div class="agent">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">⊕</div>
-          <h3>Retriever</h3>
-          <div class="role">Agentic RAG · Tier 1</div>
-          <p>Fetches relevant manuscript passages from the Knowledge Graph and Vector Store given a natural-language query.</p>
-          <div class="agent-row"><span class="dot"></span>Stage within: <b>/api/v1/ai/query</b> (single call, server-side)</div>
-          <div class="agent-row"><span class="dot"></span>Model: TF-IDF + NetworkX</div>
+      <div class="agent-grid" id="agentGrid"><div style="padding:20px;color:var(--ink3);font-style:italic">Loading agent state from main_api.py…</div></div>
+    </div>
+
+    <!-- ── PANEL: Run Log (agent orchestration: logging + HITL approval) ── -->
+    <div class="panel" id="panel-runlog">
+      <div class="runlog-wrap">
+        <div class="nm-head">
+          <h2>Agent Run Log</h2>
+          <div class="toolbar">
+            <span style="font-size:11px;color:var(--ink3);align-self:center">Synthesizer, Stemma Builder, and Bright Node Detector require approval before they execute — everything else runs immediately when triggered.</span>
+            <button class="btn" onclick="loadRuns()">↻ Refresh</button>
+          </div>
         </div>
-        <div class="agent">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">⊗</div>
-          <h3>Analyst</h3>
-          <div class="role">Agentic RAG · Tier 2</div>
-          <p>Performs ECM coherence, scribal probability, and lectio difficilior scoring on retrieved variants.</p>
-          <div class="agent-row"><span class="dot"></span>Stage within: <b>/api/v1/ai/query</b> (single call, server-side)</div>
-          <div class="agent-row"><span class="dot"></span>Model: pipeline.py v42.1</div>
-        </div>
-        <div class="agent">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">⊛</div>
-          <h3>Synthesizer</h3>
-          <div class="role">Agentic RAG · Tier 3</div>
-          <p>Composes citation-grounded answers in SBL style with proper Hebrew/Aramaic/Greek interlinear notation.</p>
-          <div class="agent-row"><span class="dot"></span>Stage within: <b>/api/v1/ai/query</b> (single call, server-side)</div>
-          <div class="agent-row"><span class="dot"></span>Model: DistilGPT-2 + SBL templates</div>
-        </div>
-        <div class="agent">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">⊜</div>
-          <h3>Critic</h3>
-          <div class="role">Agentic RAG · Tier 4</div>
-          <p>Validates citations, flags hallucinations, and enforces ±3σ bright-node thresholds before output.</p>
-          <div class="agent-row"><span class="dot"></span>Stage within: <b>/api/v1/ai/query</b> (single call, server-side)</div>
-          <div class="agent-row"><span class="dot"></span>Model: Bayesian filter</div>
-        </div>
-        <div class="agent">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">◉</div>
-          <h3>Paleography ML</h3>
-          <div class="role">Domain Agent · Tier 2</div>
-          <p>ResNet-50 letter classifier + HiMaD fine-tuning for scribal hand detection and dating.</p>
-          <div class="agent-row"><span class="dot"></span>Related: <b>/api/v1/forensics/ink-density</b> (paleography.html query box not yet wired to a live route)</div>
-          <div class="agent-row"><span class="dot"></span>Model: ResNet-50 + HiMaD</div>
-        </div>
-        <div class="agent">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">✍</div>
-          <h3>Forensic OCR</h3>
-          <div class="role">Domain Agent · Tier 2</div>
-          <p>TesserACT + Dicta-HTR v2 (PyLaia 2.42.0) for Hebrew square-script transcription with ECC bit-check.</p>
-          <div class="agent-row"><span class="dot"></span>API: <b>/api/v1/htr/transcribe-zone</b> — live in transcriber.html</div>
-          <div class="agent-row"><span class="dot"></span>Model: TesserACT + Dicta-HTR</div>
-        </div>
-        <div class="agent">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">⌬</div>
-          <h3>Stemma Builder</h3>
-          <div class="role">Domain Agent · Tier 3</div>
-          <p>CBGM stemma construction using EM posteriors and 05c baseline coherence.</p>
-          <div class="agent-row"><span class="dot"></span>API: <b>/api/v1/cbgm/stemma-json</b></div>
-          <div class="agent-row"><span class="dot"></span>Model: pipeline.cbgm</div>
-        </div>
-        <div class="agent">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">∿</div>
-          <h3>Bright Node Detector</h3>
-          <div class="role">Domain Agent · Tier 4</div>
-          <p>Flags ±3σ outliers in scribal coherence as candidate Masoretic Code locations.</p>
-          <div class="agent-row"><span class="dot"></span>API: <b>/api/v1/analysis/bright-nodes</b></div>
-          <div class="agent-row"><span class="dot"></span>Model: Gaussian + bootstrap</div>
-        </div>
-        <div class="agent" style="border-color:var(--gold-dk);border-style:dashed">
-          <span class="agent-toggle"><label class="switch"><input type="checkbox" checked><span class="slider-tg"></span></label></span>
-          <div class="ico">&#9993;</div>
-          <h3>Hermes</h3>
-          <div class="role">Scheduled Agent · Independent</div>
-          <p>Weekly research sweep for new Masoretic-text scholarship, manuscript digitizations, and library resources -- drafts a summary email rather than sending it, so it is always reviewed before it goes out.</p>
-          <div class="agent-row"><span class="dot"></span>Runs: <b>Mondays 08:00 local</b></div>
-          <div class="agent-row"><span class="dot"></span>Delivers to: <b>Gmail draft &rarr; markcorleyjune@gmail.com</b></div>
-          <div class="agent-row"><span class="dot idle"></span>Not part of main_api.py &mdash; no JWT, no FastAPI route</div>
-        </div>
+        <table class="runlog-tbl">
+          <thead><tr><th style="width:44px">#</th><th>Agent</th><th style="width:110px">Status</th><th style="width:80px">Trigger</th><th style="width:150px">Time (UTC)</th><th>Result / Note</th><th style="width:120px">Actions</th></tr></thead>
+          <tbody id="runLogBody"></tbody>
+        </table>
       </div>
     </div>
 
@@ -451,11 +423,169 @@ function masorahLogout(){
 function showPanel(p){
   document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
   document.getElementById('panel-'+p).classList.add('active');
-  document.querySelectorAll('.subnav button').forEach(b=>b.classList.remove('active'));
+  /* Only the 4 tab buttons (not the kill-switch button, which also lives
+     in .subnav) get active-state toggling. */
+  document.querySelectorAll('.subnav > button').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  /* Mark the right subnav button */
-  const idx = {graph:0, agents:1, nodes:2}[p];
-  document.querySelectorAll('.subnav button')[idx].classList.add('active');
+  const idx = {graph:0, agents:1, runlog:2, nodes:3}[p];
+  document.querySelectorAll('.subnav > button')[idx].classList.add('active');
+  if(p==='agents') loadAgents();
+  if(p==='runlog') loadRuns();
+}
+
+/* ── Agent orchestration (real, backed by main_api.py /api/v1/agents/*) ──
+   Presentation-only metadata (icon/description) stays client-side; every
+   other field (enabled, interval_minutes, last_run_ts, requires_hitl) is
+   read live from the server so this UI can never drift from what the
+   kill switch / scheduler / run log actually did. ── */
+const AGENT_META = {
+  retriever:    {ico:'⊕', desc:'Fetches relevant manuscript passages from the Knowledge Graph and Vector Store given a natural-language query.', model:'TF-IDF + NetworkX'},
+  analyst:      {ico:'⊗', desc:'Performs ECM coherence, scribal probability, and lectio difficilior scoring on retrieved variants.', model:'pipeline.py v42.1'},
+  synthesizer:  {ico:'⊛', desc:'Composes citation-grounded answers in SBL style with proper Hebrew/Aramaic/Greek interlinear notation.', model:'DistilGPT-2 + SBL templates'},
+  critic:       {ico:'⊜', desc:'Validates citations, flags hallucinations, and enforces ±3σ bright-node thresholds before output.', model:'Bayesian filter'},
+  paleography:  {ico:'◉', desc:'ResNet-50 letter classifier + HiMaD fine-tuning for scribal hand detection and dating.', model:'ResNet-50 + HiMaD'},
+  forensic_ocr: {ico:'✍', desc:'TesserACT + Dicta-HTR v2 (PyLaia 2.42.0) for Hebrew square-script transcription with ECC bit-check.', model:'TesserACT + Dicta-HTR'},
+  stemma:       {ico:'⌬', desc:'CBGM stemma construction using EM posteriors and 05c baseline coherence.', model:'pipeline.cbgm'},
+  bright_node:  {ico:'∿', desc:'Flags ±3σ outliers in scribal coherence as candidate Masoretic Code locations.', model:'Gaussian + bootstrap'},
+  hermes:       {ico:'&#9993;', desc:'Weekly research sweep for new Masoretic-text scholarship, manuscript digitizations, and library resources — drafts a summary email rather than sending it, so it is always reviewed before it goes out.', model:'Cowork scheduled task'},
+};
+let _agentsCache = [];
+
+function fmtAgo(ts){
+  if(!ts) return 'never run';
+  const d = new Date(ts); if(isNaN(d)) return ts;
+  const mins = Math.round((Date.now()-d.getTime())/60000);
+  if(mins < 1) return 'just now';
+  if(mins < 60) return mins+'m ago';
+  if(mins < 1440) return Math.round(mins/60)+'h ago';
+  return Math.round(mins/1440)+'d ago';
+}
+
+async function loadAgents(){
+  try{
+    const r = await fetch('http://localhost:8000/api/v1/agents/list',{signal:AbortSignal.timeout(5000)});
+    const d = await r.json();
+    _agentsCache = d.agents;
+    document.getElementById('ksState').textContent = 'kill switch: ' + (d.kill_switch?'ON':'OFF');
+    document.getElementById('killBtn').classList.toggle('armed', d.kill_switch);
+    document.getElementById('killBtn').textContent = d.kill_switch ? '⏻ Kill Switch: RESUME' : '⏻ Kill Switch';
+    renderAgents(d.agents);
+  }catch(e){
+    document.getElementById('agentGrid').innerHTML = '<div style="padding:20px;color:var(--err)">⚠ Corpus API unreachable — run Launch_Masorah.bat, then reopen this tab.</div>';
+  }
+}
+
+function renderAgents(agents){
+  document.getElementById('agentGrid').innerHTML = agents.map(a=>{
+    const meta = AGENT_META[a.id] || {ico:'●', desc:'', model:''};
+    const isExternal = a.kind === 'external';
+    const badge = a.last_run_ts ? '' : '<span class="agent-status-badge never">never run</span>';
+    return `
+    <div class="agent" ${isExternal?'style="border-color:var(--gold-dk);border-style:dashed"':''}>
+      <span class="agent-toggle"><label class="switch"><input type="checkbox" ${a.enabled?'checked':''} ${isExternal?'disabled':''} onchange="toggleAgent('${a.id}',this.checked)"><span class="slider-tg"></span></label></span>
+      <div class="ico">${meta.ico}</div>
+      <h3>${a.name}</h3>
+      <div class="role">${a.tier}</div>
+      <p>${meta.desc}</p>
+      <div class="agent-row"><span class="dot ${a.enabled?'':'idle'}"></span>${isExternal?'Not part of main_api.py — no JWT, no FastAPI route':'Model: '+meta.model}</div>
+      ${a.requires_hitl?'<div class="agent-row"><span class="dot idle"></span>Requires human approval before executing</div>':''}
+      <div class="agent-row"><span class="dot"></span>Last run: ${fmtAgo(a.last_run_ts)}</div>
+      ${badge}
+      ${isExternal ? `
+        <div class="agent-run-row"><button class="btn" onclick="window.open('https://claude.ai','_blank')" title="Managed via Cowork scheduled tasks, not this API">Manage in Cowork ↗</button></div>
+      ` : `
+        <div class="agent-run-row">
+          <button class="btn primary" onclick="runAgent('${a.id}')">▶ Run Now</button>
+          <button class="btn" onclick="showPanel('runlog')">📋 Log</button>
+        </div>
+        <div class="agent-sched">
+          <span>Every</span><input type="number" min="0" placeholder="off" id="sched-${a.id}" value="${a.interval_minutes||''}">
+          <span>min</span><button class="btn" style="padding:3px 8px;font-size:11px" onclick="setSchedule('${a.id}')">Set</button>
+        </div>
+      `}
+    </div>`;
+  }).join('');
+}
+
+async function toggleAgent(id, enabled){
+  try{
+    await fetch(`http://localhost:8000/api/v1/agents/${id}/toggle`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled})});
+  }catch(e){ alert('API unreachable — run Launch_Masorah.bat.'); }
+  loadAgents();
+}
+async function setSchedule(id){
+  const v = document.getElementById('sched-'+id).value;
+  const interval_minutes = v ? parseInt(v,10) : null;
+  try{
+    await fetch(`http://localhost:8000/api/v1/agents/${id}/schedule`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({interval_minutes})});
+  }catch(e){ alert('API unreachable — run Launch_Masorah.bat.'); return; }
+  loadAgents();
+}
+async function runAgent(id){
+  try{
+    const r = await fetch('http://localhost:8000/api/v1/agents/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent_id:id})});
+    const rec = await r.json();
+    if(rec.status==='pending_approval'){
+      alert('This agent requires approval — check the Run Log tab to approve or reject.');
+      showPanel('runlog');
+    } else {
+      loadAgents();
+      showPanel('runlog');
+    }
+  }catch(e){ alert('API unreachable — run Launch_Masorah.bat.'); }
+}
+async function toggleKillSwitch(){
+  const willKill = document.getElementById('ksState').textContent.includes('OFF');
+  if(willKill && !confirm('Stop ALL agent runs (manual and scheduled) until you turn this back off?')) return;
+  if(!willKill && !confirm('Resume agent runs?')) return;
+  try{
+    await fetch('http://localhost:8000/api/v1/agents/kill-switch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kill:willKill})});
+  }catch(e){ alert('API unreachable — run Launch_Masorah.bat.'); return; }
+  loadAgents();
+}
+
+/* ── Run log + HITL approval ── */
+async function loadRuns(){
+  try{
+    const r = await fetch('http://localhost:8000/api/v1/agents/runs?limit=100',{signal:AbortSignal.timeout(5000)});
+    const d = await r.json();
+    renderRunLog(d.runs);
+    const pending = d.runs.filter(x=>x.status==='pending_approval').length;
+    document.getElementById('pendingBadge').textContent = pending ? `(${pending})` : '';
+  }catch(e){
+    document.getElementById('runLogBody').innerHTML = `<tr><td colspan="7" style="color:var(--err)">⚠ Corpus API unreachable — run Launch_Masorah.bat.</td></tr>`;
+  }
+}
+function renderRunLog(runs){
+  const tbody = document.getElementById('runLogBody');
+  if(!runs.length){ tbody.innerHTML = '<tr><td colspan="7" style="color:var(--ink3);font-style:italic">No agent runs yet — trigger one from the Masorah AI tab.</td></tr>'; return; }
+  tbody.innerHTML = runs.map(r=>`
+    <tr>
+      <td style="font-family:'JetBrains Mono',monospace;color:var(--ink4)">${r.run_id}</td>
+      <td>${r.agent_name}</td>
+      <td><span class="agent-status-badge ${r.status}">${r.status.replace(/_/g,' ')}</span></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:10.5px">${r.triggered_by}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:10.5px">${(r.ts||'').replace('T',' ').replace('Z','')}</td>
+      <td class="runlog-note">${r.summary || r.note || ''}</td>
+      <td class="runlog-acts">
+        ${r.status==='pending_approval' ? `
+          <button class="ok" onclick="approveRun(${r.run_id})">✓ Approve</button>
+          <button class="no" onclick="rejectRun(${r.run_id})">✕ Reject</button>
+        ` : ''}
+      </td>
+    </tr>`).join('');
+}
+async function approveRun(id){
+  try{ await fetch(`http://localhost:8000/api/v1/agents/runs/${id}/approve`,{method:'POST'}); }
+  catch(e){ alert('API unreachable.'); return; }
+  loadRuns(); loadAgents();
+}
+async function rejectRun(id){
+  const reason = prompt('Reason for rejecting (optional):','');
+  if(reason===null) return;
+  try{ await fetch(`http://localhost:8000/api/v1/agents/runs/${id}/reject`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason})}); }
+  catch(e){ alert('API unreachable.'); return; }
+  loadRuns();
 }
 
 /* ── Node Manager (editable) ─────────────────────────────── */
@@ -562,6 +692,7 @@ async function probeAPI(){
   }
 }
 probeAPI(); setInterval(probeAPI, 8000);
+loadAgents(); loadRuns(); setInterval(loadRuns, 20000);
 </script>
 </body>
 </html>
