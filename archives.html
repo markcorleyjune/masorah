@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masorah — Archives</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cinzel:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Frank+Ruhl+Libre:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#B8860B;--gold-lt:#d4a020;--gold-dk:#8a6a20;--gold-bg:#fdfaf2;--gold-pale:#fff8e8;--gold-glow:#f7e7a0;--cream:#ffffff;--paper:#ffffff;--ink:#1a1208;--ink2:#3a2a10;--ink3:#6a5a30;--ink4:#a8956a;--amber:#E8A020;--amber-dk:#c07000;--bdr:#e8d8a0;--bdr2:#d8c890;--bdr3:#bfa860;--ok:#2e7d32;--warn:#e65100;--err:#b71c1c;--r:6px;--r2:10px;--r3:14px;--shadow-sm:0 1px 3px rgba(120,90,20,.10);--shadow:0 4px 14px rgba(120,90,20,.14);--shadow-lg:0 12px 36px rgba(120,90,20,.22)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'EB Garamond',Georgia,serif;background:#ffffff;color:var(--ink);min-height:100vh}
+
+/* ── BANNER (shared pattern) ── */
+.banner{background:linear-gradient(180deg,var(--paper) 0%,var(--gold-bg) 100%);border-bottom:3px double var(--gold);padding:0 28px;position:sticky;top:0;z-index:100;box-shadow:var(--shadow)}
+.banner-row{display:flex;align-items:center;gap:18px;height:78px;max-width:1700px;margin:0 auto}
+.brand{display:flex;align-items:center;gap:14px;padding-right:18px;border-right:1px solid var(--bdr)}
+.brand-glyph{font-family:'Frank Ruhl Libre',serif;font-size:42px;color:var(--gold);line-height:1;text-shadow:1px 1px 0 #fff,2px 2px 4px rgba(120,90,20,.2)}
+.brand-text h1{font-family:'EB Garamond',serif;font-size:22px;font-weight:700;color:var(--ink);letter-spacing:.06em;line-height:1.1}
+.brand-text p{font-size:11px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+.nav{display:flex;gap:1px;flex:1;overflow-x:auto}.nav::-webkit-scrollbar{height:0}
+.nav a{display:inline-flex;align-items:center;gap:5px;padding:8px 13px;font-size:14px;color:var(--ink2);text-decoration:none;border-radius:var(--r);font-weight:500;white-space:nowrap;transition:all .14s;border:1px solid transparent}
+.nav a:hover{background:var(--gold-pale);color:var(--gold-dk);border-color:var(--bdr)}
+.nav a.active{background:var(--gold);color:#fff;border-color:var(--gold-dk);box-shadow:var(--shadow-sm)}
+.status-cluster{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:20px;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:500;border:1px solid var(--bdr);background:var(--paper)}
+.pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}.pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.user{display:flex;align-items:center;gap:8px;padding:5px 11px 5px 5px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:13px}
+.user-n{font-size:12px;color:var(--ink2)}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:9px;font-family:'JetBrains Mono',monospace}
+.logout{background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:4px 8px;border-radius:var(--r)}
+.logout:hover{color:var(--err)}
+
+/* ── PAGE HEAD ── */
+.pagehead{max-width:1700px;margin:24px auto 0;padding:0 28px}
+.pagehead h1{font-family:'Cinzel',serif;font-size:24px;color:var(--gold-dk);font-weight:600}
+.pagehead p{font-size:13.5px;color:var(--ink3);margin-top:5px;max-width:820px;line-height:1.55}
+
+/* ── LAYOUT: filter rail + results ── */
+.wrap{max-width:1700px;margin:18px auto 40px;padding:0 28px;display:grid;grid-template-columns:250px 1fr;gap:20px;align-items:start}
+.rail{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px;box-shadow:var(--shadow-sm);position:sticky;top:96px}
+.rail-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.rail-hd h3{font-family:'Cinzel',serif;font-size:13px;color:var(--ink);text-transform:uppercase;letter-spacing:.06em}
+.rail-reset{font-size:11px;color:var(--gold-dk);cursor:pointer;background:none;border:none;text-decoration:underline}
+.search-box{width:100%;padding:8px 10px;border:1px solid var(--bdr);border-radius:var(--r);font-family:inherit;font-size:13px;background:var(--gold-bg);margin-bottom:14px}
+.search-box:focus{outline:none;border-color:var(--gold)}
+.facet{margin-bottom:16px}
+.facet-hd{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-dk);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:7px}
+.chip-row{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11.5px;padding:4px 9px;border:1px solid var(--bdr);border-radius:14px;background:var(--gold-bg);color:var(--ink2);cursor:pointer;transition:.12s;user-select:none}
+.chip:hover{border-color:var(--gold);color:var(--gold-dk)}
+.chip.sel{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+
+.results-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.results-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink3)}
+.results-count b{color:var(--gold-dk)}
+.sort-sel{border:1px solid var(--bdr);background:var(--paper);padding:5px 9px;border-radius:var(--r);font-size:12px;color:var(--ink2)}
+
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);overflow:hidden;box-shadow:var(--shadow-sm);transition:.18s;cursor:pointer;display:flex;flex-direction:column}
+.card:hover{border-color:var(--gold);box-shadow:var(--shadow);transform:translateY(-2px)}
+.card-swatch{height:86px;display:flex;align-items:center;justify-content:center;font-family:'Frank Ruhl Libre',serif;font-size:34px;color:#fff;position:relative;overflow:hidden}
+.card-swatch::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.25),transparent 60%)}
+.card-body{padding:13px 15px 15px;flex:1;display:flex;flex-direction:column;gap:6px}
+.card-sigil{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-dk);font-weight:700;letter-spacing:.04em}
+.card-title{font-family:'Cinzel',serif;font-size:15.5px;color:var(--ink);font-weight:600;line-height:1.25}
+.card-meta{font-size:11.5px;color:var(--ink3);display:flex;gap:6px;flex-wrap:wrap}
+.card-meta span{white-space:nowrap}
+.card-desc{font-size:12px;color:var(--ink2);line-height:1.5;flex:1}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.card-tags span{font-size:9.5px;background:var(--gold-pale);color:var(--gold-dk);padding:2px 7px;border-radius:8px;font-family:'JetBrains Mono',monospace}
+.card-ft{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--bdr);margin-top:4px}
+.card-ft .hold{font-size:10.5px;color:var(--ink4);font-style:italic}
+.card-ft a{font-size:11px;color:var(--gold-dk);text-decoration:none;font-weight:600}
+.card-ft a:hover{text-decoration:underline}
+.empty-note{grid-column:1/-1;text-align:center;color:var(--ink4);font-size:13px;padding:40px 0}
+
+/* ── MODAL: manuscript detail ── */
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(20,14,4,.5);z-index:900;align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:var(--paper);border-radius:var(--r3);max-width:640px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-lg);border:1px solid var(--bdr)}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--bdr);background:var(--gold-bg)}
+.modal-hd h2{font-family:'Cinzel',serif;font-size:18px;color:var(--gold-dk)}
+.modal-x{background:none;border:none;font-size:22px;color:var(--ink3);cursor:pointer}
+.modal-bd{padding:20px 22px}
+.dl-row{display:flex;gap:20px;font-size:12.5px;color:var(--ink3);margin-bottom:12px;flex-wrap:wrap}
+.dl-row b{color:var(--ink2)}
+.modal-bd p{font-size:13.5px;line-height:1.65;color:var(--ink2);margin-bottom:12px}
+.modal-acts{display:flex;gap:8px;margin-top:6px}
+.modal-acts a,.modal-acts button{font-size:12px;padding:7px 13px;border-radius:var(--r);border:1px solid var(--bdr2);background:var(--paper);color:var(--ink2);text-decoration:none;cursor:pointer;font-family:inherit}
+.modal-acts .primary{background:var(--gold);border-color:var(--gold-dk);color:#fff;font-weight:600}
+
+footer{max-width:1700px;margin:32px auto;padding:24px 28px;border-top:1px solid var(--bdr);text-align:center}
+footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+@media (max-width:1000px){.wrap{grid-template-columns:1fr}.rail{position:static}}
+</style>
+</head>
+<body>
+
+<header class="banner">
+  <div class="banner-row">
+    <div class="brand">
+      <div class="brand-glyph">מָסוֹרָה</div>
+      <div class="brand-text"><h1>Masorah</h1></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html">⌂ Project</a>
+      <a href="archives.html" class="active">📚 Archives</a>
+      <a href="map.html">🗺 Map</a>
+    </nav>
+    <div class="status-cluster">
+      <span class="pill warn" id="apiPill"><span class="dot"></span> Offline</span>
+      <!-- Scriptorium is open access - no session exists here, so no user/logout is shown.
+           Full workbench (index.html and gated pages) requires requesting access first. -->
+      <a href="login.html" style="background:var(--gold);color:#fff;text-decoration:none;font-size:12.5px;font-weight:600;padding:8px 16px;border-radius:var(--r);white-space:nowrap">🔒 Request Access</a>
+    </div>
+  </div>
+</header>
+
+<section class="pagehead">
+  <h1>Archives — Manuscript Corpus</h1>
+  <p>Every witness node in the corpus — inscriptions, scrolls, codices, and printed editions — spanning c. 2400 BCE through the 2004 Biblia Hebraica Quinta. Filter by tier, form, or region, then open a witness directly in Apparatus or Reader. Thumbnails are served live from the Digital Archive via the local API.</p>
+</section>
+
+<div class="wrap">
+  <aside class="rail">
+    <div class="rail-hd"><h3>Filter</h3><button class="rail-reset" onclick="resetFilters()">Reset</button></div>
+    <input class="search-box" id="searchBox" placeholder="Search by name, code, or place…" oninput="render()">
+    <div class="facet">
+      <div class="facet-hd">Tier</div>
+      <div class="chip-row" id="facetTier"></div>
+    </div>
+    <div class="facet">
+      <div class="facet-hd">Form</div>
+      <div class="chip-row" id="facetForm"></div>
+    </div>
+    <div class="facet">
+      <div class="facet-hd">Region</div>
+      <div class="chip-row" id="facetRegion"></div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="results-hd">
+      <span class="results-count">Showing <b id="cnt">0</b> of <b id="cntTotal">0</b> witnesses</span>
+      <select class="sort-sel" id="sortSel" onchange="render()">
+        <option value="date">Sort: Date (earliest first)</option>
+        <option value="name">Sort: Name (A–Z)</option>
+        <option value="tier">Sort: Corpus tier</option>
+      </select>
+    </div>
+    <div class="card-grid" id="cardGrid"></div>
+  </main>
+</div>
+
+<footer><p>masorah.io · Archives · 43 witness nodes live-scanned from the Digital Archive — dates are approximate (c.) where no primary-source date is on record</p></footer>
+
+<div class="modal-ov" id="detailModal">
+  <div class="modal">
+    <div class="modal-hd"><h2 id="dtTitle">—</h2><button class="modal-x" onclick="closeDetail()">×</button></div>
+    <div class="modal-bd" id="dtBody"></div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   LIBRARY — full manuscript corpus (43 real witness nodes)
+   Generated from a live scan of the Digital Archive
+   (01_Computational_Lab/1. Digital Archive) plus each node's
+   Misc/json metadata file, 2026-07-28. Dates marked "c." are
+   approximate; everything else is either a documented date from
+   the node's own metadata or well-established scholarly consensus.
+   Thumbnails load live from the local API's image resolver —
+   GET /api/v1/files/image?witness=<id>&folio=1r&convert=jpeg —
+   which now falls back to the first available scan on disk when
+   "1r" isn't the witness's real folio-naming convention (see
+   main_api.py resolve_image()). Requires Launch_Masorah.bat running.
+   ════════════════════════════════════════════════════════════ */
+const API_BASE='http://localhost:8000';
+const MSS=[
+{id:'01a_Umm_el_Marra',code:'01a',name:'Umm el-Marra Cuneiform Tablet',date:-2400,era:'c. 2400 BCE',tier:'Tier 01 - Proto-Semitic Roots',form:'Inscription',region:'Syria',color:'#8a6a20'},
+{id:'01b_Wadi_el_Hol',code:'01b',name:'Wadi el-Hol Inscriptions',date:-1900,era:'c. 1900 BCE',tier:'Tier 01 - Proto-Semitic Roots',form:'Inscription',region:'Egypt',color:'#8a6a20'},
+{id:'01c_Serabit_el_Khadim',code:'01c',name:'Serabit el-Khadim Inscriptions',date:-1500,era:'c. 1500 BCE',tier:'Tier 01 - Proto-Semitic Roots',form:'Inscription',region:'Sinai',color:'#8a6a20'},
+{id:'01d_Proto_Canaanite',code:'01d',name:'Proto-Canaanite Inscriptions',date:-1200,era:'c. 1200 BCE',tier:'Tier 01 - Proto-Semitic Roots',form:'Inscription',region:'Levant',color:'#8a6a20'},
+{id:'01e_Mesha_Stele',code:'01e',name:'Mesha Stele',date:-840,era:'c. 840 BCE',tier:'Tier 01 - Proto-Semitic Roots',form:'Inscription',region:'Moab (Jordan)',color:'#8a6a20'},
+{id:'01f_Ketef_Hinnom',code:'01f',name:'Ketef Hinnom Silver Scrolls',date:-650,era:'c. 650 BCE',tier:'Tier 01 - Proto-Semitic Roots',form:'Inscription',region:'Jerusalem',color:'#8a6a20'},
+{id:'02a_DSS_General',code:'02a',name:'Dead Sea Scrolls (General Biblical Corpus)',date:-150,era:'c. 250 BCE - 70 CE',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Judean Desert',color:'#c0394b'},
+{id:'02b_Great_Isaiah_Scroll',code:'02b',name:'Great Isaiah Scroll (1QIsaa)',date:-150,era:'c. 350-100 BCE',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Judean Desert',color:'#c0394b'},
+{id:'02c_Nash_Papyrus',code:'02c',name:'Nash Papyrus',date:-150,era:'c. 150-100 BCE',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Egypt (Fayyum)',color:'#c0394b'},
+{id:'02d_Job_Targum',code:'02d',name:'Targum of Job (11QtgJob)',date:-100,era:'c. 100 BCE - 50 CE',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Judean Desert',color:'#c0394b'},
+{id:'02e_En_Gedi_Scroll',code:'02e',name:'En-Gedi Leviticus Scroll',date:300,era:'c. 3rd-4th c. CE',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Judean Desert',color:'#c0394b'},
+{id:'02f_Severus_Rubrics',code:'02f',name:'Severus Rubrics (Temple Scroll tradition)',date:200,era:'c. 2nd-3rd c. CE (tradition)',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Jerusalem',color:'#c0394b'},
+{id:'02g_Samaritan_Pentateuch',code:'02g',name:'Samaritan Pentateuch',date:1000,era:'Ancient tradition; extant MSS medieval',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Samaria / Nablus',color:'#c0394b'},
+{id:'02h_Cairo_Genizah',code:'02h',name:'Cairo Genizah Bible Fragments',date:1000,era:'9th-14th c. (composite)',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Egypt',color:'#c0394b'},
+{id:'02i_Syriac_Peshitta',code:'02i',name:'Syriac Peshitta',date:450,era:'c. 5th c. CE',tier:'Tier 02 - Second Temple Witnesses',form:'Scroll/Fragment',region:'Mesopotamia/Syria',color:'#c0394b'},
+{id:'03a_Aleppo_Codex',code:'03a',name:'Aleppo Codex (Keter Aram Tsova)',date:920,era:'c. 920 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Tiberias / Aleppo',color:'#B8860B'},
+{id:'03b_Leningrad_Codex',code:'03b',name:'Leningrad Codex (RNL Evr. I B 19a)',date:1008,era:'1008/9 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Cairo/Egypt',color:'#B8860B'},
+{id:'03c_Sassoon_1053',code:'03c',name:'Tanakh (MS Sassoon 1053)',date:900,era:'c. 880-960 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Levant',color:'#B8860B'},
+{id:'03d_MS_Or_4445',code:'03d',name:'London Pentateuch (BL Or 4445)',date:925,era:'c. 920-950 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Levant',color:'#B8860B'},
+{id:'03e_MS_Cairensis',code:'03e',name:'MS Cairensis (Cairo Codex of the Prophets)',date:895,era:'895 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Tiberias',color:'#B8860B'},
+{id:'03f_Reuchlin_Prophets',code:'03f',name:'Reuchlin Codex of the Prophets',date:1105,era:'1105 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Karlsruhe (copied Levant)',color:'#B8860B'},
+{id:'03g_Valmadonna_I',code:'03g',name:'Valmadonna I Pentateuch',date:1189,era:'1189 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Italy/Levant',color:'#B8860B'},
+{id:'03h_Codex_Madrid_M1',code:'03h',name:'Codex Madrid M1 (Complutense)',date:1280,era:'c. 1280 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Spain',color:'#B8860B'},
+{id:'03i_Erfurt_Codex_1',code:'03i',name:'Erfurt Codex 1',date:1150,era:'c. 12th-13th c. CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Ashkenaz',color:'#B8860B'},
+{id:'03j_MS_Babylonicus',code:'03j',name:'Codex Babylonicus Petropolitanus (MS Babylonicus)',date:916,era:'916 CE',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Babylonia',color:'#B8860B'},
+{id:'03k_Yemenite_Taj',code:'03k',name:'Yemenite Taj',date:1450,era:'c. 15th-16th c. CE (tradition older)',tier:'Tier 03 - Masoretic Traditions',form:'Codex',region:'Yemen',color:'#B8860B'},
+{id:'04a_Huntington_148',code:'04a',name:'Huntington 148 Targum',date:1250,era:'c. 13th c. CE',tier:'Tier 04 - Sephardic Targum',form:'Codex',region:'Sepharad',color:'#4a148c'},
+{id:'04b_MS_Or_2363_2365',code:'04b',name:'MS Or 2363-2365 Targum',date:1300,era:'c. 14th c. CE',tier:'Tier 04 - Sephardic Targum',form:'Codex',region:'Sepharad',color:'#4a148c'},
+{id:'04c_MS_Or_2210',code:'04c',name:'MS Or 2210 Targum',date:1300,era:'c. 14th c. CE',tier:'Tier 04 - Sephardic Targum',form:'Codex',region:'Sepharad',color:'#4a148c'},
+{id:'04d_MS_Madrid_116',code:'04d',name:'MS Madrid 116 Targum',date:1350,era:'c. 14th c. CE',tier:'Tier 04 - Sephardic Targum',form:'Codex',region:'Spain',color:'#4a148c'},
+{id:'04e_Berliners_Onkelos',code:'04e',name:'Berliner\'s Onkelos Edition',date:1884,era:'1884 CE (ed. Berliner)',tier:'Tier 04 - Sephardic Targum',form:'Codex',region:'Germany',color:'#4a148c'},
+{id:'05a_Complutensian',code:'05a',name:'Complutensian Polyglot',date:1517,era:'1514-1517 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Alcala, Spain',color:'#3f8ed0'},
+{id:'05b_First_Rabbinic_1517',code:'05b',name:'First Rabbinic Bible (Bomberg 1517)',date:1517,era:'1517 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Venice',color:'#3f8ed0'},
+{id:'05c_Second_Rabbinic_1525',code:'05c',name:'Second Rabbinic Bible (Ben Hayyim 1525)',date:1525,era:'1524/25 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Venice',color:'#3f8ed0'},
+{id:'05c_Second_Rabbinic_1548',code:'05c',name:'Second Rabbinic Bible (Ben Hayyim 1548)',date:1548,era:'1548 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Venice',color:'#3f8ed0'},
+{id:'05d_Third_Rabbinic_1545',code:'05d',name:'Third Rabbinic Bible (1545/46)',date:1545,era:'1545-46 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Venice',color:'#3f8ed0'},
+{id:'05e_Western_Targums_1591',code:'05e',name:'Western Targums (Antwerp Polyglot) 1591',date:1591,era:'1591 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Antwerp',color:'#3f8ed0'},
+{id:'05f_Letteris_1852',code:'05f',name:'Letteris Edition',date:1852,era:'1852 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Vienna',color:'#3f8ed0'},
+{id:'05g_Lagarde_Jonathan_1872',code:'05g',name:'Lagarde Edition of Targum Jonathan',date:1872,era:'1872 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Germany',color:'#3f8ed0'},
+{id:'05h_Sperber_Targum_1959',code:'05h',name:'Sperber Targum Edition',date:1959,era:'1959 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Leiden',color:'#3f8ed0'},
+{id:'05i_Ginsburg_1894',code:'05i',name:'Ginsburg Edition',date:1894,era:'1894 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'London',color:'#3f8ed0'},
+{id:'05j_BHS_1977',code:'05j',name:'Biblia Hebraica Stuttgartensia (BHS)',date:1977,era:'1977 CE',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Stuttgart',color:'#3f8ed0'},
+{id:'05k_BHQ_Quinta',code:'05k',name:'Biblia Hebraica Quinta (BHQ)',date:2004,era:'2004 CE - ongoing',tier:'Tier 05 - Printed and Critical',form:'Print',region:'Stuttgart',color:'#3f8ed0'},
+];
+const state={search:'',tier:new Set(),region:new Set(),form:new Set(),sort:'date'};
+
+function uniq(k){return [...new Set(MSS.map(m=>m[k]))];}
+function buildFacet(id,key){
+  document.getElementById(id).innerHTML=uniq(key).map(v=>
+    `<span class="chip" data-k="${key}" data-v="${v.replace(/"/g,'&quot;')}" onclick="toggleChip(this)">${v}</span>`
+  ).join('');
+}
+function toggleChip(el){
+  const k=el.dataset.k,v=el.dataset.v;
+  el.classList.toggle('sel');
+  if(state[k].has(v))state[k].delete(v);else state[k].add(v);
+  render();
+}
+function resetFilters(){
+  state.search='';state.tier.clear();state.region.clear();state.form.clear();
+  document.getElementById('searchBox').value='';
+  document.querySelectorAll('.chip.sel').forEach(c=>c.classList.remove('sel'));
+  render();
+}
+function matches(m){
+  const s=state.search.trim().toLowerCase();
+  if(s&&!(m.name.toLowerCase().includes(s)||m.code.toLowerCase().includes(s)||m.region.toLowerCase().includes(s)))return false;
+  if(state.tier.size&&!state.tier.has(m.tier))return false;
+  if(state.region.size&&!state.region.has(m.region))return false;
+  if(state.form.size&&!state.form.has(m.form))return false;
+  return true;
+}
+function imgUrl(id){return `${API_BASE}/api/v1/files/image?witness=${encodeURIComponent(id)}&folio=1r&convert=jpeg`;}
+function render(){
+  state.search=document.getElementById('searchBox').value;
+  state.sort=document.getElementById('sortSel').value;
+  let list=MSS.filter(matches);
+  if(state.sort==='date')list=list.sort((a,b)=>a.date-b.date);
+  else if(state.sort==='name')list=list.sort((a,b)=>a.name.localeCompare(b.name));
+  else if(state.sort==='tier')list=list.sort((a,b)=>a.tier.localeCompare(b.tier));
+  document.getElementById('cnt').textContent=list.length;
+  document.getElementById('cntTotal').textContent=MSS.length;
+  const g=document.getElementById('cardGrid');
+  g.innerHTML=list.map(m=>`
+    <div class="card" onclick="openDetail('${m.id}')">
+      <div class="card-swatch" style="background:${m.color}" id="sw-${m.id}">
+        <img src="${imgUrl(m.id)}" alt="" style="width:100%;height:100%;object-fit:cover" loading="lazy"
+             onerror="this.style.display='none';document.getElementById('sw-${m.id}').textContent='א'">
+      </div>
+      <div class="card-body">
+        <div class="card-sigil">${m.code} · ${m.tier.replace('Tier ','T')}</div>
+        <div class="card-title">${m.name}</div>
+        <div class="card-meta"><span>📅 ${m.era}</span><span>📍 ${m.region}</span><span>${m.form}</span></div>
+        <div class="card-ft"><span class="hold">Digital Archive · ${m.code}</span><a onclick="event.stopPropagation();openDetail('${m.id}')">Details →</a></div>
+      </div>
+    </div>`).join('')||'<div class="empty-note">No witnesses match these filters.</div>';
+}
+function openDetail(id){
+  const m=MSS.find(x=>x.id===id);if(!m)return;
+  document.getElementById('dtTitle').textContent=m.name;
+  document.getElementById('dtBody').innerHTML=`
+    <img src="${imgUrl(m.id)}" alt="" style="width:100%;border-radius:8px;margin-bottom:14px;border:1px solid var(--bdr)" onerror="this.style.display='none'">
+    <div class="dl-row"><span><b>Code</b> ${m.code}</span><span><b>Date</b> ${m.era}</span><span><b>Form</b> ${m.form}</span></div>
+    <div class="dl-row"><span><b>Region</b> ${m.region}</span><span><b>Corpus tier</b> ${m.tier}</span></div>
+    <p>Live thumbnail and full-resolution scans are served from the Digital Archive by the local API (folder <code>${m.id}</code>). If the image above didn't load, start Launch_Masorah.bat first.</p>
+    <div class="modal-acts">
+      <a class="primary" href="apparatus.html">▤ Open in Apparatus</a>
+      <a href="reader.html">▦ Open in Reader</a>
+      <a href="provenance.html">⟳ Provenance record</a>
+      <a href="map.html">🗺 Show on Map</a>
+    </div>`;
+  document.getElementById('detailModal').classList.add('open');
+}
+function closeDetail(){document.getElementById('detailModal').classList.remove('open')}
+
+buildFacet('facetTier','tier');
+buildFacet('facetRegion','region');
+buildFacet('facetForm','form');
+render();
+
+async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+probeAPI();setInterval(probeAPI,8000);
+</script>
+</body>
+</html>
