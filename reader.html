@@ -201,7 +201,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 <!-- BANNER -->
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah</h1><p>Reader · Interlinear Study</p></div></div>
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah</h1><p>Reader · Interlinear Study</p></div></div>
     <nav class="nav">
       <a href="architecture.html">⧉ Arch</a>
       <a href="transcriber.html">✍ Transcriber</a>
@@ -1032,5 +1032,6 @@ DirStore.get('reader-export').then(async h=>{
   try{if((await h.queryPermission({mode:'readwrite'}))==='granted'){exportDirHandle=h;document.getElementById('exportBtn').title='Export passage -> '+h.name;}}catch(e){}
 });
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

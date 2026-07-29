@@ -179,7 +179,7 @@ input:checked + .slider-tg:before{transform:translateX(18px)}
 
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer">
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer">
       <div class="brand-glyph">מָסוֹרָה</div>
       <div class="brand-text"><h1>Masorah</h1><p>Architecture · Knowledge Graph</p></div>
     </div>
@@ -694,5 +694,6 @@ async function probeAPI(){
 probeAPI(); setInterval(probeAPI, 8000);
 loadAgents(); loadRuns(); setInterval(loadRuns, 20000);
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

@@ -73,7 +73,7 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
     </div>
     <nav class="nav">
       <a href="index.html">⌂ Project</a>
-      <a href="scriptorium.html">📚 Library</a>
+      <a href="archives.html">📚 Archives</a>
       <a href="map.html" class="active">🗺 Map</a>
     </nav>
     <div class="status-cluster">
@@ -229,7 +229,7 @@ function initMap(){
     const color=m.color||TRAD_COLORS[m.tradition]||'#8a6a20';
     const icon=L.divIcon({className:'',html:`<div class="pin-dot" style="background:${color}"></div>`,iconSize:[16,16],iconAnchor:[8,14]});
     const mk=L.marker([jLat,jLng],{icon}).addTo(map);
-    mk.bindPopup(`<div class="pop-sigil">${m.sigil}</div><div class="pop-title">${m.name}</div><div class="pop-meta">📅 ${m.dateLbl} · 📍 ${m.place}</div><div style="font-size:11.5px;color:#3a2a10;margin-bottom:6px">${m.desc}</div><a class="pop-link" href="scriptorium.html">Open in Library →</a>`);
+    mk.bindPopup(`<div class="pop-sigil">${m.sigil}</div><div class="pop-title">${m.name}</div><div class="pop-meta">📅 ${m.dateLbl} · 📍 ${m.place}</div><div style="font-size:11.5px;color:#3a2a10;margin-bottom:6px">${m.desc}</div><a class="pop-link" href="archives.html">Open in Archives →</a>`);
     mk._rec=m;
     markers.push(mk);
   });
@@ -285,5 +285,7 @@ initMap();buildChips();applyFilters();
 async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
 probeAPI();setInterval(probeAPI,8000);
 </script>
+<script>window.MASORAH_BRAND_TARGET='index.html';</script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

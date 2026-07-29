@@ -288,7 +288,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer">
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer">
       <div class="brand-glyph">מָ</div>
       <div class="brand-text"><h1>Masorah</h1><p>Annotate · MG Edition</p></div>
     </div>
@@ -1093,5 +1093,6 @@ function loadPaths(){
 renderMSList();renderContexts();updateFolioLabel();loadPaths();probeAPI();applyTransform();
 document.querySelectorAll('.anno-zone').forEach(z=>z.addEventListener('click',()=>toast('Zone: '+z.getAttribute('title')+'  — open Masorah.ai for analysis')));
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

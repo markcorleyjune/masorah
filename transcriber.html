@@ -191,7 +191,7 @@ input[type=file]{display:none}
 
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Transcriber · HTR / OCR Workbench</p></div></div>
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Transcriber · HTR / OCR Workbench</p></div></div>
     <nav class="nav">
       <a href="architecture.html">⧉ Arch</a>
       <a class="active" href="transcriber.html">✍ Transcriber</a>
@@ -983,7 +983,8 @@ function alto(stem){const ls=state.lines.map((l,i)=>{const b=state.boxes.find(x=
       <TextBlock ID="block_1">
 ${ls}
       </TextBlock></PrintSpace></Page></Layout></alto>`;}
-function hocr(stem){const ls=state.lines.map((l,i)=>{const b=state.boxes.find(x=>x.id===l.box)||{x:0,y:0,w:0,h:0};return `   <span class='ocr_line' id='line_${i+1}' title='bbox ${Math.round(b.x)} ${Math.round(b.y)} ${Math.round(b.x+b.w)} ${Math.round(b.y+b.h)}'>${esc(l.text)}</span>`;}).join('\n');return `<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='ocr-system' content='Masorah'></head><body><div class='ocr_page' title='image "${esc(stem)}.jpg"; bbox 0 0 ${state.natW} ${state.natH}'>\n${ls}\n</div></body></html>`;}
+function hocr(stem){const ls=state.lines.map((l,i)=>{const b=state.boxes.find(x=>x.id===l.box)||{x:0,y:0,w:0,h:0};return `   <span class='ocr_line' id='line_${i+1}' title='bbox ${Math.round(b.x)} ${Math.round(b.y)} ${Math.round(b.x+b.w)} ${Math.round(b.y+b.h)}'>${esc(l.text)}</span>`;}).join('\n');return `<!DOCTYPE html><html><head><meta charset='utf-8'><meta name='ocr-system' content='Masorah'></head><body><div class='ocr_page' title='image "${esc(stem)}.jpg"; bbox 0 0 ${state.natW} ${state.natH}'>\n${ls}\n</div><script src="shared-banner.js"></script>
+</body></html>`;}
 /* TEI P5, with real <facsimile>/<surface>/<zone> linking each transcribed
    line and zone to its actual image-pixel region (state.boxes), so the
    transcription is anchored to the page image the way P5 sourceDoc/facsimile
@@ -1025,7 +1026,8 @@ ${zoneXML}
 ${lineXML}
 ${kvpXML ? '        <listAnnotation>\n'+kvpXML+'\n        </listAnnotation>' : ''}
       </div>
-    </body>
+    <script src="shared-banner.js"></script>
+</body>
   </text>
 </TEI>`;
 }
@@ -1117,5 +1119,6 @@ buildAIMenu();renderAll();probe();setInterval(probe,9000);
 $('saveStem')&&$('saveStem').addEventListener('input',updateSaveHint);
 trySilentRecall(state.savePath).then(h=>{if(h){state.fsDirHandle=h;updateSaveHint();}});
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

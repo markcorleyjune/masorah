@@ -117,17 +117,23 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 .cst-table td{padding:4px 5px;border-bottom:1px solid var(--bdr);font-family:'JetBrains Mono',monospace;font-size:9.5px}
 .cst-code{font-weight:700;color:var(--gold-dk)}
 .cst-maj{color:var(--ok)}.cst-min{color:var(--err);font-weight:700}
+.cst-heb{font-family:'Frank Ruhl Libre',serif;direction:rtl;text-align:right;font-size:12.5px;line-height:1.5;display:block;max-width:150px}
+.cst-heb.cst-maj{color:var(--ink)}.cst-heb.cst-min{color:var(--err)}
+.cst-heb-empty{color:var(--ink4);font-style:italic;font-family:'EB Garamond',serif;direction:ltr;text-align:left}
+.cst-hash{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--ink4);display:block;margin-top:2px;direction:ltr;text-align:right}
+.cst-table td{vertical-align:top}
+.cst-actions{display:flex;gap:6px;margin-top:8px}
 </style>
 </head>
 <body>
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah</h1><p>Statistical Analysis Engine</p></div></div>
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer"><div class="brand-glyph">מָ</div><div class="brand-text"><h1>Masorah</h1><p>Statistical Analysis Engine</p></div></div>
     <nav class="nav">
       <a href="architecture.html">⧉ Arch</a>
       <a href="transcriber.html">✍ Transcriber</a>
       <a href="pipeline.html">⫯ Pipeline</a>
-      <a href="apparatus.html">▤ Apparatus</a>
+      <a href="annotate.html">▤ Annotate</a>
       <a href="provenance.html">⟳ Provenance</a>
       <a href="paleography.html">◉ Paleography</a>
       <a class="active" href="analysis.html">∿ Analysis</a>
@@ -179,7 +185,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
     <div class="col-head"><span>Analysis Dashboard</span><span class="tag" id="chartStatus">real data</span></div>
     <div class="charts-grid" style="grid-template-rows:auto 1fr auto">
       <div class="chart-cell" style="flex:none">
-        <div class="chart-title"><span id="cmpTitle">Compare — pick two witnesses and a book</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3)" id="cmpMeta"></span></div>
+        <div class="chart-title"><span id="cmpTitle">Compare — pick two witnesses and a book</span><span style="display:flex;align-items:center;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3)" id="cmpMeta"></span><button class="btn sm" style="padding:2px 8px;font-size:9px" onclick="exportCompareCSV()">⤓ CSV</button></span></div>
         <div class="chart-body" style="overflow-y:auto;padding:10px 14px">
           <div id="cmpBody" style="font-size:11.5px;color:var(--ink3)">Select witness A, witness B, and a book on the left, then click <b>Compare</b>. Every number below comes from the real per-verse XML on disk — not a simulation.</div>
         </div>
@@ -189,7 +195,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
         <div class="chart-body"><canvas id="distChart"></canvas></div>
       </div>
       <div class="chart-cell" style="flex:none">
-        <div class="chart-title"><span>Real CBGM Pipeline Output</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3)" id="cbgmMeta"></span></div>
+        <div class="chart-title"><span>Real CBGM Pipeline Output</span><span style="display:flex;align-items:center;gap:8px"><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3)" id="cbgmMeta"></span><button class="btn sm" style="padding:2px 8px;font-size:9px" onclick="exportCbgmCSV()">⤓ CSV</button></span></div>
         <div class="chart-body" style="overflow-y:auto;padding:10px 14px" id="cbgmBody">Loading real pipeline output…</div>
         <!-- EM convergence, merged in from analyzer.html — same v42.1 θ-per-iteration
              figures already cited in the AI panel's stock message, just visualized.
@@ -344,7 +350,7 @@ function populateSelectors(){
   document.getElementById('cmpB').value='03a';
   document.getElementById('cmpBook').innerHTML=CORPUS_BOOKS.map(b=>`<option>${b}</option>`).join('');
 }
-function addWitness(){toast('Manuscripts are added by placing real files in the Digital Archive folder — see apparatus.html to link a new one.');}
+function addWitness(){toast('Manuscripts are added by placing real files in the Digital Archive folder — see annotate.html to link a new one.');}
 function runAnalysis(){toast('Pick two witnesses + a book on the left, then click Compare.');}
 
 /* ── BCV Constraint Model (44-node checksum search across tiers 1-5) ── */
@@ -398,12 +404,16 @@ function renderConstraintResults(d){
     for(const [k,v] of Object.entries(groups)){ if(v.length>bestN){best=k;bestN=v.length;} }
     majority[ch]=best;
   }
+  // Keep the full result set around so the CSV export button can dump
+  // exactly what's on screen (real text + checksums), not a re-fetch.
+  window._lastConstraintResult = d;
   const rows=d.results.map(r=>{
     const cells=['main_text','parva','magna','notes'].map(ch=>{
       const c=r.checksums[ch];
-      if(c===null) return '<td style="color:var(--ink4)">—</td>';
+      const txt=(r.preview[ch]||'').trim();
+      if(c===null||!txt) return '<td><span class="cst-heb cst-heb-empty">—</span></td>';
       const cls=c===majority[ch]?'cst-maj':'cst-min';
-      return `<td class="${cls}" title="${(r.preview[ch]||'').replace(/"/g,'&quot;')}">${c}</td>`;
+      return `<td><span class="cst-heb ${cls}" title="checksum ${c}">${txt.replace(/</g,'&lt;')}</span><span class="cst-hash">${c}</span></td>`;
     }).join('');
     return `<tr><td class="cst-code">${r.code}</td><td>${r.condition||'—'}</td>${cells}</tr>`;
   }).join('');
@@ -413,8 +423,34 @@ function renderConstraintResults(d){
       <thead><tr><th>Code</th><th>Cond.</th><th>Text</th><th>MP</th><th>MG</th><th>Notes</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <div class="real-note" style="margin-top:8px">Green = matches this address's majority checksum for that channel (the constraint-agreeing cluster). Red = diverges from the majority — a real candidate for scribal variance or transmission error. Hover a cell for a text preview. ${d.note}</div>
+    <div class="real-note" style="margin-top:8px">Black/ink text = matches this address's majority checksum for that channel (the constraint-agreeing cluster). Red text = diverges from the majority — a real candidate for scribal variance or transmission error. The small hex code under each cell is the sha256 checksum actually used for clustering; hover it for confirmation. ${d.note}</div>
+    <div class="cst-actions"><button class="btn sm primary" onclick="exportConstraintCSV()">⤓ Export this result as CSV</button></div>
   `;
+}
+function csvCell(v){
+  const s=(v===undefined||v===null)?'':String(v);
+  return '"'+s.replace(/"/g,'""')+'"';
+}
+function downloadCSV(filename,rows){
+  const csv=rows.map(r=>r.map(csvCell).join(',')).join('\r\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}); // BOM so Hebrew renders correctly in Excel
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=filename;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function exportConstraintCSV(){
+  const d=window._lastConstraintResult;
+  if(!d||!d.results||!d.results.length){toast('Run a constraint-model search first.');return;}
+  const rows=[['bcv','code','witness','condition','main_text','main_text_sha256','parva','parva_sha256','magna','magna_sha256','notes','notes_sha256']];
+  d.results.forEach(r=>{
+    rows.push([d.bcv,r.code,r.witness,r.condition||'',
+      r.preview.main_text||'',r.checksums.main_text||'',
+      r.preview.parva||'',r.checksums.parva||'',
+      r.preview.magna||'',r.checksums.magna||'',
+      r.preview.notes||'',r.checksums.notes||'']);
+  });
+  downloadCSV(`constraint-model_${d.bcv.replace(/[^\w]+/g,'_')}.csv`,rows);
+  toast('Exported constraint-model CSV');
 }
 
 /* ── Real pairwise comparison (main_api.py /api/v1/analysis/compare) ── */
@@ -453,6 +489,7 @@ async function runCompare(){
     document.getElementById('cmpBody').innerHTML=`<span style="color:var(--warn)">⚠ ${d.reason||'No real data for this pair/book yet.'}</span>`;
     return;
   }
+  window._lastCompareResult=d;
   const A=d.a,B=d.b;
   document.getElementById('cmpMeta').textContent=`${d.both_extant_verses} verses both attest`;
   document.getElementById('cmpChartMeta').textContent=`${book}`;
@@ -489,6 +526,7 @@ async function loadCbgmReal(){
     const r=await fetch(`${API_BASE}/api/v1/analysis/cbgm-real`,{signal:AbortSignal.timeout(6000)});
     const d=await r.json();
     if(!d.found){body.innerHTML=`<span style="color:var(--warn)">⚠ ${d.reason}</span>`;return;}
+    window._lastCbgmResult=d;
     document.getElementById('cbgmMeta').textContent=d.pair;
     const c=d.cbgm_stats||{}, s=d.stability||{}, e=d.ecm_report||{};
     body.innerHTML=`
@@ -513,7 +551,55 @@ async function loadCbgmReal(){
 }
 
 function exportPDF(){toast('Exporting analysis as PDF…')}
-function exportCSV(){const rows=[['id','code','name','tier'],...WITNESSES.map(w=>[w.id,w.code,w.name,w.tier])].map(r=>r.join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([rows],{type:'text/csv'}));a.download='analysis.csv';a.click();}
+function exportCSV(){downloadCSV('witness-list.csv',[['id','code','name','tier'],...WITNESSES.map(w=>[w.id,w.code,w.name,w.tier])]);toast('Exported witness list CSV');}
+
+/* ── Per-function CSV export (item 2 — Compare / CBGM / Constraint Model) ── */
+function exportCompareCSV(){
+  const d=window._lastCompareResult;
+  if(!d){toast('Run Compare first.');return;}
+  const A=d.a,B=d.b;
+  const rows=[
+    ['metric',A.code,B.code],
+    ['book',d.book,d.book],
+    ['verse_count',A.verse_count,B.verse_count],
+    ['extant_count',A.extant_count,B.extant_count],
+    ['lacuna_count',A.lacuna_count,B.lacuna_count],
+    ['main_text_chars',A.main_text_chars,B.main_text_chars],
+    ['main_text_tokens',A.main_text_tokens,B.main_text_tokens],
+    ['parva_count',A.parva_count,B.parva_count],
+    ['magna_count',A.magna_count,B.magna_count],
+    ['cantillation_count',A.cantillation_count,B.cantillation_count],
+    ['notes_count',A.notes_count,B.notes_count],
+    ['self_correction_hits',A.self_correction_hits.length,B.self_correction_hits.length],
+    ['targum_hits',A.targum_hits.length,B.targum_hits.length],
+    ['both_extant_verses',d.both_extant_verses,''],
+    ['exact_match_verses',d.exact_match_verses,''],
+    ['agreement_rate',d.agreement_rate,''],
+  ];
+  downloadCSV(`compare_${A.code}_vs_${B.code}_${d.book.replace(/\s+/g,'_')}.csv`,rows);
+  toast('Exported compare CSV');
+}
+function exportCbgmCSV(){
+  const d=window._lastCbgmResult;
+  if(!d){toast('CBGM output not loaded yet.');return;}
+  const c=d.cbgm_stats||{}, s=d.stability||{}, e=d.ecm_report||{};
+  const rows=[
+    ['metric','value'],
+    ['pair',d.pair],
+    ['total_units',c.total_units??''],
+    ['variant_units',c.variant_units??''],
+    ['local_stemma_edges',c.local_stemma_edges??''],
+    ['coherence',c.coherence??''],
+    ['genealogical_consistency',c.genealogical_consistency??''],
+    ['mixture_ratio',c.mixture_ratio??''],
+    ['stability_verdict',s.verdict??''],
+    ['ecm_contamination_ratio',e.contamination?e.contamination.contamination_ratio:''],
+    ['gcg_score',e.gcg_score??''],
+    ['note_variants',c.note_variants??''],
+  ];
+  downloadCSV(`cbgm-pipeline_${(d.pair||'run').replace(/[^\w]+/g,'_')}.csv`,rows);
+  toast('Exported CBGM pipeline CSV');
+}
 
 /* AI */
 const AI_RESPONSES={'cbgm':`<strong>CBGM Coherence Statistics</strong><br><br>The Coherence-Based Genealogical Method (Mink 2000; Wasserman & Gurry 2017) computes pairwise coherence scores as ratio of agreements to variation units. In Masorah: 60,000 pairs, 8 features, θ=0.246 after 4 EM iterations. ECM coherence −0.483 indicates majority divergence from 05c baseline.<br><div class="ai-src">Sources: Mink 2000 · Wasserman & Gurry 2017 JSTOR · Trovato 2014 Brill</div>`,'masoretic':`<strong>Masoretic Code Verification</strong><br><br>The Masoretic Code provides internal sum-checks: Torah word count = 79,976 (Ginsburg 1897); verse count = 5,845; letter count = 304,805. These totals are encoded in the Masorah Finalis. Discrepancies indicate scribal error or variant readings. Automated sum-checking is implemented in pipeline v42.1.<br><div class="ai-src">Sources: Ginsburg 1897 · Würthwein 1995 · BHS apparatus</div>`};
@@ -524,5 +610,6 @@ function toast(msg){const d=document.createElement('div');d.className='toast';d.
 async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
 renderWits();populateSelectors();initCharts();initEMChart();loadCbgmReal();probeAPI();setInterval(probeAPI,8000);
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

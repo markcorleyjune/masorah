@@ -76,7 +76,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 <body>
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer">
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer">
       <div class="brand-glyph">מָ</div>
       <div class="brand-text"><h1>Masorah</h1><p>Provenance · Material History</p></div>
     </div>
@@ -327,5 +327,6 @@ DirStore.get('provenance').then(async h=>{
   try{if((await h.queryPermission({mode:'readwrite'}))==='granted'){provDirHandle=h;document.getElementById('pSavePath').value=h.name+'\\provenance.csv';}}catch(e){}
 });
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

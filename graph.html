@@ -83,7 +83,7 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
 <body>
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Graph Explorer · CBGM Stemma</p></div></div>
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Graph Explorer · CBGM Stemma</p></div></div>
     <nav class="nav">
       <a href="architecture.html">⧉ Arch</a>
       <a href="transcriber.html">✍ Transcriber</a>
@@ -363,5 +363,6 @@ async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill
 function start(){buildWitList();buildLegend();applyLayout();probeAPI();setInterval(probeAPI,9000);window.addEventListener('resize',()=>render());}
 start();
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

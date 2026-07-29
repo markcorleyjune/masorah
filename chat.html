@@ -76,7 +76,7 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
 <body>
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Research Chat · Agentic RAG</p></div></div>
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Research Chat · Agentic RAG</p></div></div>
     <nav class="nav">
       <a href="architecture.html">⧉ Arch</a>
       <a href="transcriber.html">✍ Transcriber</a>
@@ -267,5 +267,6 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
 buildModels();onModel();renderSessions();renderMsgs();probeAPI();setInterval(probeAPI,9000);
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

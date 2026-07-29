@@ -84,7 +84,7 @@ td .heb{font-family:'Frank Ruhl Libre',serif;font-size:22px}
 <body>
 <header class="banner">
   <div class="banner-row">
-    <div class="brand" onclick="location.href='index.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Paleography · Scribal Hand ML</p></div></div>
+    <div class="brand" onclick="location.href='workbench.html'" style="cursor:pointer"><div class="brand-glyph">מ</div><div class="brand-text"><h1>Masorah</h1><p>Paleography · Scribal Hand ML</p></div></div>
     <nav class="nav">
       <a href="architecture.html">⧉ Arch</a>
       <a href="transcriber.html">✍ Transcriber</a>
@@ -313,5 +313,6 @@ async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill
 renderMetrics();compareLetter();drawPCA();probeAPI();setInterval(probeAPI,9000);
 window.addEventListener('resize',drawPCA);
 </script>
+<script src="shared-banner.js"></script>
 </body>
 </html>

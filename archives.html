@@ -136,6 +136,9 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
 .cite-box{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px 20px;max-width:640px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
 .cite-box blockquote{font-size:13px;color:var(--ink2);border-left:3px solid var(--gold);padding-left:12px;line-height:1.6}
 .cite-copy{font-size:11px;color:var(--gold-dk);background:none;border:none;cursor:pointer;white-space:nowrap}
+.sam-credit{margin-top:20px;font-size:16px;line-height:1.7;color:var(--ink2);text-align:right;max-width:1100px;margin-left:auto}
+.sam-credit b{color:var(--ink);font-weight:700}
+.sam-credit a{color:var(--gold-dk)}
 </style>
 </head>
 <body>
@@ -229,8 +232,8 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
 
 <section class="sam">
   <h2>Sources &amp; method.</h2>
-  <p>masorah.io depends on manuscript repositories, photographers, editors, and open-data projects. Scans and page indexes are credited below. Where full text is available, it comes from <a href="https://www.tanach.us/" target="_blank" rel="noopener">UXLC</a> (the corpus's own primary reference baseline — see <code>/api/v1/corpus/structure</code>), the <a href="https://codexsinaiticus.org/en/project/transcription_download.aspx" target="_blank" rel="noopener">Codex Sinaiticus Project transcription</a>, <a href="https://github.com/bdenckla/MAM-simple" target="_blank" rel="noopener">Miqra according to the Masorah (MAM)</a>, diplomatic manuscript transcriptions from <a href="https://bima2.corpusmasoreticum.de/" target="_blank" rel="noopener">BIMA / Corpus Masoreticum</a>, the <a href="https://github.com/DT-UCPH/sp" target="_blank" rel="noopener">DT-UCPH Samaritan Pentateuch</a>, and <a href="https://git.sr.ht/~sethkush/lxx-morph" target="_blank" rel="noopener">lxx-morph</a>, with Greek-to-Hebrew verse-number equivalences from <a href="https://github.com/STEPBible/STEPBible-Data/tree/master/Versification" target="_blank" rel="noopener">STEPBible TVTMS</a>. Each witness's detail card names the source used.</p>
-  <p>Verse-level transcriptions in this corpus's own 02_Forensic_Nodes come from a mix of repository OCR/transcriptions, HTR (Codex Sassoon 1053's own TesserACT + Dicta-HTR v2 pipeline — see architecture.html), and conservative text alignment. Scans remain with their repositories and are displayed here only for passage navigation, cropping, and verse highlighting; where a repository restricts embedding (e.g. Vaticanus, which opens only in the Vatican Library viewer) this Archive links out instead of hot-linking the image directly. Image rights and credits are stated per witness.</p>
+  <p>Every scan, page index, and transcription this Archive links to belongs to the institution or project that produced it — masorah.io does not claim any of that underlying material as its own. The corpus's primary reference baseline is <a href="https://www.tanach.us/" target="_blank" rel="noopener">UXLC</a> (see <code>/api/v1/corpus/structure</code>), supplemented by <a href="https://github.com/bdenckla/MAM-simple" target="_blank" rel="noopener">Miqra according to the Masorah (MAM)</a>, diplomatic transcriptions from <a href="https://bima2.corpusmasoreticum.de/" target="_blank" rel="noopener">BIMA / Corpus Masoreticum</a>, the <a href="https://github.com/DT-UCPH/sp" target="_blank" rel="noopener">DT-UCPH Samaritan Pentateuch</a> edition, and <a href="https://git.sr.ht/~sethkush/lxx-morph" target="_blank" rel="noopener">lxx-morph</a> for Greek-tradition alignment, with verse-numbering equivalences from <a href="https://github.com/STEPBible/STEPBible-Data/tree/master/Versification" target="_blank" rel="noopener">STEPBible TVTMS</a>. Each witness's own detail card names the specific source behind its text and images.</p>
+  <p>Verse-level transcription in this corpus's 02_Forensic_Nodes tree is built in-house from a mix of repository OCR, this project's own HTR pipeline (Codex Sassoon 1053's TesserACT + Dicta-HTR v2 run — see architecture.html), and manual alignment against the baseline text; coverage and confidence vary witness by witness, and that is reported honestly rather than smoothed over. Page images stay hosted by their home repository wherever that repository restricts redistribution (Vaticanus, for instance, opens only in the Vatican Library's own viewer) — this Archive links out to the source instead of mirroring the file. Image rights belong to the institutions credited per witness below.</p>
   <div class="sam-links">
     <a href="https://www.tanach.us/XSL/LCIndex.xml" target="_blank" rel="noopener">UXLC Leningrad index ↗</a>
     <a href="https://archive.org/details/Leningrad_Codex_Color_Images" target="_blank" rel="noopener">Leningrad scan ↗</a>
@@ -243,7 +246,6 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
     <a href="https://github.com/mittagessen/kraken" target="_blank" rel="noopener">kraken OCR/HTR toolkit ↗</a>
     <a href="https://zenodo.org/records/5468286" target="_blank" rel="noopener">BiblIA medieval Hebrew model ↗</a>
     <a href="https://digi.vatlib.it/view/MSS_Vat.gr.1209" target="_blank" rel="noopener">Vaticanus facsimile ↗</a>
-    <a href="https://codexsinaiticus.org/en/project/edition.aspx" target="_blank" rel="noopener">Sinaiticus edition ↗</a>
     <a href="https://culmus.sourceforge.io/taamim/index.html" target="_blank" rel="noopener">Keter Aram Tsova typeface ↗</a>
   </div>
   <h2 style="font-size:18px;margin-top:6px">How to cite.</h2>
@@ -252,7 +254,7 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
     <blockquote id="siteCite">Corley, Mark. "Masorah: Manuscript Search &amp; Computational Lab." Accessed <span id="citeDate"></span>. https://masorah.io/.</blockquote>
     <button class="cite-copy" onclick="copyCite()">Copy</button>
   </div>
-  <p style="margin-top:14px;font-size:11px;color:var(--ink4)">Built independently; see also <a href="https://www.masoretica.org/" target="_blank" rel="noopener" style="color:var(--gold-dk)">masoretica.org ↗</a> (Idan Dershowitz) and <a href="https://etnachta.org/" target="_blank" rel="noopener" style="color:var(--gold-dk)">etnachta.org ↗</a> for related manuscript-explorer projects.</p>
+  <p class="sam-credit">Designed, built, and maintained independently by <b>Mark A. Corley Jr.</b>, as part of PhD research at FAU Erlangen-Nürnberg (external supervision, Tel Aviv University). Every dataset, script, and page on masorah.io is his own work unless a source link above says otherwise.</p>
 </section>
 
 <footer><p>masorah.io · Archives · 43 witness nodes live-scanned from the Digital Archive — dates are approximate (c.) where no primary-source date is on record</p></footer>
@@ -448,8 +450,8 @@ function openDetail(id){
     <div class="dl-row"><span><b>Region</b> ${m.region}</span><span><b>Corpus tier</b> ${m.tier}</span></div>
     <p>Live thumbnail and full-resolution scans are served from the Digital Archive by the local API (folder <code>${m.id}</code>). If the image above didn't load, start Launch_Masorah.bat first.</p>
     <div class="modal-acts">
-      <a class="primary" href="apparatus.html">▤ Open in Apparatus</a>
-      <a href="reader.html">▦ Open in Reader</a>
+      <a class="primary" href="reader.html">▦ Open in Reader</a>
+      <a href="annotate.html">▤ Open in Annotate</a>
       <a href="provenance.html">⟳ Provenance record</a>
       <a href="map.html">🗺 Show on Map</a>
       ${src?`<a href="${src}" target="_blank" rel="noopener">🔗 View at source</a>`:''}
@@ -579,5 +581,7 @@ explInit();
 async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
 probeAPI();setInterval(probeAPI,8000);
 </script>
+<script>window.MASORAH_BRAND_TARGET='index.html';</script>
+<script src="shared-banner.js"></script>
 </body>
 </html>
