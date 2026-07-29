@@ -292,7 +292,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);}
         <span class="user-n">Mark Corley</span>
         <span class="user-lvl">L4</span>
       </div>
-      <button class="logout" onclick="location.href='login.html'">Logout</button>
+      <button class="logout" onclick="masorahLogout()">Logout</button>
     </div>
   </div>
 </header>
@@ -412,6 +412,28 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);}
 <div id="toast-container"></div>
 
 <script>
+/* ── Shared session guard (Masorah unified auth) ──
+   Reads the session written by login.html's setSession(). Every gated
+   workbench page runs this same check so identity/level are never
+   hardcoded per-page and a missing session always bounces to login. ── */
+(function(){
+  const raw=sessionStorage.getItem('masorah_user');
+  if(!raw && !location.search.includes('demo=true')){location.href='login.html';return;}
+  if(raw){
+    try{
+      const u=JSON.parse(raw);
+      document.querySelectorAll('.user-n').forEach(el=>el.textContent=u.name||u.username);
+      document.querySelectorAll('.user-lvl').forEach(el=>el.textContent='L'+u.level);
+      document.querySelectorAll('.user-av').forEach(el=>el.textContent=(u.name||u.username||'?').trim().charAt(0).toUpperCase());
+    }catch(e){}
+  }
+})();
+function masorahLogout(){
+  sessionStorage.removeItem('masorah_user');sessionStorage.removeItem('masorah_token');
+  localStorage.removeItem('masorah_session');localStorage.removeItem('masorah_session_ts');
+  location.href='login.html?logout=true';
+}
+
 // ========== TEMPLATES (including new Traditional MG-style) ==========
 const TEMPLATES = {
   article: `% SBL Journal Article

@@ -312,7 +312,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
         <span class="user-n">Mark Corley</span>
         <span class="user-lvl">L4</span>
       </div>
-      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px;border-radius:5px">Logout</button>
+      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px;border-radius:5px" onclick="masorahLogout()">Logout</button>
     </div>
   </div>
 </header>
@@ -324,10 +324,6 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
     <div class="left-brand">
       <div class="left-logo">מ</div>
       <div><h3>Masorah</h3><p>MG Edition</p></div>
-    </div>
-    <div class="left-user-row">
-      <div class="left-avatar">👤</div>
-      <button class="guest-link">(Guest)</button>
     </div>
     <div class="path-config">
       <div class="path-config-hd" onclick="togglePathConfig()">⚙ File Path Config <span id="pathChevron">▼</span></div>
@@ -566,6 +562,28 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 </div>
 
 <script>
+/* ── Shared session guard (Masorah unified auth) ──
+   Reads the session written by login.html's setSession(). Every gated
+   workbench page runs this same check so identity/level are never
+   hardcoded per-page and a missing session always bounces to login. ── */
+(function(){
+  const raw=sessionStorage.getItem('masorah_user');
+  if(!raw && !location.search.includes('demo=true')){location.href='login.html';return;}
+  if(raw){
+    try{
+      const u=JSON.parse(raw);
+      document.querySelectorAll('.user-n').forEach(el=>el.textContent=u.name||u.username);
+      document.querySelectorAll('.user-lvl').forEach(el=>el.textContent='L'+u.level);
+      document.querySelectorAll('.user-av').forEach(el=>el.textContent=(u.name||u.username||'?').trim().charAt(0).toUpperCase());
+    }catch(e){}
+  }
+})();
+function masorahLogout(){
+  sessionStorage.removeItem('masorah_user');sessionStorage.removeItem('masorah_token');
+  localStorage.removeItem('masorah_session');localStorage.removeItem('masorah_session_ts');
+  location.href='login.html?logout=true';
+}
+
 /* ── Data ── */
 const MSS=[
   {id:'bnf302',name:'BnF. Département des manuscrits. Hébreu 302',folios:6,tier:'T03',type:'primary'},
@@ -752,6 +770,7 @@ let pages=[];           /* {name,url,file,isTiff,page} */
 let curPage=-1;
 let _lastOv=0;
 let _ovIds=[];
+let _activeThumbEl=null,_activeSubEl=null;  /* perf: avoid re-querying every thumb/sublist row on each page turn */
 
 const viewer=OpenSeadragon({
   id:'osdReal',prefixUrl:'https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/',
@@ -863,28 +882,54 @@ async function gotoPage(i){
   if(!p.url){ try{p.url=await fileToDisplayURL(p.file);}catch(e){toast('Decode failed: '+p.name);return;} }
   if(!p.url){return;}
   showRealImage(p.url,p.name.replace(/\.[^.]+$/,''));
-  document.querySelectorAll('#folioRail .thumb').forEach((t,idx)=>t.classList.toggle('active',idx===i));
-  document.querySelectorAll('#folioSublist .fs-item').forEach((t,idx)=>t.classList.toggle('active',idx===i));
-  /* keep active thumb visible */
-  const at=document.querySelector('#folioRail .thumb.active');if(at)at.scrollIntoView({inline:'center',block:'nearest'});
+  /* Perf: toggle only the two affected rows instead of re-querying and
+     looping every thumb/sublist element on every page turn — with large
+     manuscripts (Sassoon 1053 = 812 folios) that full re-scan on every
+     Next/Prev click was the main source of annotate.html feeling sluggish. */
+  const rail=document.getElementById('folioRail');
+  const newThumb=rail.children[i];
+  if(_activeThumbEl&&_activeThumbEl!==newThumb)_activeThumbEl.classList.remove('active');
+  if(newThumb){newThumb.classList.add('active');_activeThumbEl=newThumb;newThumb.scrollIntoView({inline:'center',block:'nearest'});}
+  const sl=document.getElementById('folioSublist');
+  const newSub=sl.children[i];
+  if(_activeSubEl&&_activeSubEl!==newSub)_activeSubEl.classList.remove('active');
+  if(newSub){newSub.classList.add('active');_activeSubEl=newSub;}
 }
 
 function renderThumbs(){
   const rail=document.getElementById('folioRail');
+  /* Revoke any preview object-URLs from the previous render before rebuilding
+     — these accumulated unbounded across manuscript switches before (a real
+     leak on the 812-folio Sassoon set). Only thumb-only URLs are tracked
+     here; a page's main display URL (p.url) is owned by the page object and
+     reused elsewhere, so it is never revoked from this list. */
+  if(rail._previewURLs){rail._previewURLs.forEach(u=>{try{URL.revokeObjectURL(u);}catch(e){}});}
+  rail._previewURLs=[];
+  _activeThumbEl=null;
   if(!pages.length){rail.innerHTML='<span class="folio-rail-empty">No folio set loaded — open a folder to populate the page rail.</span>';return;}
   rail.innerHTML=pages.map((p,i)=>`<div class="thumb ${i===curPage?'active':''}" onclick="gotoPage(${i})" title="${p.name}"><span class="thumb-lbl">${(i+1)}</span></div>`).join('');
-  /* lazily fill thumb previews */
-  pages.forEach((p,i)=>{
-    const el=rail.children[i];if(!el)return;
-    const fill=u=>{el.style.background=`#2a3640 url(${u}) center/cover no-repeat`;};
-    if(p.url)fill(p.url);
-    else if(!p.isTiff){const u=URL.createObjectURL(p.file);fill(u);}
-  });
+  if(pages[curPage])_activeThumbEl=rail.children[curPage]||null;
+  /* Fill thumb previews in small batches on the idle callback instead of
+     creating hundreds of object URLs synchronously in one pass — a 812-folio
+     manuscript (Sassoon 1053) used to block the main thread on load/switch. */
+  let i=0;const BATCH=40;
+  function fillBatch(){
+    const end=Math.min(i+BATCH,pages.length);
+    for(;i<end;i++){
+      const p=pages[i];const el=rail.children[i];if(!el)continue;
+      if(p.url){el.style.background=`#2a3640 url(${p.url}) center/cover no-repeat`;}
+      else if(!p.isTiff){const u=URL.createObjectURL(p.file);el.style.background=`#2a3640 url(${u}) center/cover no-repeat`;rail._previewURLs.push(u);}
+    }
+    if(i<pages.length){(window.requestIdleCallback||window.requestAnimationFrame)(fillBatch);}
+  }
+  fillBatch();
 }
 function renderFolioSublist(){
   const sl=document.getElementById('folioSublist');
+  _activeSubEl=null;
   if(!pages.length){sl.innerHTML='';return;}
   sl.innerHTML=pages.map((p,i)=>`<div class="fs-item ${i===curPage?'active':''}" onclick="gotoPage(${i})" title="${p.rel||p.name}">${p.name}</div>`).join('');
+  if(pages[curPage])_activeSubEl=sl.children[curPage]||null;
 }
 
 /* word overlays (BIMA colored chips) generated from layout pass.
@@ -961,18 +1006,35 @@ function exportProcessedImage(){
 /* pan + wheel-zoom wiring */
 (function wireViewer(){
   /* Only drives the synthetic demo folio's CSS-transform pan/zoom.
-     A real loaded scan pans/zooms via OpenSeadragon's own input handling. */
+     A real loaded scan pans/zooms via OpenSeadragon's own input handling.
+     Perf: pointermove/wheel used to call applyTransform() synchronously on
+     every raw browser event (can fire 60-120+/sec while dragging, and
+     trackpads send wheel bursts even faster) — every one of those forced a
+     style write + template-literal allocation. Both are now coalesced to at
+     most one applyTransform() per animation frame via rAF batching. */
   const stage=document.getElementById('viewerStage');
-  let dragging=false,sx=0,sy=0,ox=0,oy=0;
+  let dragging=false,sx=0,sy=0,ox=0,oy=0,_panRAF=null;
+  function schedulePan(){if(_panRAF)return;_panRAF=requestAnimationFrame(()=>{applyTransform();_panRAF=null;});}
   stage.addEventListener('pointerdown',e=>{if(isRealActive()||e.target.classList.contains('word-ov'))return;dragging=true;sx=e.clientX;sy=e.clientY;ox=vState.tx;oy=vState.ty;document.getElementById('viewerPan').classList.add('grabbing');stage.setPointerCapture(e.pointerId);});
-  stage.addEventListener('pointermove',e=>{if(!dragging||isRealActive())return;vState.tx=ox+(e.clientX-sx);vState.ty=oy+(e.clientY-sy);applyTransform();});
+  stage.addEventListener('pointermove',e=>{if(!dragging||isRealActive())return;vState.tx=ox+(e.clientX-sx);vState.ty=oy+(e.clientY-sy);schedulePan();});
   stage.addEventListener('pointerup',e=>{dragging=false;document.getElementById('viewerPan').classList.remove('grabbing');});
-  stage.addEventListener('wheel',e=>{if(isRealActive())return;e.preventDefault();const d=e.deltaY<0?1.12:1/1.12;vState.scale=Math.min(8,Math.max(0.1,vState.scale*d));applyTransform();},{passive:false});
+  stage.addEventListener('wheel',e=>{if(isRealActive())return;e.preventDefault();const d=e.deltaY<0?1.12:1/1.12;vState.scale=Math.min(8,Math.max(0.1,vState.scale*d));schedulePan();},{passive:false});
 })();
 
 
-/* ── API probe ── */
-async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+/* ── API probe ──
+   Backs off the poll interval (8s → up to 60s) while the engine stays
+   offline instead of hammering localhost:8000 with a fresh 2s-timeout
+   fetch every 8s indefinitely; snaps back to 8s the moment it responds. */
+let _apiPollMs=8000,_apiTimer=null;
+async function probeAPI(){
+  const pill=document.getElementById('apiPill');if(!pill)return;
+  let ok=false;
+  try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';ok=true;}}catch(e){}
+  if(!ok){pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
+  _apiPollMs=ok?8000:Math.min(_apiPollMs*1.5,60000);
+  clearTimeout(_apiTimer);_apiTimer=setTimeout(probeAPI,_apiPollMs);
+}
 /* ── Init ── */
 function loadPaths(){
   const ids={img:'pathImg',xml:'pathXml',csv:'pathCsv'};
@@ -984,7 +1046,7 @@ function loadPaths(){
     });
   });
 }
-renderMSList();renderContexts();updateFolioLabel();loadPaths();probeAPI();setInterval(probeAPI,8000);applyTransform();
+renderMSList();renderContexts();updateFolioLabel();loadPaths();probeAPI();applyTransform();
 document.querySelectorAll('.anno-zone').forEach(z=>z.addEventListener('click',()=>toast('Zone: '+z.getAttribute('title')+'  — open Masorah.ai for analysis')));
 </script>
 </body>

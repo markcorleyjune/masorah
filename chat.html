@@ -93,7 +93,7 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
     <div class="status-cluster">
       <span class="pill warn" id="apiPill"><span class="dot"></span> Offline</span>
       <div class="user"><div class="user-av">M</div><span class="user-n">Mark Corley</span><span class="user-lvl">L4</span></div>
-      <button class="logout" onclick="location.href='login.html'">Logout</button>
+      <button class="logout" onclick="masorahLogout()">Logout</button>
     </div>
   </div>
 </header>
@@ -146,6 +146,28 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--cream);color:var(-
 <div class="toast" id="toast"></div>
 
 <script>
+/* ── Shared session guard (Masorah unified auth) ──
+   Reads the session written by login.html's setSession(). Every gated
+   workbench page runs this same check so identity/level are never
+   hardcoded per-page and a missing session always bounces to login. ── */
+(function(){
+  const raw=sessionStorage.getItem('masorah_user');
+  if(!raw && !location.search.includes('demo=true')){location.href='login.html';return;}
+  if(raw){
+    try{
+      const u=JSON.parse(raw);
+      document.querySelectorAll('.user-n').forEach(el=>el.textContent=u.name||u.username);
+      document.querySelectorAll('.user-lvl').forEach(el=>el.textContent='L'+u.level);
+      document.querySelectorAll('.user-av').forEach(el=>el.textContent=(u.name||u.username||'?').trim().charAt(0).toUpperCase());
+    }catch(e){}
+  }
+})();
+function masorahLogout(){
+  sessionStorage.removeItem('masorah_user');sessionStorage.removeItem('masorah_token');
+  localStorage.removeItem('masorah_session');localStorage.removeItem('masorah_session_ts');
+  location.href='login.html?logout=true';
+}
+
 /* ── MODELS (all selectable/usable) ── */
 const MODELS=[
   {id:'distilgpt2',  name:'DistilGPT-2 (Fastest)',   tag:'local',  kind:'local'},

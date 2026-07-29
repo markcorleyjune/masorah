@@ -6,7 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Frank+Ruhl+Libre:wght@300;400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'EB Garamond',serif;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at 55% 40%,#FBF5E0 0%,#F5EBCC 45%,#EBE0B8 100%);}
+body{font-family:'EB Garamond',serif;min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:linear-gradient(rgba(40,28,10,.62),rgba(40,28,10,.68)),url('assets/sassoon1053_dan4_bg.jpg') center/cover no-repeat,radial-gradient(ellipse at 55% 40%,#FBF5E0 0%,#F5EBCC 45%,#EBE0B8 100%);}
 
 /* PARCHMENT TEXTURE GRID */
 body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 29px,rgba(184,134,11,.04) 29px,rgba(184,134,11,.04) 30px),repeating-linear-gradient(90deg,transparent,transparent 29px,rgba(184,134,11,.04) 29px,rgba(184,134,11,.04) 30px);pointer-events:none;z-index:0;}
@@ -87,7 +87,7 @@ body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-
   <div class="logo">
     <span class="logo-mem">מ</span>
     <h1>Masorah Workbench</h1>
-    <p>Sassoon 1053 · eCBGM v42 · 05c Baseline 1525</p>
+    <p>eCBGM v42 · 05c Baseline 1525</p>
   </div>
 
   <div class="tabs" id="loginTabs">
@@ -103,10 +103,10 @@ body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-
     <div class="field"><label>Password</label><input type="password" id="password" autocomplete="current-password"></div>
     <button class="btn-primary" id="loginBtn" onclick="doLogin()">Sign In to Workbench</button>
     <div class="tiers">
-      <div class="tier-row"><span class="lv lv1">L1</span>Reader · Archive · Architecture</div>
+      <div class="tier-row"><span class="lv lv1">L1</span>Reader · Apparatus · Architecture</div>
       <div class="tier-row"><span class="lv lv2">L2</span>Provenance · Forensics</div>
       <div class="tier-row"><span class="lv lv3">L3</span>Transcriber · Paleography · Chat · Graph</div>
-      <div class="tier-row"><span class="lv lv4">L4</span>Pipeline · Analyzer · LaTeX Publish</div>
+      <div class="tier-row"><span class="lv lv4">L4</span>Pipeline · Analysis · LaTeX Publish</div>
     </div>
   </div>
 
@@ -119,10 +119,10 @@ body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-
     <div class="field"><label>Institution</label><input type="text" id="regInst" placeholder="University / Research Institute"></div>
     <div class="field"><label>Requested Level</label>
       <select id="regLevel">
-        <option value="1">L1 – Reader (Archive, Architecture)</option>
+        <option value="1">L1 – Reader (Apparatus, Architecture)</option>
         <option value="2">L2 – Researcher (Provenance, Forensics)</option>
         <option value="3">L3 – Advanced (Transcriber, Paleography, Chat, Graph)</option>
-        <option value="4">L4 – Full Access (Pipeline, Analyzer, Publish)</option>
+        <option value="4">L4 – Full Access (Pipeline, Analysis, Publish)</option>
       </select>
     </div>
     <div class="field"><label>Research Purpose</label><textarea id="regPurpose" placeholder="Describe your research focus and reason for access…"></textarea></div>

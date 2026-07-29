@@ -21,7 +21,7 @@ body{font-family:'EB Garamond',Georgia,serif;background:var(--paper);color:var(-
 .brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit}
 .brand-mem{font-family:'Frank Ruhl Libre',serif;font-weight:700;font-size:44px;line-height:1;color:var(--gold);flex-shrink:0;text-shadow:1px 1px 0 rgba(184,134,11,.15)}
 .brand-code{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.14em;color:#fff;background:var(--gold);padding:2px 7px;border-radius:9px;margin-left:2px;vertical-align:middle;text-transform:uppercase}
-.brand-text h1{font-family:'Cinzel',serif;font-size:20px;font-weight:600;letter-spacing:.04em;color:var(--ink)}
+.brand-text h1{font-family:'EB Garamond',serif;font-size:20px;font-weight:600;letter-spacing:.04em;color:var(--ink)}
 
 .nav{display:flex;align-items:center;gap:6px;margin-left:auto}
 .nav a{padding:9px 16px;font-size:15px;font-weight:500;color:var(--ink2);text-decoration:none;border-radius:var(--r);transition:.15s}
@@ -103,6 +103,7 @@ section{max-width:1180px;margin:0 auto;padding:86px 28px}
 footer{text-align:center;padding:34px 28px;border-top:1px solid var(--bdr)}
 footer .heb{font-family:'Frank Ruhl Libre',serif;font-size:15px;color:var(--gold);margin-bottom:8px}
 footer p{font-size:11.5px;color:var(--ink4)}
+footer .site-mark{font-size:13px;color:var(--gold-dk);font-weight:600;letter-spacing:.12em;text-transform:lowercase}
 
 @media(max-width:760px){.split{grid-template-columns:1fr}.nav{display:none}}
 </style>
@@ -112,13 +113,13 @@ footer p{font-size:11.5px;color:var(--ink4)}
 <header class="topbar">
   <div class="topbar-row">
     <a href="index.html" class="brand">
-      <span class="brand-mem">מ<span class="brand-code">Code</span></span>
+      <span class="brand-mem">מ</span>
       <div class="brand-text"><h1>Masorah</h1></div>
     </a>
     <nav class="nav">
       <a href="#project">Project</a>
       <a href="#team">Team</a>
-      <a href="scriptorium.html">Library</a>
+      <a href="archives.html">Archives</a>
       <a href="map.html">Map</a>
       <a href="#contact">Contact</a>
     </nav>
@@ -202,10 +203,10 @@ footer p{font-size:11.5px;color:var(--ink4)}
   <div class="split">
     <div class="split-card">
       <div class="ico">מ</div>
-      <h4>Library</h4>
+      <h4>Archives</h4>
       <p>Browse the manuscript library — per-witness images, transcriptions, and metadata across all seven tiers of the corpus.</p>
       <div class="note">Open access — no sign-in required. <b>Editing tools require a Workbench account.</b></div>
-      <a class="btn btn-gold" href="scriptorium.html">Open Library →</a>
+      <a class="btn btn-gold" href="archives.html">Open Archives →</a>
     </div>
     <div id="map-sec" class="split-card">
       <div class="ico">🜃</div>
@@ -231,8 +232,7 @@ footer p{font-size:11.5px;color:var(--ink4)}
 </section>
 
 <footer>
-  <div class="heb">מ</div>
-  <p>Masorah · FAU Erlangen-Nürnberg (external supervision, TAU) · eCBGM Engine v42.1 · 1525 baseline</p>
+  <p class="site-mark">masorah.io</p>
 </footer>
 
 <script>

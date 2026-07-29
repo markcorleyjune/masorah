@@ -27,6 +27,11 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);mi
 .pill.live{background:#e8f5e9;border-color:#2e7d32;color:#1b5e20}
 .pill.warn{background:#fff3e0;border-color:#e65100;color:#bf360c}
 .pill .dot{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+.user-chip{display:flex;align-items:center;gap:7px;padding:3px 9px 3px 3px;border:1px solid var(--bdr);border-radius:20px;background:var(--paper)}
+.user-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dk));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:'Cinzel',serif;font-size:12px}
+.user-n{font-size:11px;color:var(--ink2);font-family:'JetBrains Mono',monospace}
+.user-lvl{font-size:9px;background:var(--gold);color:#fff;padding:1px 5px;border-radius:8px}
+.logout{background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px;border-radius:5px;font-family:inherit}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
 /* Sub-tabs */
@@ -160,6 +165,8 @@ input:checked + .slider-tg:before{transform:translateX(18px)}
     </nav>
     <div class="status-cluster">
       <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
+      <div class="user-chip"><div class="user-av">M</div><span class="user-n">Mark Corley</span><span class="user-lvl">L4</span></div>
+      <button class="logout" onclick="masorahLogout()">Logout</button>
     </div>
   </div>
 </header>
@@ -418,6 +425,28 @@ input:checked + .slider-tg:before{transform:translateX(18px)}
 </div>
 
 <script>
+/* ── Shared session guard (Masorah unified auth) ──
+   Reads the session written by login.html's setSession(). Every gated
+   workbench page runs this same check so identity/level are never
+   hardcoded per-page and a missing session always bounces to login. ── */
+(function(){
+  const raw=sessionStorage.getItem('masorah_user');
+  if(!raw && !location.search.includes('demo=true')){location.href='login.html';return;}
+  if(raw){
+    try{
+      const u=JSON.parse(raw);
+      document.querySelectorAll('.user-n').forEach(el=>el.textContent=u.name||u.username);
+      document.querySelectorAll('.user-lvl').forEach(el=>el.textContent='L'+u.level);
+      document.querySelectorAll('.user-av').forEach(el=>el.textContent=(u.name||u.username||'?').trim().charAt(0).toUpperCase());
+    }catch(e){}
+  }
+})();
+function masorahLogout(){
+  sessionStorage.removeItem('masorah_user');sessionStorage.removeItem('masorah_token');
+  localStorage.removeItem('masorah_session');localStorage.removeItem('masorah_session_ts');
+  location.href='login.html?logout=true';
+}
+
 /* ── Panel switching ─────────────────────────────── */
 function showPanel(p){
   document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));

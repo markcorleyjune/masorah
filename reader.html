@@ -218,7 +218,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
     <div class="status-cluster">
       <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
       <div class="user-chip"><div class="user-av">M</div><span class="user-n">Mark Corley</span><span class="user-lvl">L4</span></div>
-      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px">Logout</button>
+      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px" onclick="masorahLogout()">Logout</button>
     </div>
   </div>
 </header>
@@ -348,6 +348,28 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 </div>
 
 <script>
+/* ── Shared session guard (Masorah unified auth) ──
+   Reads the session written by login.html's setSession(). Every gated
+   workbench page runs this same check so identity/level are never
+   hardcoded per-page and a missing session always bounces to login. ── */
+(function(){
+  const raw=sessionStorage.getItem('masorah_user');
+  if(!raw && !location.search.includes('demo=true')){location.href='login.html';return;}
+  if(raw){
+    try{
+      const u=JSON.parse(raw);
+      document.querySelectorAll('.user-n').forEach(el=>el.textContent=u.name||u.username);
+      document.querySelectorAll('.user-lvl').forEach(el=>el.textContent='L'+u.level);
+      document.querySelectorAll('.user-av').forEach(el=>el.textContent=(u.name||u.username||'?').trim().charAt(0).toUpperCase());
+    }catch(e){}
+  }
+})();
+function masorahLogout(){
+  sessionStorage.removeItem('masorah_user');sessionStorage.removeItem('masorah_token');
+  localStorage.removeItem('masorah_session');localStorage.removeItem('masorah_session_ts');
+  location.href='login.html?logout=true';
+}
+
 /* ══════════════════════════════════════
    MASORAH CORPUS READER — Interlinear Study Edition
    PhD-level multi-pane interlinear reader
@@ -395,7 +417,9 @@ const TIERS=[
     {code:'02a',name:'DSS General',loc:'250 BCE–70 CE',badges:'N',checked:false},
     {code:'02b',name:'Great Isaiah Scroll (1QIsa-a)',loc:'c.150 BCE · Qumran',badges:'NG',checked:false},
     {code:'02c',name:'Nash Papyrus',loc:'c.150–100 BCE · Egypt',badges:'N',checked:false},
+    {code:'02d',name:'Targum of Job (11QtgJob)',loc:'c.100 BCE–50 CE · Judean Desert',badges:'N',checked:false},
     {code:'02e',name:'En-Gedi Scroll',loc:'c.1–3rd c. CE',badges:'N',checked:false},
+    {code:'02f',name:'Severus Rubrics (Temple Scroll tradition)',loc:'c.2nd–3rd c. CE · Jerusalem',badges:'N',checked:false},
     {code:'02g',name:'Samaritan Pentateuch',loc:'',badges:'N',checked:false},
     {code:'02h',name:'Cairo Genizah',loc:'11th–19th c. CE',badges:'N',checked:false},
     {code:'02i',name:'Syriac Peshitta',loc:'',badges:'N',checked:false},
@@ -407,18 +431,29 @@ const TIERS=[
     {code:'03d',name:'MS Or 4445',loc:'',badges:'N',checked:false},
     {code:'03e',name:'MS Cairensis',loc:'',badges:'MN',checked:false},
     {code:'03f',name:'Reuchlin Prophets',loc:'',badges:'N',checked:false},
+    {code:'03g',name:'Valmadonna I Pentateuch',loc:'1189 CE · Italy/Levant',badges:'N',checked:false},
+    {code:'03h',name:'Codex Madrid M1 (Complutense)',loc:'c.1280 CE · Spain',badges:'N',checked:false},
+    {code:'03i',name:'Erfurt Codex 1',loc:'c.12th–13th c. CE · Ashkenaz',badges:'N',checked:false},
+    {code:'03j',name:'Codex Babylonicus Petropolitanus',loc:'916 CE · Babylonia',badges:'N',checked:false},
     {code:'03k',name:'Yemenite Taj',loc:'',badges:'N',checked:false},
   ]},
   {tier:'Tier 04 – Later MSS',items:[
     {code:'04a',name:'Huntington 148',loc:'',badges:'N',checked:false},
     {code:'04b',name:'MS Or 2363-2365',loc:'',badges:'N',checked:false},
+    {code:'04c',name:'MS Or 2210 Targum',loc:'c.14th c. CE · Sepharad',badges:'N',checked:false},
+    {code:'04d',name:'MS Madrid 116 Targum',loc:'c.14th c. CE · Spain',badges:'N',checked:false},
     {code:'04e',name:"Berliner's Onkelos",loc:'',badges:'N',checked:false},
   ]},
   {tier:'Tier 05 – Print Editions',items:[
     {code:'05a',name:'Complutensian Polyglot',loc:'1514–1517',badges:'N',checked:false},
     {code:'05b',name:'First Rabbinic Bible 1517',loc:'Venice',badges:'MN',checked:false},
     {code:'05c',name:'Second Rabbinic Bible 1525',loc:'Venice · Ben Hayyim',badges:'MNC',checked:true},
+    {code:'05c2',name:'Second Rabbinic Bible 1548',loc:'Venice',badges:'N',checked:false},
     {code:'05d',name:'Third Rabbinic Bible 1545',loc:'Venice',badges:'N',checked:false},
+    {code:'05e',name:'Western Targums (Antwerp Polyglot) 1591',loc:'Antwerp',badges:'N',checked:false},
+    {code:'05f',name:'Letteris Edition 1852',loc:'Vienna',badges:'N',checked:false},
+    {code:'05g',name:'Lagarde Edition of Targum Jonathan 1872',loc:'Germany',badges:'N',checked:false},
+    {code:'05h',name:'Sperber Targum Edition 1959',loc:'Leiden',badges:'N',checked:false},
     {code:'05i',name:'Ginsburg 1894',loc:'London',badges:'N',checked:false},
     {code:'05j',name:'BHS 1977',loc:'Stuttgart',badges:'NG',checked:false},
     {code:'05k',name:'BHQ Quinta',loc:'',badges:'N',checked:false},
