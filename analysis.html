@@ -96,6 +96,27 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
 .agree-bar{height:16px;border-radius:8px;background:var(--bdr2);overflow:hidden;margin:4px 0}
 .agree-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-lt));display:flex;align-items:center;justify-content:flex-end;padding-right:6px;color:#fff;font-size:9px;font-weight:700}
 .real-note{font-size:10px;color:var(--ink4);font-style:italic;margin-top:4px}
+
+/* ── BCV Constraint Model drawer (merged from analyzer.html + new 44-node checksum search) ── */
+.cst-toggle{width:100%;margin-top:8px}
+.cst-drawer{position:fixed;top:72px;right:-460px;bottom:0;width:440px;background:var(--paper);border-left:1px solid var(--bdr);box-shadow:var(--shadow-lg);z-index:500;display:flex;flex-direction:column;transition:right .22s ease}
+.cst-drawer.open{right:0}
+.cst-hd{padding:12px 16px;background:linear-gradient(180deg,var(--gold-bg),var(--paper));border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cst-hd h3{font-family:'Cinzel',serif;font-size:12.5px;color:var(--gold-dk);letter-spacing:.05em;text-transform:uppercase}
+.cst-close{background:none;border:none;font-size:18px;color:var(--ink3);cursor:pointer}
+.cst-body{flex:1;overflow-y:auto;padding:14px 16px}
+.cst-row{display:flex;gap:6px;margin-bottom:8px;align-items:center}
+.cst-row label{font-size:10px;color:var(--ink3);width:44px;flex-shrink:0}
+.cst-row select,.cst-row input{flex:1;padding:5px 7px;border:1px solid var(--bdr);border-radius:var(--r);font-family:inherit;font-size:12px;background:var(--paper)}
+.cst-tiers{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0 10px}
+.cst-tier-chip{font-size:10.5px;padding:3px 9px;border:1px solid var(--bdr);border-radius:12px;background:var(--gold-bg);color:var(--ink2);cursor:pointer;user-select:none}
+.cst-tier-chip.sel{background:var(--gold);color:#fff;border-color:var(--gold-dk)}
+.cst-summary{font-size:10.5px;color:var(--ink3);margin-bottom:8px;padding:6px 8px;background:var(--gold-pale);border-radius:var(--r)}
+.cst-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-top:6px}
+.cst-table th{padding:4px 5px;background:var(--gold-bg);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gold-dk);text-align:left;border-bottom:2px solid var(--gold)}
+.cst-table td{padding:4px 5px;border-bottom:1px solid var(--bdr);font-family:'JetBrains Mono',monospace;font-size:9.5px}
+.cst-code{font-weight:700;color:var(--gold-dk)}
+.cst-maj{color:var(--ok)}.cst-min{color:var(--err);font-weight:700}
 </style>
 </head>
 <body>
@@ -118,7 +139,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
     <div class="status-cluster">
       <span class="pill live" id="apiPill"><span class="dot"></span> Active</span>
       <div class="user-chip"><div class="user-av">M</div><span class="user-n">Mark Corley</span><span class="user-lvl">L4</span></div>
-      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px">Logout</button>
+      <button style="background:none;border:none;font-size:11px;color:var(--ink3);cursor:pointer;padding:3px 7px" onclick="masorahLogout()">Logout</button>
     </div>
   </div>
 </header>
@@ -143,6 +164,7 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
         <select class="cmp-sel" id="cmpBook"></select>
       </div>
       <button class="btn sm primary" style="width:100%;margin-bottom:10px" onclick="runCompare()">▶ Compare (real XML)</button>
+      <button class="btn sm cst-toggle" onclick="toggleConstraintPanel()">⊡ BCV Constraint Model (44-node checksum search)</button>
       <div class="wit-section-label" style="margin-top:0">All 43 Witnesses</div>
       <div id="witList"></div>
     </div>
@@ -169,6 +191,14 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
       <div class="chart-cell" style="flex:none">
         <div class="chart-title"><span>Real CBGM Pipeline Output</span><span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3)" id="cbgmMeta"></span></div>
         <div class="chart-body" style="overflow-y:auto;padding:10px 14px" id="cbgmBody">Loading real pipeline output…</div>
+        <!-- EM convergence, merged in from analyzer.html — same v42.1 θ-per-iteration
+             figures already cited in the AI panel's stock message, just visualized.
+             Kept as a sibling of #cbgmBody (not inside it) since loadCbgmReal()
+             replaces #cbgmBody's innerHTML wholesale. -->
+        <div style="padding:0 14px 10px;flex-shrink:0">
+          <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold-dk)">EM Convergence · θ per iteration (pipeline v42.1, 60,000 pairs / 4 iters)</div>
+          <div style="height:64px;margin-top:3px"><canvas id="emChart"></canvas></div>
+        </div>
       </div>
     </div>
   </div>
@@ -201,7 +231,49 @@ body{font-family:'EB Garamond',serif;background:var(--cream);color:var(--ink);di
   </div>
 </div>
 
+<!-- ── BCV Constraint Model drawer ──
+     Searches every real witness (tier 01-05) that has BCV-structured
+     XML for one Book/Chapter/Verse address, checksums main text / Parva
+     / Magna / Notes per witness, and clusters witnesses by agreement —
+     a live, on-demand read of the Masoretic apparatus's distributed
+     constraint/cross-check structure. See main_api.py
+     /api/v1/analysis/constraint-model. -->
+<div class="cst-drawer" id="cstDrawer">
+  <div class="cst-hd"><h3>BCV Constraint Model</h3><button class="cst-close" onclick="toggleConstraintPanel()">×</button></div>
+  <div class="cst-body">
+    <div class="real-note" style="margin-bottom:10px">Scans every witness with real BCV-structured XML (tier 01-02 inscriptions/fragments have no Book/Chapter/Verse and are excluded automatically) for one verse address, checksums each apparatus channel, and groups witnesses that agree byte-for-byte — a static, single-verse snapshot of the Masoretic apparatus as a cross-check system, not a probabilistic score.</div>
+    <div class="cst-row"><label>Book</label><select id="cstBook"></select></div>
+    <div class="cst-row"><label>Ch.</label><input type="number" id="cstChapter" value="1" min="1"><label style="width:20px;text-align:center">Vs.</label><input type="number" id="cstVerse" value="1" min="1"></div>
+    <div class="cst-tiers" id="cstTiers"></div>
+    <button class="btn sm primary" style="width:100%" onclick="runConstraintModel()">▶ Search all nodes for this BCV</button>
+    <div id="cstResults"></div>
+  </div>
+</div>
+
 <script>
+/* ── Shared session guard (Masorah unified auth) — merged in from
+   analyzer.html. Reads the session written by login.html's setSession().
+   Every gated workbench page runs this same check so identity/level are
+   never hardcoded per-page and a missing session always bounces to
+   login. Pass ?demo=true to preview the page without logging in. ── */
+(function(){
+  const raw=sessionStorage.getItem('masorah_user');
+  if(!raw && !location.search.includes('demo=true')){location.href='login.html';return;}
+  if(raw){
+    try{
+      const u=JSON.parse(raw);
+      document.querySelectorAll('.user-n').forEach(el=>el.textContent=u.name||u.username);
+      document.querySelectorAll('.user-lvl').forEach(el=>el.textContent='L'+u.level);
+      document.querySelectorAll('.user-av').forEach(el=>el.textContent=(u.name||u.username||'?').trim().charAt(0).toUpperCase());
+    }catch(e){}
+  }
+})();
+function masorahLogout(){
+  sessionStorage.removeItem('masorah_user');sessionStorage.removeItem('masorah_token');
+  localStorage.removeItem('masorah_session');localStorage.removeItem('masorah_session_ts');
+  location.href='login.html?logout=true';
+}
+
 const API_BASE='http://localhost:8000';
 /* Real 43-witness corpus (same dataset as archives.html/apparatus.html —
    the local 01_Computational_Lab/1. Digital Archive tree) — replaces the
@@ -275,6 +347,76 @@ function populateSelectors(){
 function addWitness(){toast('Manuscripts are added by placing real files in the Digital Archive folder — see apparatus.html to link a new one.');}
 function runAnalysis(){toast('Pick two witnesses + a book on the left, then click Compare.');}
 
+/* ── BCV Constraint Model (44-node checksum search across tiers 1-5) ── */
+const CST_TIERS=['01','02','03','04','05'];
+let cstSelectedTiers=new Set(['01','02','03','04','05']);
+function renderCstTiers(){
+  document.getElementById('cstTiers').innerHTML=CST_TIERS.map(t=>
+    `<span class="cst-tier-chip ${cstSelectedTiers.has(t)?'sel':''}" data-t="${t}" onclick="toggleCstTier(this)">Tier ${t}</span>`
+  ).join('');
+}
+function toggleCstTier(el){
+  const t=el.dataset.t;
+  el.classList.toggle('sel');
+  if(cstSelectedTiers.has(t))cstSelectedTiers.delete(t);else cstSelectedTiers.add(t);
+}
+function toggleConstraintPanel(){
+  const d=document.getElementById('cstDrawer');
+  d.classList.toggle('open');
+  if(d.classList.contains('open') && !document.getElementById('cstBook').options.length){
+    document.getElementById('cstBook').innerHTML=CORPUS_BOOKS.map(b=>`<option>${b}</option>`).join('');
+    document.getElementById('cstBook').value='Nahum';
+    renderCstTiers();
+  }
+}
+async function runConstraintModel(){
+  const book=document.getElementById('cstBook').value;
+  const chapter=document.getElementById('cstChapter').value||'1';
+  const verse=document.getElementById('cstVerse').value||'1';
+  const tiers=[...cstSelectedTiers].join(',');
+  const box=document.getElementById('cstResults');
+  box.innerHTML='<div class="real-note">Searching real per-verse XML across all selected-tier witnesses…</div>';
+  try{
+    const r=await fetch(`${API_BASE}/api/v1/analysis/constraint-model?book=${encodeURIComponent(book)}&chapter=${chapter}&verse=${verse}&tiers=${tiers}`,{signal:AbortSignal.timeout(15000)});
+    const d=await r.json();
+    renderConstraintResults(d);
+  }catch(e){
+    box.innerHTML='<span style="color:var(--err)">⚠ Corpus API unreachable — run Launch_Masorah.bat.</span>';
+  }
+}
+function renderConstraintResults(d){
+  const box=document.getElementById('cstResults');
+  if(!d.results||!d.results.length){
+    box.innerHTML=`<div class="cst-summary">${d.bcv}: ${d.witnesses_scanned} witness(es) scanned with BCV XML in the selected tiers, but none has a record at this exact address.</div>`;
+    return;
+  }
+  // Majority checksum per channel = the constraint-agreeing cluster; anything else is a divergence.
+  const majority={};
+  for(const ch of ['main_text','parva','magna','notes']){
+    const groups=d.clusters[ch]||{};
+    let best=null,bestN=0;
+    for(const [k,v] of Object.entries(groups)){ if(v.length>bestN){best=k;bestN=v.length;} }
+    majority[ch]=best;
+  }
+  const rows=d.results.map(r=>{
+    const cells=['main_text','parva','magna','notes'].map(ch=>{
+      const c=r.checksums[ch];
+      if(c===null) return '<td style="color:var(--ink4)">—</td>';
+      const cls=c===majority[ch]?'cst-maj':'cst-min';
+      return `<td class="${cls}" title="${(r.preview[ch]||'').replace(/"/g,'&quot;')}">${c}</td>`;
+    }).join('');
+    return `<tr><td class="cst-code">${r.code}</td><td>${r.condition||'—'}</td>${cells}</tr>`;
+  }).join('');
+  box.innerHTML=`
+    <div class="cst-summary">${d.bcv} — ${d.witnesses_with_bcv_data} of ${d.witnesses_scanned} scanned witnesses have a record at this address (tiers ${d.tiers_requested.join(', ')}).</div>
+    <table class="cst-table">
+      <thead><tr><th>Code</th><th>Cond.</th><th>Text</th><th>MP</th><th>MG</th><th>Notes</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="real-note" style="margin-top:8px">Green = matches this address's majority checksum for that channel (the constraint-agreeing cluster). Red = diverges from the majority — a real candidate for scribal variance or transmission error. Hover a cell for a text preview. ${d.note}</div>
+  `;
+}
+
 /* ── Real pairwise comparison (main_api.py /api/v1/analysis/compare) ── */
 let distChart;
 function initCharts(){
@@ -283,6 +425,11 @@ function initCharts(){
     {label:'A',data:[0,0,0,0,0],backgroundColor:'rgba(184,134,11,0.78)',borderColor:'#8a6a20',borderWidth:1},
     {label:'B',data:[0,0,0,0,0],backgroundColor:'rgba(46,93,120,0.72)',borderColor:'#1f4a5f',borderWidth:1}
   ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'JetBrains Mono',size:9}}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(200,180,100,.2)'},ticks:{font:{family:'JetBrains Mono',size:9}}},x:{ticks:{font:{family:'JetBrains Mono',size:9},maxRotation:20}}}}});
+}
+/* EM convergence — merged from analyzer.html (same static v42.1 figures cited elsewhere in this page). */
+function initEMChart(){
+  const el=document.getElementById('emChart');if(!el)return;
+  new Chart(el.getContext('2d'),{type:'line',data:{labels:['Iter 0','Iter 1','Iter 2','Iter 3','Iter 4'],datasets:[{label:'θ convergence',data:[0.10,0.18,0.22,0.243,0.246],borderColor:'#B8860B',backgroundColor:'rgba(184,134,11,.15)',tension:0.3,pointRadius:3,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:'rgba(200,180,100,.15)'},ticks:{font:{family:'JetBrains Mono',size:8}}},x:{ticks:{font:{family:'JetBrains Mono',size:8}}}}}});
 }
 function hitListHTML(hits,emptyMsg){
   if(!hits.length) return `<div class="real-note">${emptyMsg}</div>`;
@@ -375,7 +522,7 @@ function aiQuery(q){document.getElementById('aiInput').value=q;sendAI()}
 function exportAI(){const t=document.getElementById('aiMessages').innerText;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/plain'}));a.download='analyzer_ai.txt';a.click();}
 function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),2800);}
 async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
-renderWits();populateSelectors();initCharts();loadCbgmReal();probeAPI();setInterval(probeAPI,8000);
+renderWits();populateSelectors();initCharts();initEMChart();loadCbgmReal();probeAPI();setInterval(probeAPI,8000);
 </script>
 </body>
 </html>

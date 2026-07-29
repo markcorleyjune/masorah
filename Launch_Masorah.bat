@@ -69,23 +69,29 @@ goto OPEN
 echo  [OK] API server is ready
 
 :OPEN
-REM Open index.html - the project landing page - in the default browser
-echo  [*] Opening landing page...
-start "" "%DIR%index.html"
+REM Open the LIVE masorah.io site directly (not the local index.html file).
+REM The site is static (GitHub Pages, see CNAME) and every page's fetch()
+REM calls point at http://localhost:8000 - CORS on the API already allows
+REM allow_origins=["*"], so masorah.io works against this local API exactly
+REM like the local files did. Local index.html is still on disk as a
+REM fallback for offline use (no internet / DNS issues).
+echo  [*] Opening https://masorah.io ...
+start "" "https://masorah.io"
 
 echo.
 echo  ================================================
 echo   RUNNING:
-echo   API:       http://localhost:8000
-echo   API Docs:  http://localhost:8000/docs
-echo   Landing:   %DIR%index.html
-echo   Live site: https://masorah.io  (works too, as long as this is running)
-echo   Login:     %DIR%login.html
-echo   User:      markcorleyjune
-echo   Password:  masorah1525
+echo   API:        http://localhost:8000
+echo   API Docs:   http://localhost:8000/docs
+echo   Live site:  https://masorah.io   (opened just now)
+echo   Local copy: %DIR%index.html      (offline fallback)
+echo   Login:      https://masorah.io/login.html
+echo   User:       markcorleyjune
+echo   Password:   masorah1525
 echo.
-echo   If the browser did not open, double-click index.html
-echo   manually from File Explorer.
+echo   If the browser did not open, or masorah.io is unreachable,
+echo   double-click index.html in this folder instead - it uses the
+echo   same local API and works fully offline.
 echo  ================================================
 echo.
 echo  Press any key to STOP the server...

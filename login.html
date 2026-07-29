@@ -141,6 +141,16 @@ body::after{content:'';position:fixed;inset:0;background-image:repeating-linear-
 
 <script>
 const ADMIN={username:'markcorleyjune',password:'masorah1525',level:4,name:'Mark Corley'};
+// Advisor accounts — Level 4, shared prototype password. These mirror the
+// entries in main_api.py's USERS dict so the two advisors can sign in even
+// when the local API engine isn't running (same offline-fallback path as
+// ADMIN below). This is a client-visible credential store, not real
+// security — fine for a private research prototype, not for anything
+// public-facing.
+const ADVISORS=[
+  {username:'lutz.edzard@fau.de',password:'masorah1525',level:4,name:'Prof. Lutz Edzard'},
+  {username:'nachumd@tauex.tau.ac.il',password:'masorah1525',level:4,name:'Prof. Nachum Dershowitz'},
+];
 const UK='masorah_users', RK='masorah_requests';
 
 function getUsers(){try{return JSON.parse(localStorage.getItem(UK)||'[]');}catch{return [];}}
@@ -191,6 +201,11 @@ async function doLogin(){
   // demo/offline mode until Launch_Masorah.bat is running and login retried.
   if(u.toLowerCase()===ADMIN.username.toLowerCase()&&p===ADMIN.password){
     setSession(ADMIN.username,ADMIN.level,ADMIN.name);
+    window.location.href='workbench.html';return;
+  }
+  const advisor=ADVISORS.find(a=>a.username.toLowerCase()===u.toLowerCase()&&p===a.password);
+  if(advisor){
+    setSession(advisor.username,advisor.level,advisor.name);
     window.location.href='workbench.html';return;
   }
   const users=getUsers();

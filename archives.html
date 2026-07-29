@@ -97,6 +97,45 @@ footer{max-width:1700px;margin:32px auto;padding:24px 28px;border-top:1px solid 
 footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
 
 @media (max-width:1000px){.wrap{grid-template-columns:1fr}.rail{position:static}}
+
+/* ── Manuscript Explorer (Masoretica-style BCV navigation) ── */
+.explorer{max-width:1700px;margin:22px auto 0;padding:0 28px}
+.expl-card{background:linear-gradient(180deg,#20170a,#1a1208);border-radius:var(--r3);padding:20px 24px;box-shadow:var(--shadow-lg);color:#f3e8c8}
+.expl-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.expl-hd h2{font-family:'Cinzel',serif;font-size:16px;color:var(--gold-lt);letter-spacing:.05em}
+.expl-hd p{font-size:11.5px;color:#c9b878;margin-top:2px;max-width:640px}
+.expl-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px}
+.expl-field{display:flex;flex-direction:column;gap:3px}
+.expl-field label{font-size:9.5px;color:#c9b878;text-transform:uppercase;letter-spacing:.08em}
+.expl-field select,.expl-field input{padding:7px 9px;border-radius:var(--r);border:1px solid #6a5a30;background:#2a2010;color:#f3e8c8;font-family:inherit;font-size:13px;min-width:70px}
+.expl-field select{min-width:150px}
+.expl-go{padding:8px 18px;border-radius:var(--r);border:1px solid var(--gold-dk);background:var(--gold);color:#1a1208;font-weight:700;font-family:'Cinzel',serif;font-size:12px;cursor:pointer;height:34px;align-self:flex-end}
+.expl-go:hover{background:var(--gold-lt)}
+.expl-body{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start}
+.expl-text{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--r2);padding:16px 18px;min-height:120px}
+.expl-ref{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-lt);margin-bottom:8px}
+.expl-hebrew{font-family:'Frank Ruhl Libre',serif;font-size:22px;line-height:1.9;direction:rtl;text-align:right}
+.expl-meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:10.5px;color:#c9b878}
+.expl-meta-row b{color:#f3e8c8}
+.expl-note{font-size:11px;color:#a89860;font-style:italic;margin-top:10px}
+.expl-img-wrap{background:#000;border-radius:var(--r2);overflow:hidden;border:1px solid rgba(255,255,255,.08);min-height:120px;display:flex;align-items:center;justify-content:center}
+.expl-img-wrap img{width:100%;display:block}
+.expl-img-cap{font-size:10px;color:#a89860;margin-top:6px;font-family:'JetBrains Mono',monospace}
+.expl-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.expl-actions button{font-size:11px;padding:6px 12px;border-radius:var(--r);border:1px solid #6a5a30;background:#2a2010;color:#f3e8c8;cursor:pointer;font-family:inherit}
+.expl-actions button:hover{border-color:var(--gold-lt);color:var(--gold-lt)}
+@media (max-width:900px){.expl-body{grid-template-columns:1fr}}
+
+/* ── Sources & Method ── */
+.sam{max-width:1700px;margin:40px auto 0;padding:34px 28px;border-top:1px solid var(--bdr);background:var(--gold-bg)}
+.sam h2{font-family:'Cinzel',serif;font-size:26px;color:var(--ink);font-weight:700;margin-bottom:14px}
+.sam p{font-size:13px;line-height:1.7;color:var(--ink2);margin-bottom:14px;max-width:1100px}
+.sam-links{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 26px}
+.sam-links a{font-size:11px;padding:6px 11px;border:1px solid var(--bdr2);border-radius:14px;background:var(--paper);color:var(--ink2);text-decoration:none}
+.sam-links a:hover{border-color:var(--gold);color:var(--gold-dk)}
+.cite-box{background:var(--paper);border:1px solid var(--bdr);border-radius:var(--r2);padding:16px 20px;max-width:640px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.cite-box blockquote{font-size:13px;color:var(--ink2);border-left:3px solid var(--gold);padding-left:12px;line-height:1.6}
+.cite-copy{font-size:11px;color:var(--gold-dk);background:none;border:none;cursor:pointer;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -120,6 +159,37 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
     </div>
   </div>
 </header>
+
+<section class="explorer">
+  <div class="expl-card">
+    <div class="expl-hd">
+      <div><h2>⌕ Manuscript Explorer</h2><p>Jump straight to one Book/Chapter/Verse in one witness — text, apparatus fields, and the real manuscript page, side by side. Modeled after masoretica.org's reference/manuscript navigator, wired to this corpus's own live API.</p></div>
+      <div class="expl-actions">
+        <button onclick="explCite()">❝ Cite this page</button>
+        <button onclick="explPermalink()"># Permalink</button>
+      </div>
+    </div>
+    <div class="expl-form">
+      <div class="expl-field"><label>Manuscript</label><select id="exWitness"></select></div>
+      <div class="expl-field"><label>Book</label><select id="exBook"></select></div>
+      <div class="expl-field"><label>Chapter</label><input type="number" id="exChapter" value="1" min="1"></div>
+      <div class="expl-field"><label>Verse</label><input type="number" id="exVerse" value="1" min="1"></div>
+      <button class="expl-go" onclick="findPage()">Find the page →</button>
+    </div>
+    <div class="expl-body">
+      <div class="expl-text">
+        <div class="expl-ref" id="exRef">Pick a manuscript, book, chapter, and verse, then click "Find the page".</div>
+        <div class="expl-hebrew" id="exHebrew"></div>
+        <div class="expl-meta-row" id="exMeta"></div>
+        <div class="expl-note" id="exNote"></div>
+      </div>
+      <div>
+        <div class="expl-img-wrap" id="exImgWrap"><span style="color:#665;font-size:12px">Manuscript page will appear here</span></div>
+        <div class="expl-img-cap" id="exImgCap"></div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="pagehead">
   <h1>Archives — Manuscript Corpus</h1>
@@ -156,6 +226,34 @@ footer p{font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace
     <div class="card-grid" id="cardGrid"></div>
   </main>
 </div>
+
+<section class="sam">
+  <h2>Sources &amp; method.</h2>
+  <p>masorah.io depends on manuscript repositories, photographers, editors, and open-data projects. Scans and page indexes are credited below. Where full text is available, it comes from <a href="https://www.tanach.us/" target="_blank" rel="noopener">UXLC</a> (the corpus's own primary reference baseline — see <code>/api/v1/corpus/structure</code>), the <a href="https://codexsinaiticus.org/en/project/transcription_download.aspx" target="_blank" rel="noopener">Codex Sinaiticus Project transcription</a>, <a href="https://github.com/bdenckla/MAM-simple" target="_blank" rel="noopener">Miqra according to the Masorah (MAM)</a>, diplomatic manuscript transcriptions from <a href="https://bima2.corpusmasoreticum.de/" target="_blank" rel="noopener">BIMA / Corpus Masoreticum</a>, the <a href="https://github.com/DT-UCPH/sp" target="_blank" rel="noopener">DT-UCPH Samaritan Pentateuch</a>, and <a href="https://git.sr.ht/~sethkush/lxx-morph" target="_blank" rel="noopener">lxx-morph</a>, with Greek-to-Hebrew verse-number equivalences from <a href="https://github.com/STEPBible/STEPBible-Data/tree/master/Versification" target="_blank" rel="noopener">STEPBible TVTMS</a>. Each witness's detail card names the source used.</p>
+  <p>Verse-level transcriptions in this corpus's own 02_Forensic_Nodes come from a mix of repository OCR/transcriptions, HTR (Codex Sassoon 1053's own TesserACT + Dicta-HTR v2 pipeline — see architecture.html), and conservative text alignment. Scans remain with their repositories and are displayed here only for passage navigation, cropping, and verse highlighting; where a repository restricts embedding (e.g. Vaticanus, which opens only in the Vatican Library viewer) this Archive links out instead of hot-linking the image directly. Image rights and credits are stated per witness.</p>
+  <div class="sam-links">
+    <a href="https://www.tanach.us/XSL/LCIndex.xml" target="_blank" rel="noopener">UXLC Leningrad index ↗</a>
+    <a href="https://archive.org/details/Leningrad_Codex_Color_Images" target="_blank" rel="noopener">Leningrad scan ↗</a>
+    <a href="https://jdavidstark.com/how-to-find-your-way-around-the-aleppo-codex/" target="_blank" rel="noopener">Aleppo page index ↗</a>
+    <a href="https://commons.wikimedia.org/wiki/File:2_File-Aleppo-fascimile_FULL.pdf" target="_blank" rel="noopener">Aleppo facsimile ↗</a>
+    <a href="https://ihbmr.com/manuscripts" target="_blank" rel="noopener">Codex Sassoon 1053 page index ↗</a>
+    <a href="https://archive.org/details/tanakh-ms-sassoon-1053-color-images" target="_blank" rel="noopener">Sassoon scan ↗</a>
+    <a href="https://www.nli.org.il/en/discover/manuscripts/hebrew-manuscripts/itempage?docId=PNX_MANUSCRIPTS990001349580205171&vid=MANUSCRIPTS" target="_blank" rel="noopener">Sassoon catalogue ↗</a>
+    <a href="https://digital.bodleian.ox.ac.uk/objects/8c264b23-f6cc-4f18-98cf-9d75f7175b54/" target="_blank" rel="noopener">Kennicott 1 scan ↗</a>
+    <a href="https://github.com/mittagessen/kraken" target="_blank" rel="noopener">kraken OCR/HTR toolkit ↗</a>
+    <a href="https://zenodo.org/records/5468286" target="_blank" rel="noopener">BiblIA medieval Hebrew model ↗</a>
+    <a href="https://digi.vatlib.it/view/MSS_Vat.gr.1209" target="_blank" rel="noopener">Vaticanus facsimile ↗</a>
+    <a href="https://codexsinaiticus.org/en/project/edition.aspx" target="_blank" rel="noopener">Sinaiticus edition ↗</a>
+    <a href="https://culmus.sourceforge.io/taamim/index.html" target="_blank" rel="noopener">Keter Aram Tsova typeface ↗</a>
+  </div>
+  <h2 style="font-size:18px;margin-top:6px">How to cite.</h2>
+  <p>If masorah.io has facilitated your research, a citation is appreciated. For a specific witness or BCV page, use "Cite this page" in the Manuscript Explorer above for a permalink-based citation.</p>
+  <div class="cite-box">
+    <blockquote id="siteCite">Corley, Mark. "Masorah: Manuscript Explorer &amp; Computational Lab." Accessed <span id="citeDate"></span>. https://masorah.io/.</blockquote>
+    <button class="cite-copy" onclick="copyCite()">Copy</button>
+  </div>
+  <p style="margin-top:14px;font-size:11px;color:var(--ink4)">Built independently; see also <a href="https://www.masoretica.org/" target="_blank" rel="noopener" style="color:var(--gold-dk)">masoretica.org ↗</a> (Idan Dershowitz) and <a href="https://etnachta.org/" target="_blank" rel="noopener" style="color:var(--gold-dk)">etnachta.org ↗</a> for related manuscript-explorer projects.</p>
+</section>
 
 <footer><p>masorah.io · Archives · 43 witness nodes live-scanned from the Digital Archive — dates are approximate (c.) where no primary-source date is on record</p></footer>
 
@@ -301,6 +399,115 @@ buildFacet('facetTier','tier');
 buildFacet('facetRegion','region');
 buildFacet('facetForm','form');
 render();
+
+/* ════════════════════════════════════════════════════════════
+   MANUSCRIPT EXPLORER — masoretica.org-style BCV navigation,
+   wired to this corpus's own live API (GET /api/v1/corpus/chapter,
+   GET /api/v1/files/image). Real text + real page image side by
+   side; no fabricated verse content — same "found:false, honest
+   reason" contract main_api.py uses everywhere else.
+   ════════════════════════════════════════════════════════════ */
+const EXPL_BOOKS=['Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth','1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther','Job','Psalms','Proverbs','Ecclesiastes','Song of Songs','Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi'];
+
+function explInit(){
+  document.getElementById('exWitness').innerHTML=MSS.map(m=>`<option value="${m.id}">${m.code} — ${m.name}</option>`).join('');
+  document.getElementById('exBook').innerHTML=EXPL_BOOKS.map(b=>`<option>${b}</option>`).join('');
+  const p=new URLSearchParams(location.search);
+  const manu=p.get('manuscript'), book=p.get('book'), ch=p.get('chapter'), vs=p.get('verse');
+  if(manu){
+    const hit=MSS.find(m=>m.code===manu||m.id.toLowerCase().includes(manu.toLowerCase()));
+    if(hit) document.getElementById('exWitness').value=hit.id;
+  } else {
+    document.getElementById('exWitness').value='03c_Sassoon_1053';
+  }
+  if(book && EXPL_BOOKS.includes(book)) document.getElementById('exBook').value=book; else document.getElementById('exBook').value='Nahum';
+  if(ch) document.getElementById('exChapter').value=ch;
+  if(vs) document.getElementById('exVerse').value=vs;
+  if(book||manu||ch||vs) findPage();
+}
+
+async function findPage(){
+  const witId=document.getElementById('exWitness').value;
+  const code=witId.split('_')[0];
+  const book=document.getElementById('exBook').value;
+  const chapter=parseInt(document.getElementById('exChapter').value||'1',10);
+  const verse=parseInt(document.getElementById('exVerse').value||'1',10);
+  const m=MSS.find(x=>x.id===witId);
+  document.getElementById('exRef').textContent=`${(m?m.name:witId)} — ${book} ${chapter}:${verse} — loading…`;
+  document.getElementById('exHebrew').textContent='';
+  document.getElementById('exMeta').innerHTML='';
+  document.getElementById('exNote').textContent='';
+  document.getElementById('exImgWrap').innerHTML='<span style="color:#665;font-size:12px">Loading…</span>';
+  document.getElementById('exImgCap').textContent='';
+  let d;
+  try{
+    const r=await fetch(`${API_BASE}/api/v1/corpus/chapter?code=${encodeURIComponent(code)}&book=${encodeURIComponent(book)}&chapter=${chapter}`,{signal:AbortSignal.timeout(10000)});
+    d=await r.json();
+  }catch(e){
+    document.getElementById('exRef').textContent=`${book} ${chapter}:${verse} — corpus API unreachable (run Launch_Masorah.bat)`;
+    document.getElementById('exImgWrap').innerHTML='<span style="color:#a55;font-size:12px">API offline</span>';
+    return;
+  }
+  if(!d.found){
+    document.getElementById('exRef').textContent=`${(m?m.name:witId)} — ${book} ${chapter}:${verse}`;
+    document.getElementById('exNote').textContent='⚠ '+(d.reason||'No real data for this witness/book/chapter yet.');
+    document.getElementById('exImgWrap').innerHTML='<span style="color:#a95;font-size:12px">No page to show</span>';
+    return;
+  }
+  if(d.no_bcv){
+    // Tier 01/02 inscription/fragment — no Book/Chapter/Verse structure at all.
+    document.getElementById('exRef').textContent=`${d.node_name} — no BCV structure (inscription/fragment node)`;
+    document.getElementById('exHebrew').textContent=d.content||'';
+    document.getElementById('exNote').textContent=`Source: ${d.source_file} · status: ${d.status||'—'} · type: ${d.source_type||'—'}`;
+    document.getElementById('exImgWrap').innerHTML='<span style="color:#665;font-size:12px">No paginated page image for this node</span>';
+    updatePermalinkURL(witId,book,chapter,verse);
+    return;
+  }
+  const row=(d.verses||[]).find(v=>v.n===verse);
+  if(!row){
+    document.getElementById('exRef').textContent=`${(m?m.name:witId)} — ${book} ${chapter}:${verse}`;
+    document.getElementById('exNote').textContent=`⚠ XML has ${d.verse_count} verse record(s) for ${book} ${chapter}, but none at verse ${verse}.`;
+    document.getElementById('exImgWrap').innerHTML='<span style="color:#a95;font-size:12px">Verse not found</span>';
+    return;
+  }
+  document.getElementById('exRef').textContent=`${m?m.name:witId} (${code}) — ${book} ${chapter}:${verse}`;
+  document.getElementById('exHebrew').textContent=row.text||'(no transcribed text for this verse)';
+  document.getElementById('exMeta').innerHTML=`
+    <span><b>Condition</b> ${row.condition||'—'}</span>
+    <span><b>Parva</b> ${row.parva||'—'}</span>
+    <span><b>Magna</b> ${row.magna||'—'}</span>
+    <span><b>Cantillation</b> ${row.cantillation||'—'}</span>
+    <span><b>Confidence</b> ${row.confidence||'—'}</span>`;
+  document.getElementById('exNote').textContent=row.notes?('Notes: '+row.notes):'';
+  const folio=row.page_num||'1r';
+  const imgUrl2=`${API_BASE}/api/v1/files/image?witness=${encodeURIComponent(witId)}&folio=${encodeURIComponent(folio)}&convert=jpeg`;
+  document.getElementById('exImgWrap').innerHTML=`<img src="${imgUrl2}" alt="" onerror="this.parentElement.innerHTML='<span style=\\'color:#a95;font-size:12px\\'>No page image on disk for this folio</span>'">`;
+  document.getElementById('exImgCap').textContent=`${d.source_file||''} · folio/page ${folio}`;
+  updatePermalinkURL(witId,book,chapter,verse);
+}
+function updatePermalinkURL(witId,book,chapter,verse){
+  const m=MSS.find(x=>x.id===witId);
+  const params=new URLSearchParams({book,chapter,verse,manuscript:m?m.code:witId});
+  history.replaceState(null,'','archives.html?'+params.toString());
+}
+function explPermalink(){
+  findPage();
+  navigator.clipboard&&navigator.clipboard.writeText(location.href).then(()=>alert('Permalink copied:\n'+location.href)).catch(()=>alert(location.href));
+}
+function explCite(){
+  const witId=document.getElementById('exWitness').value;
+  const m=MSS.find(x=>x.id===witId);
+  const book=document.getElementById('exBook').value, ch=document.getElementById('exChapter').value, vs=document.getElementById('exVerse').value;
+  const today=new Date().toISOString().slice(0,10);
+  const txt=`Corley, Mark. "Masorah: Manuscript Explorer." ${m?m.name:witId}, ${book} ${ch}:${vs}. Accessed ${today}. ${location.origin}${location.pathname}?book=${encodeURIComponent(book)}&chapter=${ch}&verse=${vs}&manuscript=${m?m.code:witId}`;
+  navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>alert('Citation copied to clipboard:\n\n'+txt)).catch(()=>alert(txt));
+}
+function copyCite(){
+  const txt=document.getElementById('siteCite').textContent;
+  navigator.clipboard&&navigator.clipboard.writeText(txt).then(()=>alert('Copied.')).catch(()=>{});
+}
+document.getElementById('citeDate').textContent=new Date().toISOString().slice(0,10);
+explInit();
 
 async function probeAPI(){const pill=document.getElementById('apiPill');if(!pill)return;try{const r=await fetch('http://localhost:8000/api/v1/system/health-check',{cache:'no-store',signal:AbortSignal.timeout(2000)});if(r.ok){pill.className='pill live';pill.innerHTML='<span class="dot"></span> Active';return;}}catch(e){}pill.className='pill warn';pill.innerHTML='<span class="dot"></span> Offline';}
 probeAPI();setInterval(probeAPI,8000);
